@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ROPOD</title>
+    <link href="{{ url_for('static', filename='jquery-ui.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='jquery-ui.structure.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url_for('static', filename='jquery-ui.theme.css') }}" rel="stylesheet" type="text/css" />
+    <script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='jquery-ui.js') }}" type="text/javascript"></script>
+
+    <script type=text/javascript>
+      var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+</head>
+
+{% block body %}{% endblock %}
+</html>
