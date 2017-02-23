@@ -27,8 +27,16 @@ class DbQueries(object):
                                     "pose_t" : "$pose_t"
                                     }
                         }])
+            position_x = list()
+            position_y = list()
+            orientation = list()
             for r in cursor:
-                data.append([ r['pos_x'], r['pos_y'], r['pose_t'] ])
+                position_x.append([ r['timestamp'], r['pos_x'] ])
+                position_y.append([ r['timestamp'], r['pos_y'] ])
+                orientation.append([ r['timestamp'], r['pose_t'] ])
+            data.append(position_x)
+            data.append(position_y)
+            data.append(orientation)
             data_labels = ['x', 'y', 'theta']
         elif key == VariableConstants.BATTERY_STATUS:
             cursor = db_connection.collection.aggregate([
@@ -41,8 +49,10 @@ class DbQueries(object):
                                     "battery_status" : "$battery_status"
                                     }
                         }])
+            status = list()
             for r in cursor:
-                data.append([ r['battery_status'] ])
+                status.append([ r['timestamp'], r['battery_status'] ])
+            data.append(status)
             data_labels = ['Battery status']
         elif key == VariableConstants.EXTERNAL_SOURCE_STATUS:
             cursor = db_connection.collection.aggregate([
@@ -55,8 +65,10 @@ class DbQueries(object):
                                     "ext_source_status" : "$ext_source_status"
                                     }
                         }])
+            status = list()
             for r in cursor:
-                data.append([ r['ext_source_status'] ])
+                status.append([ r['timestamp'], r['ext_source_status'] ])
+            data.append(status)
             data_labels = ['External source status']
         elif key == VariableConstants.WHEEL_FAULT_STATUS:
             cursor = db_connection.collection.aggregate([
@@ -72,8 +84,19 @@ class DbQueries(object):
                                     "fault_status_j4" : "$fault_status_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['fault_status_j1'], r['fault_status_j2'], r['fault_status_j3'], r['fault_status_j4'] ])
+                data_j1.append([ r['timestamp'], r['fault_status_j1'] ])
+                data_j2.append([ r['timestamp'], r['fault_status_j2'] ])
+                data_j3.append([ r['timestamp'], r['fault_status_j3'] ])
+                data_j4.append([ r['timestamp'], r['fault_status_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.WHEEL_CURRENTS:
             cursor = db_connection.collection.aggregate([
@@ -89,8 +112,19 @@ class DbQueries(object):
                                     "current_j4" : "$current_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['current_j1'], r['current_j2'], r['current_j3'], r['current_j4'] ])
+                data_j1.append([ r['timestamp'], r['current_j1'] ])
+                data_j2.append([ r['timestamp'], r['current_j2'] ])
+                data_j3.append([ r['timestamp'], r['current_j3'] ])
+                data_j4.append([ r['timestamp'], r['current_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.WHEEL_ANGLES:
             cursor = db_connection.collection.aggregate([
@@ -106,8 +140,19 @@ class DbQueries(object):
                                     "angle_j4" : "$angle_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['angle_j1'], r['angle_j2'], r['angle_j3'], r['angle_j4'] ])
+                data_j1.append([ r['timestamp'], r['angle_j1'] ])
+                data_j2.append([ r['timestamp'], r['angle_j2'] ])
+                data_j3.append([ r['timestamp'], r['angle_j3'] ])
+                data_j4.append([ r['timestamp'], r['angle_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.WHEEL_VELOCITIES:
             cursor = db_connection.collection.aggregate([
@@ -123,8 +168,19 @@ class DbQueries(object):
                                     "velocity_j4" : "$velocity_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['velocity_j1'], r['velocity_j2'], r['velocity_j3'], r['velocity_j4'] ])
+                data_j1.append([ r['timestamp'], r['velocity_j1'] ])
+                data_j2.append([ r['timestamp'], r['velocity_j2'] ])
+                data_j3.append([ r['timestamp'], r['velocity_j3'] ])
+                data_j4.append([ r['timestamp'], r['velocity_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.WHEEL_TORQUES:
             cursor = db_connection.collection.aggregate([
@@ -140,8 +196,19 @@ class DbQueries(object):
                                     "torque_j4" : "$torque_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['torque_j1'], r['torque_j2'], r['torque_j3'], r['torque_j4'] ])
+                data_j1.append([ r['timestamp'], r['torque_j1'] ])
+                data_j2.append([ r['timestamp'], r['torque_j2'] ])
+                data_j3.append([ r['timestamp'], r['torque_j3'] ])
+                data_j4.append([ r['timestamp'], r['torque_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.EXPECTED_WHEEL_VELOCITIES:
             cursor = db_connection.collection.aggregate([
@@ -157,8 +224,19 @@ class DbQueries(object):
                                     "exp_velocity_j4" : "$exp_velocity_j4"
                                     }
                         }])
+            data_j1 = list()
+            data_j2 = list()
+            data_j3 = list()
+            data_j4 = list()
             for r in cursor:
-                data.append([ r['exp_velocity_j1'], r['exp_velocity_j2'], r['exp_velocity_j3'], r['exp_velocity_j4'] ])
+                data_j1.append([ r['timestamp'], r['exp_velocity_j1'] ])
+                data_j2.append([ r['timestamp'], r['exp_velocity_j2'] ])
+                data_j3.append([ r['timestamp'], r['exp_velocity_j3'] ])
+                data_j4.append([ r['timestamp'], r['exp_velocity_j4'] ])
+            data.append(data_j1)
+            data.append(data_j2)
+            data.append(data_j3)
+            data.append(data_j4)
             data_labels = ['Joint 1', 'Joint 2', 'Joint 3', 'Joint 4']
         elif key == VariableConstants.ROBOT_VELOCITY:
             cursor = db_connection.collection.aggregate([
@@ -173,8 +251,16 @@ class DbQueries(object):
                                     "angular_velocity" : "$angular_velocity"
                                     }
                         }])
+            longitudinal_velocity = list()
+            transversal_velocity = list()
+            angular_velocity = list()
             for r in cursor:
-                data.append([ r['longitudinal_velocity'], r['transversal_velocity'], r['angular_velocity'] ])
+                longitudinal_velocity.append([ r['timestamp'], r['longitudinal_velocity'] ])
+                transversal_velocity.append([ r['timestamp'], r['transversal_velocity'] ])
+                angular_velocity.append([ r['timestamp'], r['angular_velocity'] ])
+            data.append(longitudinal_velocity)
+            data.append(transversal_velocity)
+            data.append(angular_velocity)
             data_labels = ['Longitudinal', 'Transversal', 'Angular']
         elif key == VariableConstants.ROBOT_VELOCITY_CMD:
             cursor = db_connection.collection.aggregate([
@@ -189,8 +275,16 @@ class DbQueries(object):
                                     "angular_velocity_cmd" : "$angular_velocity_cmd"
                                     }
                         }])
+            longitudinal_velocity = list()
+            transversal_velocity = list()
+            angular_velocity = list()
             for r in cursor:
-                data.append([ r['longitudinal_velocity_cmd'], r['transversal_velocity_cmd'], r['angular_velocity_cmd'] ])
+                longitudinal_velocity.append([ r['timestamp'], r['longitudinal_velocity_cmd'] ])
+                transversal_velocity.append([ r['timestamp'], r['transversal_velocity_cmd'] ])
+                angular_velocity.append([ r['timestamp'], r['angular_velocity_cmd'] ])
+            data.append(longitudinal_velocity)
+            data.append(transversal_velocity)
+            data.append(angular_velocity)
             data_labels = ['Longitudinal', 'Transversal', 'Angular']
 
         return data, data_labels
