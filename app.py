@@ -24,8 +24,8 @@ def get_data():
     start_time = datetime(int(start_date_components[2]), int(start_date_components[0]), int(start_date_components[1]))
     end_time = datetime(int(end_date_components[2]), int(end_date_components[0]), int(end_date_components[1]))
 
-    start_timestamp = (start_time - datetime(1970, 1, 1)).total_seconds()
-    end_timestamp = (end_time - datetime(1970, 1, 1)).total_seconds()
+    start_timestamp = (start_time - datetime(1970, 1, 1)).total_seconds() * 1000
+    end_timestamp = (end_time - datetime(1970, 1, 1)).total_seconds() * 1000
 
     data, data_labels = DbQueries.get_data(db_connection, variable, start_timestamp, end_timestamp)
     return jsonify(data=data, data_labels=data_labels)
