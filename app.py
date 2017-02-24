@@ -42,6 +42,27 @@ def get_data():
 
     data, data_labels = DbQueries.get_data(db_connection, variable, start_timestamp, end_timestamp)
     return jsonify(data=data, data_labels=data_labels)
-    
+
+@app.route('/add_ropod')
+def add_ropod():
+    hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
+    return render_template('ropod_crud/add_ropod.html', hospitals=hospital_names)
+
+@app.route('/add_new_ropod', methods=['POST'])
+def add_new_ropod():
+    data = request.get_json(force=True)
+    hospital = data['hospital']
+    ip_address = data['ip_address']
+    RopodAdminQueries.add_new_ropod(local_db_connection, hospital, ip_address)
+    return jsonify(success=True)
+
+@app.route('/update_ropod')
+def update_ropod():
+    return render_template('ropod_crud/update_ropod.html')
+
+@app.route('/remove_ropod')
+def remove_ropod():
+    return render_template('ropod_crud/remove_ropod.html')
+
 if __name__ == '__main__':
     app.run()

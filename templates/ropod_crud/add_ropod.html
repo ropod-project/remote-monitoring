@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script>
+    $(document).ready(function() {
+        $('#btn_add').prop('disabled', true);
+
+        $('#hospitals').change(function() {
+            if ($(this).val() != 'none' && $('#ip_address').val() != '') {
+                $('#btn_add').prop('disabled', false);
+            }
+            else {
+                $('#btn_add').prop('disabled', true);
+            }
+        });
+
+        $('#ip_address').change(function() {
+            if ($(this).val() != '' && $('#hospitals').val() != 'none') {
+                $('#btn_add').prop('disabled', false);
+            }
+            else {
+                $('#btn_add').prop('disabled', true);
+            }
+        });
+
+        $('#btn_add').click(function() {
+            var hospital = $('#hospitals').val();
+            var ip_address = $('#ip_address').val();
+            $.ajax({
+                url: SCRIPT_ROOT + '/add_new_ropod',
+                type: 'post',
+                data: JSON.stringify({ hospital: hospital, ip_address: ip_address }),
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                console.log('Ropod successfully added');
+                reset_fields();
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+        });
+    });
+
+    function reset_fields() {
+        $('#hospitals').val('none');
+        $('#ip_address').val('');
+        $('#btn_add').prop('disabled', true);
+    }
+</script>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Add ropod</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-1">
+        <div class="form-group">Hospital</div>
+    </div>
+    <div class="col-lg-2">
+        <div class="form-group">
+            <select id="hospitals" class="form-control">
+                <option value="none">Choose hospital</option>
+                {% for hospital in hospitals %}
+                    <option value="{{ hospital }}">{{ hospital }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1">
+        <div class="form-group">IP address</div>
+    </div>
+    <div class="col-lg-2">
+        <div class="form-group"><input id="ip_address" class="form-control" type="text" value="" /></div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-1">
+        <div class="form-group"><button id="btn_add" class="btn btn-primary" type="button">Add ropod</button></div>
+    </div>
+</div>
+
+{% endblock %}

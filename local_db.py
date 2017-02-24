@@ -19,3 +19,7 @@ class RopodAdminQueries(object):
         for row in cursor:
             ips.append(row['ip_address'])
         return ips
+
+    @staticmethod
+    def add_new_ropod(db_connection, hospital_name, ip_address):
+        db_connection.collection.insert_one( {  'hospital': hospital_name, 'ip_address': ip_address } )
