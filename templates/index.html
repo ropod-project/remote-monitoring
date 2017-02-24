@@ -2,28 +2,78 @@
 {% block body %}
 
 <script>
+    var data = [];
+    var data_labels = [];
+    var comparison_data = [];
+    var comparison_data_labels = [];
+
     $(document).ready(function() {
+        $('#data_container').hide();
+
         $('#start_date').datepicker();
         $('#end_date').datepicker();
 
-        $('#start_date_container').hide();
-        $('#end_date_container').hide();
-        $('#display_data_btn_container').hide();
-        var data = [];
-        var data_labels = [];
+        $('#btn_display_data').prop('disabled', true);
+        $('#btn_display_data_comparison').prop('disabled', true);
+        $('#operation_indicator').hide();
 
-        $('#variables').change(function() {
-            if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
-                $('#display_data_btn_container').hide();
-            }
-
-            if ($(this).val() == 'none') {
-                $('#start_date_container').hide();
-                $('#end_date_container').hide();
+        $('#hospitals').change(function() {
+            var hospital = $(this).val();
+            if (hospital != 'none') {
+                $.ajax({
+                    url: SCRIPT_ROOT + '/get_hospital_ips',
+                    type: 'get',
+                    data: { hospital: hospital },
+                    contentType: 'application/json',
+                    cache: false
+                }).done(function(result) {
+                    var ips = result.ips;
+                    console.log(ips.length);
+                    var html_string = '<option value="none">Choose hospital</option>';
+                    for (var i=0; i<ips.length; i++) {
+                        html_string += '<option value="' + ips[i] + '">' + ips[i] + '</option>';
+                    }
+                    $('#ropod_ip_addresses').html('');
+                    $('#ropod_ip_addresses').html(html_string);
+                    $('#ropod_ip_addresses').prop('disabled', false);
+                }).fail(function(jqXHR, status, error) {
+                    console.log(error);
+                });
             }
             else {
-                $('#start_date_container').show();
-                $('#end_date_container').show();
+                $('#ropod_ip_addresses').html('');
+                $('#ropod_ip_addresses').prop('disabled', 'disabled');
+                $('#data_container').hide();
+            }
+        });
+
+        $('#ropod_ip_addresses').change(function() {
+            var ip_address = $(this).val();
+            if (ip_address != 'none') {
+                $('#data_container').show();
+            }
+            else {
+                $('#data_container').hide();
+            }
+        });
+
+        $('#variables').change(function() {
+            if ($(this).val() == 'none') {
+                $('#btn_display_data').prop('disabled', true);
+                $('#btn_display_data_comparison').prop('disabled', true);
+            }
+            else {
+                if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
+                    $('#btn_display_data').prop('disabled', true);
+                    $('#btn_display_data_comparison').prop('disabled', true);
+                }
+                else
+                {
+                    $('#btn_display_data').prop('disabled', false);
+                    if ($('#plot_placeholder').html() != '') {
+                        $('#btn_display_data_comparison').prop('disabled', false);
+                    }
+                }
             }
         });
 
@@ -32,11 +82,15 @@
             var end_date = $('#end_date').val();
             if (start_date == '') {
                 $(this).val('Start date');
-                $('#display_data_btn_container').hide();
+                $('#btn_display_data').prop('disabled', true);
+                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (end_date != 'End date') {
-                    $('#display_data_btn_container').show();
+                    $('#btn_display_data').prop('disabled', false);
+                    if ($('#plot_placeholder').html() != '') {
+                        $('#btn_display_data_comparison').prop('disabled', false);
+                    }
                 }
             }
         });
@@ -46,68 +100,164 @@
             var start_date = $('#start_date').val();
             if (end_date == '') {
                 $(this).val('End date');
-                $('#display_data_btn_container').hide();
+                $('#btn_display_data').prop('disabled', true);
+                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (start_date != 'Start date') {
-                    $('#display_data_btn_container').show();
+                    $('#btn_display_data').prop('disabled', false);
+                    if ($('#plot_placeholder').html() != '') {
+                        $('#btn_display_data_comparison').prop('disabled', false);
+                    }
                 }
             }
         });
 
         $('#btn_display_data').click(function() {
-            variable = $('#variables').val();
-            start_date = $('#start_date').val();
-            end_date = $('#end_date').val();
-            $.ajax({
-                url: SCRIPT_ROOT + '/get_data',
-                type: 'get',
-                data: { variable: variable, start_date: start_date, end_date: end_date },
-                contentType: 'application/json',
-                cache: false
-            }).done(function(result) {
+            display_data(this.id);
+        });
+
+        $('#btn_display_data_comparison').click(function() {
+            display_data(this.id);
+        });
+
+        $(document).on('change', '.plot_variables', function() {
+            var checked = $('.plot_variables:checked');
+            var flot_data = [];
+            for (var i=0; i<checked.length; i++) {
+                var id = parseInt($(checked[i]).val());
+                flot_data.push({ label: data_labels[id], data: data[id] });
+            }
+            $.plot($("#plot_placeholder"), flot_data);
+        });
+
+        $(document).on('change', '.comparison_plot_variables', function() {
+            var checked = $('.comparison_plot_variables:checked');
+            var flot_data = [];
+            for (var i=0; i<checked.length; i++) {
+                var id = parseInt($(checked[i]).val());
+                flot_data.push({ label: comparison_data_labels[id], data: comparison_data[id] });
+            }
+            $.plot($("#comparison_plot_placeholder"), flot_data);
+        });
+    });
+
+    function display_data(caller_id) {
+        var variable = $('#variables').val();
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        var ip_address = $('#ropod_ip_addresses').val();
+        $('#operation_indicator').show();
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_data',
+            type: 'get',
+            data: { variable: variable, start_date: start_date, end_date: end_date, server_ip: ip_address },
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            var plot_container = null;
+            if (caller_id == 'btn_display_data') {
                 data = result.data;
                 data_labels = result.data_labels;
-                flot_data = [];
+                var flot_data = [];
                 for (var i=0; i<data.length; i++) {
                     flot_data.push({ label: data_labels[i], data: data[i] });
                 }
                 $.plot($("#plot_placeholder"), flot_data);
-            }).fail(function(jqXHR, status, error) {
-                console.log(error);
-            });
+                add_variable_selection_checkboxes($("#plot_variable_selection"), 'plot_variables', data_labels);
+            }
+            else if (caller_id == 'btn_display_data_comparison') {
+                comparison_data = result.data;
+                comparison_data_labels = result.data_labels;
+                var flot_data = [];
+                for (var i=0; i<data.length; i++) {
+                    flot_data.push({ label: comparison_data_labels[i], data: comparison_data[i] });
+                }
+                $.plot($("#comparison_plot_placeholder"), flot_data);
+                add_variable_selection_checkboxes($("#comparison_plot_variable_selection"), 'comparison_plot_variables', comparison_data_labels);
+            }
+
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#operation_indicator').hide();
         });
-    });
+    }
+
+    function add_variable_selection_checkboxes(container, checkbox_class, labels) {
+        var html_string = '<div class="form-group">';
+        for (var i=0; i<labels.length; i++) {
+            html_string += '<div class="checkbox"><label><input class="' + checkbox_class + '" type="checkbox" value="' + i + '" checked="true">' + labels[i] + '</label></div>';
+        }
+        html_string += "</div>";
+        container.html(html_string);
+    }
 </script>
 
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Dashboard</h1>
+        <h1 class="page-header">ROPOD Remote Monitoring</h1>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-2">
-        <div class="form-group">
-            <select id="variables" class="form-control">
-                <option value="none">Choose variable to display</option>
-                {% for key in variable_keys %}
-                    <option value={{ key }}>{{ variable_labels[loop.index-1] }}</option>
-                {% endfor %}
-            </select>
+<div id="ropod_selection_container">
+    <div class="row">
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="hospitals" class="form-control">
+                    <option value="none">Choose hospital</option>
+                    {% for key in hospitals %}
+                        <option value="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="ropod_ip_addresses" class="form-control" disabled="disabled"></select>
+            </div>
         </div>
     </div>
-    <div class="col-lg-3">
-        <div id="start_date_container" class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
-    </div>
-    <div class="col-lg-3">
-        <div id="end_date_container" class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
-    </div>
-    <div class="col-lg-1">
-        <div id="display_data_btn_container" class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
-    </div>
 </div>
 
-<div id="plot_placeholder" style="width:1000px;height:400px"></div>
+<div id="data_container">
+    <div class="row">
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="variables" class="form-control">
+                    <option value="none">Choose variable to display</option>
+                    {% for key in variable_keys %}
+                        <option value={{ key }}>{{ variable_labels[loop.index-1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
+        </div>
+        <div class="col-lg-1">
+            <div class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group"><button id="btn_display_data_comparison" class="btn btn-primary" type="button">Display data in second plot</button></div>
+        </div>
+        <div class="col-lg-1">
+            <div id="operation_indicator" class="indicator"></div>
+        </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div id="plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="plot_variable_selection" class="col-lg-2"></div>
+    </div>
+
+    <div class="col-lg-12">
+        <div id="comparison_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="comparison_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+</div>
 
 {% endblock %}

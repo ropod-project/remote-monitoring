@@ -1,5 +1,8 @@
+class LocalDbConstants(object):
+    DATABASE = 'ropods'
+    COLLECTION = 'ropod_data'
+
 class DbConstants(object):
-    HOST_ADDRESS = '127.0.0.1'
     DATABASE = 'aiciss_logs'
     COLLECTION = 'robot_state'
 

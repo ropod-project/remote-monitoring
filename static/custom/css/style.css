@@ -1,0 +1,11 @@
+.data-plot
+{
+    height: 400px;
+}
+
+.indicator
+{
+    width: 16px;
+    height: 16px;
+    background-image: url("../images/indicator.gif");
+}
