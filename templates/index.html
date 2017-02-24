@@ -28,7 +28,7 @@
                     cache: false
                 }).done(function(result) {
                     var ips = result.ips;
-                    var html_string = '<option value="none">Choose hospital</option>';
+                    var html_string = '<option value="none">Choose IP address</option>';
                     for (var i=0; i<ips.length; i++) {
                         html_string += '<option value="' + ips[i] + '">' + ips[i] + '</option>';
                     }
