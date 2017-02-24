@@ -28,7 +28,6 @@
                     cache: false
                 }).done(function(result) {
                     var ips = result.ips;
-                    console.log(ips.length);
                     var html_string = '<option value="none">Choose hospital</option>';
                     for (var i=0; i<ips.length; i++) {
                         html_string += '<option value="' + ips[i] + '">' + ips[i] + '</option>';
@@ -44,6 +43,7 @@
                 $('#ropod_ip_addresses').html('');
                 $('#ropod_ip_addresses').prop('disabled', 'disabled');
                 $('#data_container').hide();
+                reset_data_panel();
             }
         });
 
@@ -54,6 +54,7 @@
             }
             else {
                 $('#data_container').hide();
+                reset_data_panel();
             }
         });
 
@@ -141,6 +142,19 @@
             $.plot($("#comparison_plot_placeholder"), flot_data);
         });
     });
+
+    function reset_data_panel() {
+        $('#variables').val('none');
+        $('#start_date').val('Start date');
+        $('#end_date').val('End date');
+        $('#btn_display_data').prop('disabled', true);
+        $('#btn_display_data_comparison').prop('disabled', true);
+        $('#operation_indicator').hide();
+        $('#plot_placeholder').html('');
+        $('#plot_variable_selection').html('');
+        $("#comparison_plot_placeholder").html('');
+        $('#comparison_plot_variable_selection').html('');
+    }
 
     function display_data(caller_id) {
         var variable = $('#variables').val();
