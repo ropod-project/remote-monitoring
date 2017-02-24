@@ -58,7 +58,18 @@ def add_new_ropod():
 
 @app.route('/update_ropod')
 def update_ropod():
-    return render_template('ropod_crud/update_ropod.html')
+    hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
+    return render_template('ropod_crud/update_ropod.html', hospitals=hospital_names)
+
+@app.route('/update_existing_ropod', methods=['POST'])
+def update_existing_ropod():
+    data = request.get_json(force=True)
+    old_hospital = data['old_hospital']
+    old_ip_address = data['old_ip_address']
+    new_hospital = data['new_hospital']
+    new_ip_address = data['new_ip_address']
+    RopodAdminQueries.update_existing_ropod(local_db_connection, old_hospital, old_ip_address, new_hospital, new_ip_address)
+    return jsonify(success=True)
 
 @app.route('/remove_ropod')
 def remove_ropod():

@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script>
+    var original_hospital = '';
+    var original_ip_address = '';
+
+    $(document).ready(function() {
+        $('#data_container').hide();
+
+        $('#hospitals').change(function() {
+            var hospital = $(this).val();
+            if (hospital != 'none') {
+                $.ajax({
+                    url: SCRIPT_ROOT + '/get_hospital_ips',
+                    type: 'get',
+                    data: { hospital: hospital },
+                    contentType: 'application/json',
+                    cache: false
+                }).done(function(result) {
+                    var ips = result.ips;
+                    var html_string = '<option value="none">Choose IP address</option>';
+                    for (var i=0; i<ips.length; i++) {
+                        html_string += '<option value="' + ips[i] + '">' + ips[i] + '</option>';
+                    }
+                    $('#ip_addresses').html('');
+                    $('#ip_addresses').html(html_string);
+                    $('#ip_addresses').prop('disabled', false);
+                }).fail(function(jqXHR, status, error) {
+                    console.log(error);
+                });
+            }
+            else {
+                $('#ip_addresses').html('');
+                $('#ip_addresses').prop('disabled', 'disabled');
+                $('#data_container').hide();
+                reset_data_panel();
+            }
+        });
+
+        $('#ip_addresses').change(function() {
+            var ip_address = $(this).val();
+            if (ip_address != 'none') {
+                $('#data_container').show();
+
+                original_hospital = $('#hospitals').val();
+                original_ip_address = $('#ip_addresses').val();
+
+                $('#ropod_hospital').val(original_hospital);
+                $('#ropod_ip_address').val(original_ip_address);
+            }
+            else {
+                $('#data_container').hide();
+                reset_data_panel();
+            }
+        });
+
+        $('#ropod_ip_address').change(function() {
+            if ($(this).val() != '') {
+                $('#btn_update').prop('disabled', false);
+            }
+            else {
+                $('#btn_update').prop('disabled', true);
+            }
+        });
+
+        $('#btn_update').click(function() {
+            var hospital = $('#ropod_hospital').val();
+            var ip_address = $('#ropod_ip_address').val();
+            $.ajax({
+                url: SCRIPT_ROOT + '/update_existing_ropod',
+                type: 'post',
+                data: JSON.stringify({ old_hospital: original_hospital, old_ip_address: original_ip_address, 
+                                       new_hospital: hospital, new_ip_address: ip_address }),
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                console.log('Ropod successfully updated');
+                $('#hospitals').val(hospital);
+                var ip_option = $('#ip_addresses option[value="' + original_ip_address + '"]');
+                ip_option.val(ip_address);
+                ip_option.html(ip_address);
+
+                original_hospital = hospital;
+                original_ip_address = ip_address;
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+        });
+
+        $('#btn_cancel').click(function() {
+            $('#ropod_hospital').val(original_hospital);
+            $('#ropod_ip_address').val(original_ip_address);
+        });
+    });
+
+    function reset_data_panel() {
+        $('#ropod_ip_address').val('');
+    }
+</script>
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Update ropod</h1>
+    </div>
+</div>
+
+<div id="ropod_selection_container">
+    <div class="row">
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="hospitals" class="form-control">
+                    <option value="none">Choose hospital</option>
+                    {% for key in hospitals %}
+                        <option value="{{ key }}">{{ key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="ip_addresses" class="form-control" disabled="disabled"></select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="data_container">
+    <div class="row">
+        <div class="col-lg-1">
+            <div class="form-group">Hospital</div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group">
+                <select id="ropod_hospital" class="form-control">
+                    {% for hospital in hospitals %}
+                        <option value="{{ hospital }}">{{ hospital }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-1">
+            <div class="form-group">IP address</div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group"><input id="ropod_ip_address" class="form-control" type="text" value="" /></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-1">
+            <div class="form-group"><button id="btn_update" class="btn btn-success" type="button">Update ropod</button></div>
+        </div>
+
+        <div class="col-lg-1">
+            <div class="form-group"><button id="btn_cancel" class="btn btn-danger" type="button">Cancel changes</button></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
