@@ -71,9 +71,18 @@ def update_existing_ropod():
     RopodAdminQueries.update_existing_ropod(local_db_connection, old_hospital, old_ip_address, new_hospital, new_ip_address)
     return jsonify(success=True)
 
-@app.route('/remove_ropod')
+@app.route('/delete_ropod')
+def delete_ropod():
+    hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
+    return render_template('ropod_crud/delete_ropod.html', hospitals=hospital_names)
+
+@app.route('/remove_ropod', methods=['POST'])
 def remove_ropod():
-    return render_template('ropod_crud/remove_ropod.html')
+    data = request.get_json(force=True)
+    hospital = data['hospital']
+    ip_address = data['ip_address']
+    RopodAdminQueries.remove_ropod(local_db_connection, hospital, ip_address)
+    return jsonify(success=True)
 
 if __name__ == '__main__':
     app.run()
