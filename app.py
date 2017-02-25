@@ -43,10 +43,15 @@ def get_data():
     data, data_labels = DbQueries.get_data(db_connection, variable, start_timestamp, end_timestamp)
     return jsonify(data=data, data_labels=data_labels)
 
+@app.route('/manage_ropods')
+def manage_ropods():
+    hospitals, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
+    return render_template('manage_ropods.html', hospitals=hospitals, ip_addresses=ip_addresses)
+
 @app.route('/add_ropod')
 def add_ropod():
     hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
-    return render_template('ropod_crud/add_ropod.html', hospitals=hospital_names)
+    return render_template('add_ropod.html', hospitals=hospital_names)
 
 @app.route('/add_new_ropod', methods=['POST'])
 def add_new_ropod():
@@ -56,10 +61,12 @@ def add_new_ropod():
     RopodAdminQueries.add_new_ropod(local_db_connection, hospital, ip_address)
     return jsonify(success=True)
 
-@app.route('/update_ropod')
-def update_ropod():
+@app.route('/edit_ropod')
+def edit_ropod():
     hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
-    return render_template('ropod_crud/update_ropod.html', hospitals=hospital_names)
+    original_hospital = request.args.get('hospital', '', type=str)
+    original_ip_address = request.args.get('ip_address', '', type=str)
+    return render_template('edit_ropod.html', hospitals=hospital_names, original_hospital=original_hospital, original_ip_address=original_ip_address)
 
 @app.route('/update_existing_ropod', methods=['POST'])
 def update_existing_ropod():
@@ -71,17 +78,12 @@ def update_existing_ropod():
     RopodAdminQueries.update_existing_ropod(local_db_connection, old_hospital, old_ip_address, new_hospital, new_ip_address)
     return jsonify(success=True)
 
-@app.route('/delete_ropod')
+@app.route('/delete_ropod', methods=['POST'])
 def delete_ropod():
-    hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
-    return render_template('ropod_crud/delete_ropod.html', hospitals=hospital_names)
-
-@app.route('/remove_ropod', methods=['POST'])
-def remove_ropod():
     data = request.get_json(force=True)
     hospital = data['hospital']
     ip_address = data['ip_address']
-    RopodAdminQueries.remove_ropod(local_db_connection, hospital, ip_address)
+    RopodAdminQueries.delete_ropod(local_db_connection, hospital, ip_address)
     return jsonify(success=True)
 
 if __name__ == '__main__':

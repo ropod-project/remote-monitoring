@@ -5,6 +5,16 @@ from db import DbConnection
 
 class RopodAdminQueries(object):
     @staticmethod
+    def get_all_ropods(db_connection):
+        cursor = db_connection.collection.find()
+        hospitals = list()
+        ip_addresses = list()
+        for ropod in cursor:
+            hospitals.append(ropod['hospital'])
+            ip_addresses.append(ropod['ip_address'])
+        return hospitals, ip_addresses
+
+    @staticmethod
     def get_hospital_names(db_connection):
         cursor = db_connection.collection.find().distinct('hospital')
         hospital_names = list()
@@ -30,5 +40,5 @@ class RopodAdminQueries(object):
         { '$set': {  'hospital': new_hospital_name, 'ip_address': new_ip_address } } )
 
     @staticmethod
-    def remove_ropod(db_connection, hospital_name, ip_address):
+    def delete_ropod(db_connection, hospital_name, ip_address):
         db_connection.collection.delete_one( { 'hospital': hospital_name, 'ip_address': ip_address } )

@@ -33,19 +33,12 @@
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
-                console.log('Ropod successfully added');
-                reset_fields();
+                window.location = '/manage_ropods';
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
             });
         });
     });
-
-    function reset_fields() {
-        $('#hospitals').val('none');
-        $('#ip_address').val('');
-        $('#btn_add').prop('disabled', true);
-    }
 </script>
 
 <div class="row">
