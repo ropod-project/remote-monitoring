@@ -9,6 +9,8 @@
     var comparison_data = [];
     var comparison_data_labels = [];
     var real_time_plot_update_interval = 500;
+    var real_time_data = false;
+    var update_plot = false;
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -69,7 +71,7 @@
                 $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
-                var real_time_data = $('#check_real_time').prop('checked');
+                real_time_data = $('#check_real_time').prop('checked');
                 if (real_time_data) {
                     $('#btn_display_data').prop('disabled', false);
                     if ($('#plot_placeholder').html() != '') {
@@ -129,12 +131,18 @@
         });
 
         $('#check_real_time').change(function() {
-            var checked = $(this).prop('checked');
-            if (checked) {
+            real_time_data = $(this).prop('checked');
+            if (real_time_data) {
                 $('#start_date').val('Start date');
                 $('#start_date').prop('disabled', 'disabled');
                 $('#end_date').val('End date');
                 $('#end_date').prop('disabled', 'disabled');
+                if ($('#variables').val() != 'none') {
+                    $('#btn_display_data').prop('disabled', false);
+                    if ($('#plot_placeholder').html() != '') {
+                        $('#btn_display_data_comparison').prop('disabled', false);
+                    }
+                }
             }
             else {
                 $('#start_date').val('Start date');
@@ -156,26 +164,17 @@
 
         $(document).on('change', '.plot_variables', function() {
             var checked = $('.plot_variables:checked');
-            var flot_data = [];
-            for (var i=0; i<checked.length; i++) {
-                var id = parseInt($(checked[i]).val());
-                flot_data.push({ label: data_labels[id], data: data[id] });
-            }
-            $.plot($("#plot_placeholder"), flot_data);
+            display_selected_data(checked, $('#plot_placeholder'));
         });
 
         $(document).on('change', '.comparison_plot_variables', function() {
             var checked = $('.comparison_plot_variables:checked');
-            var flot_data = [];
-            for (var i=0; i<checked.length; i++) {
-                var id = parseInt($(checked[i]).val());
-                flot_data.push({ label: comparison_data_labels[id], data: comparison_data[id] });
-            }
-            $.plot($("#comparison_plot_placeholder"), flot_data);
+            display_selected_data(checked, $("#comparison_plot_placeholder"));
         });
     });
 
     function reset_data_panel() {
+        update_plot = false;
         $('#variables').val('none');
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
@@ -191,7 +190,8 @@
     function get_data(caller_id) {
         var variable = $('#variables').val();
         var ip_address = $('#ropod_ip_addresses').val();
-        var real_time_data = $('#check_real_time').prop('checked');
+        real_time_data = $('#check_real_time').prop('checked');
+        update_plot = false;
 
         if (!real_time_data) {
             var start_date = $('#start_date').val();
@@ -207,17 +207,16 @@
             var end_time_ms = end_date_obj.getTime();
 
             $('#operation_indicator').show();
-            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, false);
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
         }
         else {
             var start_time_ms = (new Date()).getTime() - 7260000;
             var end_time_ms = (new Date()).getTime();
-
-            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, true);
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
         }
     }
 
-    function display_data(caller_id, variable, start_time, end_time, ip_address, real_time_data) {
+    function display_data(caller_id, variable, start_time, end_time, ip_address) {
         $.ajax({
             url: SCRIPT_ROOT + '/get_data',
             type: 'get',
@@ -228,34 +227,30 @@
             if (caller_id == 'btn_display_data') {
                 data = result.data;
                 data_labels = result.data_labels;
-                var flot_data = [];
-                for (var i=0; i<data.length; i++) {
-                    flot_data.push({ label: data_labels[i], data: data[i] });
+
+                if (!update_plot) {
+                    add_variable_selection_checkboxes($("#plot_variable_selection"), 'plot_variables', data_labels);
                 }
-                $("#plot_placeholder").html('');
-                $.plot($("#plot_placeholder"), flot_data);
-                add_variable_selection_checkboxes($("#plot_variable_selection"), 'plot_variables', data_labels);
+                display_selected_data($('.plot_variables:checked'), $("#plot_placeholder"));
             }
             else if (caller_id == 'btn_display_data_comparison') {
                 comparison_data = result.data;
                 comparison_data_labels = result.data_labels;
-                var flot_data = [];
-                for (var i=0; i<data.length; i++) {
-                    flot_data.push({ label: comparison_data_labels[i], data: comparison_data[i] });
+
+                if (!update_plot) {
+                    add_variable_selection_checkboxes($("#comparison_plot_variable_selection"), 'comparison_plot_variables', data_labels);
                 }
-                $("#comparison_plot_placeholder").html('');
-                $.plot($("#comparison_plot_placeholder"), flot_data);
-                add_variable_selection_checkboxes($("#comparison_plot_variable_selection"), 'comparison_plot_variables', comparison_data_labels);
+                display_selected_data($('.comparison_plot_variables:checked'), $("#comparison_plot_placeholder"));
             }
 
             $('#operation_indicator').hide();
 
             if (real_time_data) {
+                update_plot = true;
                 setTimeout(function() {
-                    console.log('calling');
                     var start_time_ms = (new Date()).getTime() - 7260000;
                     var end_time_ms = (new Date()).getTime();
-                    display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, true);
+                    display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
                 }, real_time_plot_update_interval);
             }
         }).fail(function(jqXHR, status, error) {
@@ -271,6 +266,15 @@
         }
         html_string += "</div>";
         container.html(html_string);
+    }
+
+    function display_selected_data(checked, container) {
+        var flot_data = [];
+        for (var i=0; i<checked.length; i++) {
+            var id = parseInt($(checked[i]).val());
+            flot_data.push({ label: data_labels[id], data: data[id] });
+        }
+        $.plot(container, flot_data);
     }
 </script>
 
