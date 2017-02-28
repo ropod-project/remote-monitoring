@@ -207,20 +207,17 @@
             var end_time_ms = end_date_obj.getTime();
 
             $('#operation_indicator').show();
-            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, false);
         }
         else {
-            var start_time_ms = (new Date()).getTime() - 300000;
+            var start_time_ms = (new Date()).getTime() - 7260000;
             var end_time_ms = (new Date()).getTime();
 
-            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
-            setTimeout(function() {
-                display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
-            }, real_time_plot_update_interval);
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, true);
         }
     }
 
-    function display_data(caller_id, variable, start_time, end_time, ip_address) {
+    function display_data(caller_id, variable, start_time, end_time, ip_address, real_time_data) {
         $.ajax({
             url: SCRIPT_ROOT + '/get_data',
             type: 'get',
@@ -228,8 +225,6 @@
             contentType: 'application/json',
             cache: false
         }).done(function(result) {
-            console.log(result.start_timestamp);
-            console.log(result.end_timestamp);
             if (caller_id == 'btn_display_data') {
                 data = result.data;
                 data_labels = result.data_labels;
@@ -237,6 +232,7 @@
                 for (var i=0; i<data.length; i++) {
                     flot_data.push({ label: data_labels[i], data: data[i] });
                 }
+                $("#plot_placeholder").html('');
                 $.plot($("#plot_placeholder"), flot_data);
                 add_variable_selection_checkboxes($("#plot_variable_selection"), 'plot_variables', data_labels);
             }
@@ -247,11 +243,21 @@
                 for (var i=0; i<data.length; i++) {
                     flot_data.push({ label: comparison_data_labels[i], data: comparison_data[i] });
                 }
+                $("#comparison_plot_placeholder").html('');
                 $.plot($("#comparison_plot_placeholder"), flot_data);
                 add_variable_selection_checkboxes($("#comparison_plot_variable_selection"), 'comparison_plot_variables', comparison_data_labels);
             }
 
             $('#operation_indicator').hide();
+
+            if (real_time_data) {
+                setTimeout(function() {
+                    console.log('calling');
+                    var start_time_ms = (new Date()).getTime() - 7260000;
+                    var end_time_ms = (new Date()).getTime();
+                    display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address, true);
+                }, real_time_plot_update_interval);
+            }
         }).fail(function(jqXHR, status, error) {
             console.log(error);
             $('#operation_indicator').hide();
