@@ -1,11 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
+
 <script>
     var data = [];
     var data_labels = [];
     var comparison_data = [];
     var comparison_data_labels = [];
+    var real_time_plot_update_interval = 500;
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -51,9 +54,11 @@
             var ip_address = $(this).val();
             if (ip_address != 'none') {
                 $('#data_container').show();
+                $('#check_real_time').prop('disabled', false);
             }
             else {
                 $('#data_container').hide();
+                $('#check_real_time').prop('disabled', true);
                 reset_data_panel();
             }
         });
@@ -64,15 +69,24 @@
                 $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
-                if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
-                    $('#btn_display_data').prop('disabled', true);
-                    $('#btn_display_data_comparison').prop('disabled', true);
-                }
-                else
-                {
+                var real_time_data = $('#check_real_time').prop('checked');
+                if (real_time_data) {
                     $('#btn_display_data').prop('disabled', false);
                     if ($('#plot_placeholder').html() != '') {
                         $('#btn_display_data_comparison').prop('disabled', false);
+                    }
+                }
+                else {
+                    if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
+                        $('#btn_display_data').prop('disabled', true);
+                        $('#btn_display_data_comparison').prop('disabled', true);
+                    }
+                    else
+                    {
+                        $('#btn_display_data').prop('disabled', false);
+                        if ($('#plot_placeholder').html() != '') {
+                            $('#btn_display_data_comparison').prop('disabled', false);
+                        }
                     }
                 }
             }
@@ -114,12 +128,30 @@
             }
         });
 
+        $('#check_real_time').change(function() {
+            var checked = $(this).prop('checked');
+            if (checked) {
+                $('#start_date').val('Start date');
+                $('#start_date').prop('disabled', 'disabled');
+                $('#end_date').val('End date');
+                $('#end_date').prop('disabled', 'disabled');
+            }
+            else {
+                $('#start_date').val('Start date');
+                $('#start_date').prop('disabled', false);
+                $('#end_date').val('End date');
+                $('#end_date').prop('disabled', false);
+                $('#btn_display_data').prop('disabled', true);
+                $('#btn_display_data_comparison').prop('disabled', true);
+            }
+        });
+
         $('#btn_display_data').click(function() {
-            display_data(this.id);
+            get_data(this.id);
         });
 
         $('#btn_display_data_comparison').click(function() {
-            display_data(this.id);
+            get_data(this.id);
         });
 
         $(document).on('change', '.plot_variables', function() {
@@ -156,20 +188,48 @@
         $('#comparison_plot_variable_selection').html('');
     }
 
-    function display_data(caller_id) {
+    function get_data(caller_id) {
         var variable = $('#variables').val();
-        var start_date = $('#start_date').val();
-        var end_date = $('#end_date').val();
         var ip_address = $('#ropod_ip_addresses').val();
-        $('#operation_indicator').show();
+        var real_time_data = $('#check_real_time').prop('checked');
+
+        if (!real_time_data) {
+            var start_date = $('#start_date').val();
+            var end_date = $('#end_date').val();
+
+            var start_date_components = start_date.split('/');
+            var end_date_components = end_date.split('/');
+
+            var start_date_obj = new Date(parseInt(start_date_components[2]), parseInt(start_date_components[0])-1, parseInt(start_date_components[1]));
+            var end_date_obj = new Date(parseInt(end_date_components[2]), parseInt(end_date_components[0])-1, parseInt(end_date_components[1]));
+
+            var start_time_ms = start_date_obj.getTime();
+            var end_time_ms = end_date_obj.getTime();
+
+            $('#operation_indicator').show();
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
+        }
+        else {
+            var start_time_ms = (new Date()).getTime() - 300000;
+            var end_time_ms = (new Date()).getTime();
+
+            display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
+            setTimeout(function() {
+                display_data(caller_id, variable, start_time_ms, end_time_ms, ip_address);
+            }, real_time_plot_update_interval);
+        }
+    }
+
+    function display_data(caller_id, variable, start_time, end_time, ip_address) {
         $.ajax({
             url: SCRIPT_ROOT + '/get_data',
             type: 'get',
-            data: { variable: variable, start_date: start_date, end_date: end_date, server_ip: ip_address },
+            data: { variable: variable, start_time: start_time, end_time: end_time, server_ip: ip_address },
             contentType: 'application/json',
             cache: false
         }).done(function(result) {
-            var plot_container = null;
+            console.log(result.start_timestamp);
+            console.log(result.end_timestamp);
             if (caller_id == 'btn_display_data') {
                 data = result.data;
                 data_labels = result.data_labels;
@@ -201,7 +261,7 @@
     function add_variable_selection_checkboxes(container, checkbox_class, labels) {
         var html_string = '<div class="form-group">';
         for (var i=0; i<labels.length; i++) {
-            html_string += '<div class="checkbox"><label><input class="' + checkbox_class + '" type="checkbox" value="' + i + '" checked="true">' + labels[i] + '</label></div>';
+            html_string += '<div class="checkbox"><label><input class="' + checkbox_class + '" type="checkbox" value="' + i + '" checked="true" />' + labels[i] + '</label></div>';
         }
         html_string += "</div>";
         container.html(html_string);
@@ -229,6 +289,13 @@
         <div class="col-lg-2">
             <div class="form-group">
                 <select id="ropod_ip_addresses" class="form-control" disabled="disabled"></select>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group">
+                <div class="checkbox">
+                    <label><input id="check_real_time" class="checkbox" type="checkbox" disabled="disabled" />Real-time data</label>
+                </div>
             </div>
         </div>
     </div>

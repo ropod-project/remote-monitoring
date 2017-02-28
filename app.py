@@ -25,21 +25,11 @@ def get_hospital_ips():
 @app.route('/get_data', methods=['GET', 'POST'])
 def get_data():
     variable = request.args.get('variable', '', type=str)
-    start_date = request.args.get('start_date', '', type=str)
-    end_date = request.args.get('end_date', '', type=str)
+    start_timestamp = request.args.get('start_time', '', type=float)
+    end_timestamp = request.args.get('end_time', '', type=float)
     db_server_ip = request.args.get('server_ip', '', type=str)
 
     db_connection = DbConnection(db_server_ip, DbConstants.DATABASE, DbConstants.COLLECTION)
-
-    start_date_components = start_date.split('/')
-    end_date_components = end_date.split('/')
-
-    start_time = datetime(int(start_date_components[2]), int(start_date_components[0]), int(start_date_components[1]))
-    end_time = datetime(int(end_date_components[2]), int(end_date_components[0]), int(end_date_components[1]))
-
-    start_timestamp = (start_time - datetime(1970, 1, 1)).total_seconds() * 1000
-    end_timestamp = (end_time - datetime(1970, 1, 1)).total_seconds() * 1000
-
     data, data_labels = DbQueries.get_data(db_connection, variable, start_timestamp, end_timestamp)
     return jsonify(data=data, data_labels=data_labels)
 
