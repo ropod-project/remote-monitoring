@@ -2,23 +2,19 @@
 {% block body %}
 
 <script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='custom/js/plot.js') }}" type="text/javascript"></script>
 
 <script>
-    var DATA_PLOT = 0;
-    var DATA_COMPARISON_PLOT = 1;
-
-    var data = [];
-    var data_labels = [];
-    var comparison_data = [];
-    var comparison_data_labels = [];
     var real_time_plot_update_interval = 500;
     var real_time_data = false;
-    var update_plot = false;
-    var update_comparison_plot = false;
-    var current_variable = null;
-    var current_comparison_variable = null;
+
+    var plot = null;
+    var comparison_plot = null;
 
     $(document).ready(function() {
+        plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
+        comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
+
         $('#data_container').hide();
 
         $('#start_date').datepicker();
@@ -80,7 +76,7 @@
                 real_time_data = $('#check_real_time').prop('checked');
                 if (real_time_data) {
                     $('#btn_display_data').prop('disabled', false);
-                    if ($('#plot_placeholder').html() != '') {
+                    if (!this.plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -92,7 +88,7 @@
                     else
                     {
                         $('#btn_display_data').prop('disabled', false);
-                        if ($('#plot_placeholder').html() != '') {
+                        if (!this.plot.is_empty()) {
                             $('#btn_display_data_comparison').prop('disabled', false);
                         }
                     }
@@ -111,7 +107,7 @@
             else {
                 if (end_date != 'End date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if ($('#plot_placeholder').html() != '') {
+                    if (!this.plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -129,7 +125,7 @@
             else {
                 if (start_date != 'Start date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if ($('#plot_placeholder').html() != '') {
+                    if (!this.plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -145,7 +141,7 @@
                 $('#end_date').prop('disabled', 'disabled');
                 if ($('#variables').val() != 'none') {
                     $('#btn_display_data').prop('disabled', false);
-                    if ($('#plot_placeholder').html() != '') {
+                    if (!this.plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -161,179 +157,68 @@
         });
 
         $('#btn_display_data').click(function() {
-            get_data(this.id);
+            plot_data(this.id);
         });
 
         $('#btn_display_data_comparison').click(function() {
-            get_data(this.id);
+            plot_data(this.id);
         });
 
         $(document).on('change', '.plot_variables', function() {
-            var checked = $('.plot_variables:checked');
-            display_selected_data(checked, $('#plot_placeholder'), DATA_PLOT);
+            this.plot.display_selected_data();
         });
 
         $(document).on('change', '.comparison_plot_variables', function() {
-            var checked = $('.comparison_plot_variables:checked');
-            display_selected_data(checked, $("#comparison_plot_placeholder"), DATA_COMPARISON_PLOT);
+            this.comparison_plot.display_selected_data();
         });
     });
 
+    function plot_data(caller_id) {
+        var variable = $('#variables').val();
+        var ip_address = $('#ropod_ip_addresses').val();
+        real_time_data = $('#check_real_time').prop('checked');
+
+        var start_time_ms = 0;
+        var end_time_ms = 0;
+        if (!real_time_data) {
+            start_time_ms = date_str_to_timestamp($('#start_date').val());
+            end_time_ms = date_str_to_timestamp($('#end_date').val());
+            $('#operation_indicator').show();
+        }
+        else {
+            start_time_ms = (new Date()).getTime() - 7260000;
+            end_time_ms = (new Date()).getTime();
+        }
+
+        if (caller_id == 'btn_display_data') {
+            this.plot.current_variable = variable;
+            this.plot.update_plot = false;
+            this.plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+        }
+        else if (caller_id == 'btn_display_data_comparison') {
+            this.comparison_plot.current_variable = variable;
+            this.comparison_plot.update_plot = false;
+            this.comparison_plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+        }
+    }
+
     function reset_data_panel() {
-        update_plot = false;
-        update_comparison_plot = false;
-        current_variable = null;
-        current_comparison_variable = null;
         $('#variables').val('none');
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
         $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
-        $('#plot_placeholder').html('');
-        $('#plot_variable_selection').html('');
-        $("#comparison_plot_placeholder").html('');
-        $('#comparison_plot_variable_selection').html('');
+
+        this.plot.reset();
+        this.comparison_plot.reset();
     }
 
-    function get_data(caller_id) {
-        var variable = $('#variables').val();
-        var ip_address = $('#ropod_ip_addresses').val();
-        real_time_data = $('#check_real_time').prop('checked');
-
-        if (!real_time_data) {
-            var start_date = $('#start_date').val();
-            var end_date = $('#end_date').val();
-
-            var start_date_components = start_date.split('/');
-            var end_date_components = end_date.split('/');
-
-            var start_date_obj = new Date(parseInt(start_date_components[2]), parseInt(start_date_components[0])-1, parseInt(start_date_components[1]));
-            var end_date_obj = new Date(parseInt(end_date_components[2]), parseInt(end_date_components[0])-1, parseInt(end_date_components[1]));
-
-            var start_time_ms = start_date_obj.getTime();
-            var end_time_ms = end_date_obj.getTime();
-
-            $('#operation_indicator').show();
-
-            if (caller_id == 'btn_display_data') {
-                current_variable = variable;
-                update_plot = false;
-                display_data(variable, start_time_ms, end_time_ms, ip_address);
-            }
-            else if (caller_id == 'btn_display_data_comparison') {
-                current_comparison_variable = variable;
-                update_comparison_plot = false;
-                display_comparison_data(variable, start_time_ms, end_time_ms, ip_address);
-            }
-        }
-        else {
-            var start_time_ms = (new Date()).getTime() - 7260000;
-            var end_time_ms = (new Date()).getTime();
-            if (caller_id == 'btn_display_data') {
-                current_variable = variable;
-                update_plot = false;
-                display_data(variable, start_time_ms, end_time_ms, ip_address);
-            }
-            else if (caller_id == 'btn_display_data_comparison') {
-                current_comparison_variable = variable;
-                update_comparison_plot = false;
-                display_comparison_data(variable, start_time_ms, end_time_ms, ip_address);
-            }
-        }
-    }
-
-    function display_data(variable, start_time, end_time, ip_address) {
-        $.ajax({
-            url: SCRIPT_ROOT + '/get_data',
-            type: 'get',
-            data: { variable: variable, start_time: start_time, end_time: end_time, server_ip: ip_address },
-            contentType: 'application/json',
-            cache: false
-        }).done(function(result) {
-            data = result.data;
-            data_labels = result.data_labels;
-
-            if (!update_plot) {
-                $("#plot_placeholder").html('');
-                add_variable_selection_checkboxes($("#plot_variable_selection"), 'plot_variables', data_labels);
-            }
-            display_selected_data($('.plot_variables:checked'), $("#plot_placeholder"), DATA_PLOT);
-
-            if (real_time_data && (variable == current_variable)) {
-                update_plot = true;
-                setTimeout(function() {
-                    var start_time_ms = (new Date()).getTime() - 7260000;
-                    var end_time_ms = (new Date()).getTime();
-                    display_data(variable, start_time_ms, end_time_ms, ip_address);
-                }, real_time_plot_update_interval);
-            }
-
-            $('#operation_indicator').hide();
-        }).fail(function(jqXHR, status, error) {
-            console.log(error);
-            $('#operation_indicator').hide();
-        });
-    }
-
-    function display_comparison_data(variable, start_time, end_time, ip_address) {
-        $.ajax({
-            url: SCRIPT_ROOT + '/get_data',
-            type: 'get',
-            data: { variable: variable, start_time: start_time, end_time: end_time, server_ip: ip_address },
-            contentType: 'application/json',
-            cache: false
-        }).done(function(result) {
-            comparison_data = result.data;
-            comparison_data_labels = result.data_labels;
-
-            if (!update_comparison_plot) {
-                $("#comparison_plot_placeholder").html('');
-                add_variable_selection_checkboxes($("#comparison_plot_variable_selection"), 'comparison_plot_variables', comparison_data_labels);
-            }
-            display_selected_data($('.comparison_plot_variables:checked'), $("#comparison_plot_placeholder"), DATA_COMPARISON_PLOT);
-
-            if (real_time_data && (variable == current_comparison_variable)) {
-                update_comparison_plot = true;
-                setTimeout(function() {
-                    var start_time_ms = (new Date()).getTime() - 7260000;
-                    var end_time_ms = (new Date()).getTime();
-                    display_comparison_data(variable, start_time_ms, end_time_ms, ip_address);
-                }, real_time_plot_update_interval);
-            }
-
-            $('#operation_indicator').hide();
-        }).fail(function(jqXHR, status, error) {
-            console.log(error);
-            $('#operation_indicator').hide();
-        });
-    }
-
-    function add_variable_selection_checkboxes(container, checkbox_class, labels) {
-        var html_string = '<div class="form-group">';
-        for (var i=0; i<labels.length; i++) {
-            html_string += '<div class="checkbox"><label><input class="' + checkbox_class + '" type="checkbox" value="' + i + '" checked="true" />' + labels[i] + '</label></div>';
-        }
-        html_string += "</div>";
-        container.html(html_string);
-    }
-
-    function display_selected_data(checked, container, plot_id) {
-        var flot_data = [];
-
-        if (plot_id == DATA_PLOT) {
-            for (var i=0; i<checked.length; i++) {
-                var id = parseInt($(checked[i]).val());
-                flot_data.push({ label: data_labels[id], data: data[id] });
-            }
-        }
-        else if (plot_id == DATA_COMPARISON_PLOT) {
-            for (var i=0; i<checked.length; i++) {
-                var id = parseInt($(checked[i]).val());
-                flot_data.push({ label: comparison_data_labels[id], data: comparison_data[id] });
-            }
-        }
-        $.plot(container, flot_data);
+    function date_str_to_timestamp(date_str) {
+        var date_components = date_str.split('/');
+        var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
+        var time_ms = date_obj.getTime();
+        return time_ms;
     }
 </script>
 
