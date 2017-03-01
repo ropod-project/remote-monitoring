@@ -1,6 +1,6 @@
 function Plot(container_name, variable_selection_container_name, variable_selection_class_name, data_route) {
-    this.plot_container = $('#' + container_name);
-    this.variable_selection_container = $('#' + variable_selection_container_name);
+    this.plot_container_name = container_name;
+    this.variable_selection_container_name = variable_selection_container_name;
     this.variable_selection_class_name = variable_selection_class_name;
     this.data_route = data_route;
     this.data = [];
@@ -10,28 +10,29 @@ function Plot(container_name, variable_selection_container_name, variable_select
 }
 
 Plot.prototype.display_data = function(variable, start_time, end_time, server_ip) {
+    var parent_obj = this;
     $.ajax({
-        url: SCRIPT_ROOT + this.data_route,
+        url: SCRIPT_ROOT + parent_obj.data_route,
         type: 'get',
         data: { variable: variable, start_time: start_time, end_time: end_time, server_ip: server_ip },
         contentType: 'application/json',
         cache: false
     }).done(function(result) {
-        this.data = result.data;
-        this.data_labels = result.data_labels;
+        parent_obj.data = result.data;
+        parent_obj.data_labels = result.data_labels;
 
-        if (!this.update_plot) {
-            this.plot_container.html('');
-            this.add_variable_selection_checkboxes();
+        if (!parent_obj.update_plot) {
+            $('#' + parent_obj.plot_container_name).html('');
+            parent_obj.add_variable_selection_checkboxes();
         }
-        this.display_selected_data();
+        parent_obj.display_selected_data();
 
-        if (real_time_data && (variable == this.current_variable)) {
-            this.update_plot = true;
+        if (real_time_data && (variable == parent_obj.current_variable)) {
+            parent_obj.update_plot = true;
             setTimeout(function() {
                 var start_time_ms = (new Date()).getTime() - 7260000;
                 var end_time_ms = (new Date()).getTime();
-                this.display_data(variable, start_time_ms, end_time_ms, ip_address);
+                parent_obj.display_data(variable, start_time_ms, end_time_ms, server_ip);
             }, real_time_plot_update_interval);
         }
 
@@ -44,11 +45,11 @@ Plot.prototype.display_data = function(variable, start_time, end_time, server_ip
 
 Plot.prototype.add_variable_selection_checkboxes = function() {
     var html_string = '<div class="form-group">';
-    for (var i=0; i<labels.length; i++) {
+    for (var i=0; i<this.data_labels.length; i++) {
         html_string += '<div class="checkbox"><label><input class="' + this.variable_selection_class_name + '" type="checkbox" value="' + i + '" checked="true" />' + this.data_labels[i] + '</label></div>';
     }
     html_string += "</div>";
-    this.variable_selection_container.html(html_string);
+    $('#' + this.variable_selection_container_name).html(html_string);
 };
 
 Plot.prototype.display_selected_data = function () {
@@ -58,11 +59,11 @@ Plot.prototype.display_selected_data = function () {
         var id = parseInt($(checked[i]).val());
         flot_data.push({ label: this.data_labels[id], data: this.data[id] });
     }
-    $.plot(this.plot_container, flot_data);
+    $.plot($('#' + this.plot_container_name), flot_data);
 };
 
 Plot.prototype.is_empty = function() {
-    return this.plot_container.html() == '';
+    return $('#' + this.plot_container_name).html() == '';
 };
 
 Plot.prototype.reset = function() {
@@ -70,6 +71,6 @@ Plot.prototype.reset = function() {
     this.data_labels = [];
     this.update_plot = false;
     this.current_variable = null;
-    this.plot_container.html('');
-    this.variable_selection_container.html('');
+    $('#' + this.plot_container_name).html('');
+    $('#' + this.variable_selection_container_name).html('');
 };

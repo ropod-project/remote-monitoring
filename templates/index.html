@@ -8,13 +8,10 @@
     var real_time_plot_update_interval = 500;
     var real_time_data = false;
 
-    var plot = null;
-    var comparison_plot = null;
+    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
+    var comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
 
     $(document).ready(function() {
-        plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
-        comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
-
         $('#data_container').hide();
 
         $('#start_date').datepicker();
@@ -76,7 +73,7 @@
                 real_time_data = $('#check_real_time').prop('checked');
                 if (real_time_data) {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!this.plot.is_empty()) {
+                    if (!plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -88,7 +85,7 @@
                     else
                     {
                         $('#btn_display_data').prop('disabled', false);
-                        if (!this.plot.is_empty()) {
+                        if (!plot.is_empty()) {
                             $('#btn_display_data_comparison').prop('disabled', false);
                         }
                     }
@@ -107,7 +104,7 @@
             else {
                 if (end_date != 'End date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!this.plot.is_empty()) {
+                    if (!plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -125,7 +122,7 @@
             else {
                 if (start_date != 'Start date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!this.plot.is_empty()) {
+                    if (!plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -141,7 +138,7 @@
                 $('#end_date').prop('disabled', 'disabled');
                 if ($('#variables').val() != 'none') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!this.plot.is_empty()) {
+                    if (!plot.is_empty()) {
                         $('#btn_display_data_comparison').prop('disabled', false);
                     }
                 }
@@ -165,11 +162,11 @@
         });
 
         $(document).on('change', '.plot_variables', function() {
-            this.plot.display_selected_data();
+            plot.display_selected_data();
         });
 
         $(document).on('change', '.comparison_plot_variables', function() {
-            this.comparison_plot.display_selected_data();
+            comparison_plot.display_selected_data();
         });
     });
 
@@ -191,14 +188,14 @@
         }
 
         if (caller_id == 'btn_display_data') {
-            this.plot.current_variable = variable;
-            this.plot.update_plot = false;
-            this.plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+            plot.current_variable = variable;
+            plot.update_plot = false;
+            plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
         }
         else if (caller_id == 'btn_display_data_comparison') {
-            this.comparison_plot.current_variable = variable;
-            this.comparison_plot.update_plot = false;
-            this.comparison_plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+            comparison_plot.current_variable = variable;
+            comparison_plot.update_plot = false;
+            comparison_plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
         }
     }
 
@@ -210,8 +207,8 @@
         $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
 
-        this.plot.reset();
-        this.comparison_plot.reset();
+        plot.reset();
+        comparison_plot.reset();
     }
 
     function date_str_to_timestamp(date_str) {
