@@ -9,12 +9,12 @@ function Plot(container_name, variable_selection_container_name, variable_select
     this.current_variable = null;
 }
 
-Plot.prototype.display_data = function(variable, start_time, end_time, server_ip) {
+Plot.prototype.display_data = function(variable, start_time, end_time, hospital, ropod_id) {
     var parent_obj = this;
     $.ajax({
         url: SCRIPT_ROOT + parent_obj.data_route,
         type: 'get',
-        data: { variable: variable, start_time: start_time, end_time: end_time, server_ip: server_ip },
+        data: { variable: variable, start_time: start_time, end_time: end_time, hospital: hospital, ropod_id: ropod_id },
         contentType: 'application/json',
         cache: false
     }).done(function(result) {

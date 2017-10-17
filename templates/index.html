@@ -25,35 +25,35 @@
             var hospital = $(this).val();
             if (hospital != 'none') {
                 $.ajax({
-                    url: SCRIPT_ROOT + '/get_hospital_ips',
+                    url: SCRIPT_ROOT + '/get_hospital_ropod_ids',
                     type: 'get',
                     data: { hospital: hospital },
                     contentType: 'application/json',
                     cache: false
                 }).done(function(result) {
-                    var ips = result.ips;
-                    var html_string = '<option value="none">Choose IP address</option>';
-                    for (var i=0; i<ips.length; i++) {
-                        html_string += '<option value="' + ips[i] + '">' + ips[i] + '</option>';
+                    var ids = result.ids;
+                    var html_string = '<option value="none">Choose ropod ID</option>';
+                    for (var i=0; i<ids.length; i++) {
+                        html_string += '<option value="' + ids[i] + '">' + ids[i] + '</option>';
                     }
-                    $('#ropod_ip_addresses').html('');
-                    $('#ropod_ip_addresses').html(html_string);
-                    $('#ropod_ip_addresses').prop('disabled', false);
+                    $('#ropod_ids').html('');
+                    $('#ropod_ids').html(html_string);
+                    $('#ropod_ids').prop('disabled', false);
                 }).fail(function(jqXHR, status, error) {
                     console.log(error);
                 });
             }
             else {
-                $('#ropod_ip_addresses').html('');
-                $('#ropod_ip_addresses').prop('disabled', 'disabled');
+                $('#ropod_ids').html('');
+                $('#ropod_ids').prop('disabled', 'disabled');
                 $('#data_container').hide();
                 reset_data_panel();
             }
         });
 
-        $('#ropod_ip_addresses').change(function() {
-            var ip_address = $(this).val();
-            if (ip_address != 'none') {
+        $('#ropod_ids').change(function() {
+            var ropod_id = $(this).val();
+            if (ropod_id != 'none') {
                 $('#data_container').show();
                 $('#check_real_time').prop('disabled', false);
             }
@@ -172,7 +172,8 @@
 
     function plot_data(caller_id) {
         var variable = $('#variables').val();
-        var ip_address = $('#ropod_ip_addresses').val();
+        var hospital = $('#hospitals').val();
+        var ropod_id = $('#ropod_ids').val();
         real_time_data = $('#check_real_time').prop('checked');
 
         var start_time_ms = 0;
@@ -190,12 +191,12 @@
         if (caller_id == 'btn_display_data') {
             plot.current_variable = variable;
             plot.update_plot = false;
-            plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+            plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
         }
         else if (caller_id == 'btn_display_data_comparison') {
             comparison_plot.current_variable = variable;
             comparison_plot.update_plot = false;
-            comparison_plot.display_data(variable, start_time_ms, end_time_ms, ip_address);
+            comparison_plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
         }
     }
 
@@ -239,7 +240,7 @@
         </div>
         <div class="col-lg-2">
             <div class="form-group">
-                <select id="ropod_ip_addresses" class="form-control" disabled="disabled"></select>
+                <select id="ropod_ids" class="form-control" disabled="disabled"></select>
             </div>
         </div>
         <div class="col-lg-2">

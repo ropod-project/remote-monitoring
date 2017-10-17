@@ -3,12 +3,13 @@
 
 <script>
     var original_hospital = '{{ original_hospital }}';
+    var original_id = '{{ original_id }}';
     var original_ip_address = '{{ original_ip_address }}';
 
     $(document).ready(function() {
         $('#ropod_hospital').val(original_hospital);
 
-        $('#ropod_ip_address').change(function() {
+        $('#ropod_id').change(function() {
             if ($(this).val() != '') {
                 $('#btn_update').prop('disabled', false);
             }
@@ -19,12 +20,13 @@
 
         $('#btn_update').click(function() {
             var hospital = $('#ropod_hospital').val();
-            var ip_address = $('#ropod_ip_address').val();
+            var ropod_id = $('#ropod_id').val();
+            var ip_address = $('#ip_address').val();
             $.ajax({
                 url: SCRIPT_ROOT + '/update_existing_ropod',
                 type: 'post',
-                data: JSON.stringify({ old_hospital: original_hospital, old_ip_address: original_ip_address, 
-                                       new_hospital: hospital, new_ip_address: ip_address }),
+                data: JSON.stringify({ old_hospital: original_hospital, old_id: original_id, old_ip_address: original_ip_address,
+                                       new_hospital: hospital, new_id: ropod_id, new_ip_address: ip_address }),
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
@@ -63,10 +65,18 @@
     </div>
     <div class="row">
         <div class="col-lg-1">
+            <div class="form-group">ID</div>
+        </div>
+        <div class="col-lg-2">
+            <div class="form-group"><input id="ropod_id" class="form-control" type="text" value="{{ original_id }}" /></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-1">
             <div class="form-group">IP address</div>
         </div>
         <div class="col-lg-2">
-            <div class="form-group"><input id="ropod_ip_address" class="form-control" type="text" value="{{ original_ip_address }}" /></div>
+            <div class="form-group"><input id="ip_address" class="form-control" type="text" value="{{ original_ip_address }}" /></div>
         </div>
     </div>
 
