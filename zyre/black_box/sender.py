@@ -1,7 +1,9 @@
 '''
-Zyre communication (sender) in python using Pyre library
+Zyre communication (sender) in python using Pyre library.
+This program will run on the server and asks robot to send 
+information.
 This program connects to a zyre group and when we decided 
-it starts to get a serries of queries from another node 
+it starts to get a serries of queries from another program 
 that we choose.   
 
 Author: Mohammadali Varfan
@@ -17,58 +19,49 @@ import uuid
 import logging
 import sys
 import json
+import time
+
 
 n = Pyre("sender_node")
-print('Join group [CHAT]')
 n.join("CHAT")
-
-print('node START')
 n.start()
 
-print('node uuid: ', n.uuid())
-print('node name: ', n.name())
-
 nodes_list = dict()
+
+t = time.localtime()
+current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5]+"Z")
+
+features_list = ['a', 'b', 'c']
+start_query_time = ""
+end_query_time = ""
+
+
 msg_data = {
   "header": {
     "type": "CMD",
     "version": "0.1.0",
     "metamodel": "ropod-msg-schema.json",
     "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
-    "timestamp": "2017-11-11T11:11:00Z"
+    "timestamp": current_time
   },
   "payload": {
     "metamodel": "ropod-demo-cmd-schema.json",
     "commandList":[
       { 
-        "command": "GOTO",
-        "location": "START"
+        "command": "ASKINFORMATION",
+        "features": features_list
+        "start_time": start_query_time
+        "end_time": end_query_time
       }
      ]
   }
 }
 
-queries = [{ 
-        "command": "GOTO",
-        "location": "MOBIDIK"
-      },
-      { 
-        "command": "GOTO",
-        "location": "START"
-      },
-      { 
-        "command": "GOTO",
-        "location": "ELEVATOR"
-      },
-      { 
-        "command": "POSE"
-      },
-      { 
-        "command": "RESUME",
-      },
-      { 
-        "command": "STOP",
-      }]
+# queries = [
+#       { 
+#         "command": "ASKINFORMATION",
+#         "features": features_list
+#       }]
 
 msg_name_request = 'NameRequest'
 dest_name = "receiver_node"
@@ -106,16 +99,22 @@ while get_queries:
 			pass
 
 	# If we get an answer for the previous query we send the next one
-	if send_next_query:
-		#print("start sending query")
-		msg_data['payload']['commandList'][0] = queries[q]
-		jmsg_data = json.dumps(msg_data).encode('utf-8')
-		dest_uuid = nodes_list[dest_name]
-		n.whisper(dest_uuid, jmsg_data)
-		send_next_query = False
-		q += 1
-		if q == len(queries):
-			get_queries = False
+  if send_next_query:
+    jmsg_data = json.dumps(msg_data).encode('utf-8')
+    dest_uuid = nodes_list[dest_name]
+    n.whisper(dest_uuid, jmsg_data)
+    send_next_query = False
+
+	# if send_next_query:
+	# 	# print("start sending query")
+	# 	msg_data['payload']['commandList'][0] = queries[q]
+	# 	jmsg_data = json.dumps(msg_data).encode('utf-8')
+	# 	dest_uuid = nodes_list[dest_name]
+	# 	n.whisper(dest_uuid, jmsg_data)
+	# 	send_next_query = False
+	# 	q += 1
+	# 	if q == len(queries):
+	# 		get_queries = False
 
 
 n.stop()
