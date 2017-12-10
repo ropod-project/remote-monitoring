@@ -14,13 +14,17 @@ import uuid
 import logging
 import sys
 import json
+from bson import json_util
 import time
+from calendar import datetime
+import pymongo
 from pymongo import MongoClient
+import collections
 
 
-col_name = 'database'
+# col_name = 'members'
 con = MongoClient()
-db = con.col_name
+db = con.test_db
 
 
 # establishing and joining a zyre group
@@ -31,7 +35,7 @@ n.start()
 # print(n.name(), n.uuid())
 
 t = time.localtime()
-current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5]+"Z")
+current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5])+"Z"
 
 msg_data = {
   "header": {
@@ -79,36 +83,42 @@ while True:
 
         if have_command:
             for item in jdata['payload']['commandList']:
-                if item['command'] == "ASKINFORMATION":
-                    features_list = item['features']
-                    features = []
-                    for f in features_list:
-                        features.append({f:1})
-                    start_query_time = item['start_time']
-                    end_query_time = item['end_time']
-
-                    # get query
-                    query_result = db.col_name.find({'timestamp': {$gte: start_query_time, $lt: end_query_time}},
-                                                    {$or : features})
+                if item['command'] == "SENDINFO":
+                    feilds = [*db.members.find({})[0].keys()]
+                    # print('feilds')
+                    # print(feilds)
                     # create the response
-                    answers['information'] = query_result              
+                    answers['information'] = feilds
                     answers['command'] = "ANSWER"
                     msg_data['payload']['answerList'][0] = answers
-
                     # sending the response
                     jmsg_data = json.dumps(msg_data).encode('utf-8')
                     n.whisper(sender_uuid, jmsg_data)
                     break
-                    # print("message sent")
+
+                if item['command'] == "GETQUERY":
+                    features_list = item['features']
+                    features = dict()
+                    for f in features_list:
+                        features[f] = 1
+                    start_query_time = item['start_time']
+                    start_query_time = datetime.datetime.strptime(start_query_time, "%Y-%m-%d %H:%M:%S")
+                    end_query_time = item['end_time']
+                    end_query_time = datetime.datetime.strptime(end_query_time, "%Y-%m-%d %H:%M:%S")
+                    # get query
+                    query_results = db.members.find({'timestamp': {'$gte': start_query_time, '$lt': end_query_time}},features)
+                    query_results = [*query_results]
+                    # print('query results')
+                    # print(query_results)
+                    # create the response
+                    answers['information'] = query_results              
+                    answers['command'] = "ANSWER"
+                    msg_data['payload']['answerList'][0] = answers
+                    # sending the response
+                    jq_data = json.dumps(msg_data, sort_keys=True, indent=4, default=json_util.default)
+                    jmsg_data = jq_data.encode('utf-8')
+                    # jmsg_data = json.dumps(msg_data).encode('utf-8')
+                    n.whisper(sender_uuid, jmsg_data)
+                    break
 
 print('Finished')
-
-
-# "commandList":[
-#       { 
-#         "command": "ASKINFORMATION",
-#         "features": features_list
-#         "start_time": start_query_time
-#         "end_time": end_query_time
-#       }
-#      ]

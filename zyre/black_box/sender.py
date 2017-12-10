@@ -29,11 +29,11 @@ n.start()
 nodes_list = dict()
 
 t = time.localtime()
-current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5]+"Z")
+current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5])+"Z"
 
-features_list = ['a', 'b', 'c']
-start_query_time = ""
-end_query_time = ""
+features_list = ['robotID', 'sensors', 'timestamp']
+start_query_time = "2017-12-10 3:55:40"
+end_query_time = "2017-12-10 11:25:40"
 
 
 msg_data = {
@@ -48,9 +48,9 @@ msg_data = {
     "metamodel": "ropod-demo-cmd-schema.json",
     "commandList":[
       { 
-        "command": "ASKINFORMATION",
-        "features": features_list
-        "start_time": start_query_time
+        "command": "GETQUERY",
+        "features": features_list,
+        "start_time": start_query_time,	
         "end_time": end_query_time
       }
      ]
@@ -59,14 +59,15 @@ msg_data = {
 
 # queries = [
 #       { 
-#         "command": "ASKINFORMATION",
+#         "command": "SENDINFO",
 #         "features": features_list
 #       }]
 
 msg_name_request = 'NameRequest'
 dest_name = "receiver_node"
+get_info = True
 get_queries = True
-send_next_query = True
+send_next_query = False
 k = 0
 q = 0
 
@@ -91,31 +92,32 @@ while get_queries:
 		try:
 			jdata = json.loads(data)
 			if jdata['payload']['answerList'][0]['command'] == "ANSWER":
-				send_next_query = True
+				# send_next_query = True
 				print('received answer:')
 				print(jdata['payload']['answerList'])
+				received_answer = jdata['payload']['answerList']
 		except Exception as e:
 			# print('Exception: ', e)
 			pass
 
-	# If we get an answer for the previous query we send the next one
-  if send_next_query:
-    jmsg_data = json.dumps(msg_data).encode('utf-8')
-    dest_uuid = nodes_list[dest_name]
-    n.whisper(dest_uuid, jmsg_data)
-    send_next_query = False
+	if send_next_query:
+		msg_data['payload']['commandList'][0] = {"command": "GETQUERY",
+		"features": features_list,
+		"start_time": start_query_time,
+		"end_time": end_query_time
+		}
+		jmsg_data = json.dumps(msg_data).encode('utf-8')
+		dest_uuid = nodes_list[dest_name]
+		n.whisper(dest_uuid, jmsg_data)
+		send_next_query = False
 
-	# if send_next_query:
-	# 	# print("start sending query")
-	# 	msg_data['payload']['commandList'][0] = queries[q]
-	# 	jmsg_data = json.dumps(msg_data).encode('utf-8')
-	# 	dest_uuid = nodes_list[dest_name]
-	# 	n.whisper(dest_uuid, jmsg_data)
-	# 	send_next_query = False
-	# 	q += 1
-	# 	if q == len(queries):
-	# 		get_queries = False
-
+	if get_info:
+		msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
+		jmsg_data = json.dumps(msg_data).encode('utf-8')
+		dest_uuid = nodes_list[dest_name]
+		n.whisper(dest_uuid, jmsg_data)
+		send_next_query = True
+		get_info = False
 
 n.stop()
 print('Program Finished')
