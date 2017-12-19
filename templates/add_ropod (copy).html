@@ -3,36 +3,34 @@
 
 <script>
     $(document).ready(function() {
+        $('#btn_add').prop('disabled', true);
 
-        // $('#btn_add').prop('disabled', true);
+        $('#hospitals').change(function() {
+            if ($(this).val() != 'none' && $('#ropod_id').val() != '' && $('#ip_address').val() != '') {
+                $('#btn_add').prop('disabled', false);
+            }
+            else {
+                $('#btn_add').prop('disabled', true);
+            }
+        });
 
-        // $('#hospitals').change(function() {
-        //     if ($(this).val() != 'none' && $('#ropod_id').val() != '' && $('#ip_address').val() != '') {
-        //         $('#btn_add').prop('disabled', false);
-        //     }
-        //     else {
-        //         $('#btn_add').prop('disabled', true);
-        //     }
-        // });
+        $('#ropod_id').change(function() {
+            if ($(this).val() != '' && $('#hospitals').val() != 'none' && $('#ip_address').val() != '') {
+                $('#btn_add').prop('disabled', false);
+            }
+            else {
+                $('#btn_add').prop('disabled', true);
+            }
+        });
 
-        // $('#ropod_id').change(function() {
-        //     if ($(this).val() != '' && $('#hospitals').val() != 'none' && $('#ip_address').val() != '') {
-        //         $('#btn_add').prop('disabled', false);
-        //     }
-        //     else {
-        //         $('#btn_add').prop('disabled', true);
-        //     }
-        // });
-
-        // $('#ip_address').change(function() {
-        //     if ($(this).val() != '' && $('#hospitals').val() != 'none' && $('#ropod_id').val() != '') {
-        //         $('#btn_add').prop('disabled', false);
-        //     }
-        //     else {
-        //         $('#btn_add').prop('disabled', true);
-        //     }
-        // });
-
+        $('#ip_address').change(function() {
+            if ($(this).val() != '' && $('#hospitals').val() != 'none' && $('#ropod_id').val() != '') {
+                $('#btn_add').prop('disabled', false);
+            }
+            else {
+                $('#btn_add').prop('disabled', true);
+            }
+        });
 
         $('#btn_add').click(function() {
             var hospital = $('#hospitals').val();
@@ -46,7 +44,6 @@
                 cache: false
             }).done(function(result) {
                 window.location = '/manage_ropods';
-                // window.location = '/ropod_info?ropod_id=' + ropod_id ;
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
             });

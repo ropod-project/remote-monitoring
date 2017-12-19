@@ -1,14 +1,112 @@
 #!/usr/bin/env python
 
+import os
+from flask import send_from_directory
 from flask import Flask, jsonify, render_template, request, redirect, url_for
-from datetime import datetime
+# from datetime import datetime
+from calendar import datetime
 
 from constants import LocalDbConstants, DbConstants, VariableConstants
 from db import DbConnection, DbQueries
 from local_db import RopodAdminQueries
 
+import pyre
+from pyre import Pyre
+from pyre import zhelper
+import zmq
+import uuid
+import logging
+import sys
+import json
+import time
+
+n = Pyre("sender_node")
+n.join("CHAT")
+n.start()
+
+nodes_list = dict()
+
+t = time.localtime()
+current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5])+"Z"
+
+features_list = ['robotID', 'sensors', 'timestamp']
+start_query_time = "2017-12-10 3:55:40"
+end_query_time = "2017-12-10 11:25:40"
+
+msg_data = {
+  "header": {
+    "type": "CMD",
+    "version": "0.1.0",
+    "metamodel": "ropod-msg-schema.json",
+    "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
+    "timestamp": current_time
+  },
+  "payload": {
+    "metamodel": "ropod-demo-cmd-schema.json",
+    "commandList":[
+      { 
+        "command": "GETQUERY",
+        "features": features_list,
+        "start_time": start_query_time, 
+        "end_time": end_query_time
+      }
+     ]
+  }
+}
+
+msg_name_request = 'NameRequest'
+dest_name = "receiver_node"
+get_info = True
+get_queries = True
+send_next_query = False
+k = 0
+q = 0
+
+rec1 = {
+    'timestamp': datetime.datetime.strptime('2017-12-10 3:25:40', "%Y-%m-%d %H:%M:%S"),
+    'robotID':'r1',
+    'pose':'5,8',
+    'busy':'y',
+    'battery':'51',
+    'sensors':[{
+        'IR':'1',
+        'sonar':'0',
+        'laser':'1',
+        'microphone':'0'
+    }],
+    'motor values':[
+    {
+        'motor1':'8',
+        'motor2':'9',
+        'motor3':'9',
+        'motor4':'8'
+    }]
+}
+rec2 = {
+    'timestamp': datetime.datetime.strptime('2017-12-10 4:25:40', "%Y-%m-%d %H:%M:%S"),
+    'robotID':'r2',
+    'pose':'0,0',
+    'busy':'n',
+    'battery':'85',
+    'sensors':[{
+        'IR':'1',
+        'sonar':'1',
+        'laser':'1',
+        'microphone':'0'
+    }],
+    'motor values':[
+    {
+        'motor1':'7',
+        'motor2':'5',
+        'motor3':'5',
+        'motor4':'8'
+    }]
+}
+
+
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
+rid = str()
 
 @app.route('/')
 def index():
@@ -40,6 +138,63 @@ def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
     return render_template('manage_ropods.html', hospitals=hospitals, ids=ids, ip_addresses=ip_addresses)
 
+@app.route('/ropod_info')
+def ropod_info():
+    features = ['Motors','Pose','Sensors','Battery','Busy']
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
+
+@app.route('/ropod_info2')
+def ropod_info2():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    wait = 1000
+    n.shout("CHAT", msg_name_request.encode('utf-8'))
+    while wait>0:
+        wait -= 1
+        rec_msg = n.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        sender_name = rec_msg[2].decode('utf-8')
+        nodes_list[sender_name] = sender_uuid
+
+    msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
+    jmsg_data = json.dumps(msg_data).encode('utf-8')
+    dest_uuid = nodes_list[ropod_id]
+    n.whisper(dest_uuid, jmsg_data)
+    while True:
+        rec_msg = n.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        data = rec_msg[-1]
+        data = data.decode('utf-8')
+        if str(msg_type) == 'SHOUT' or str(msg_type) == 'WHISPER':
+            try:
+                jdata = json.loads(data)
+                if jdata['payload']['answerList'][0]['command'] == "ANSWER" and sender_uuid == dest_uuid:
+                    received_answer = jdata['payload']['answerList']
+                    break
+            except Exception as e:
+                pass
+    n.stop()
+    features = received_answer
+    return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
+
+@app.route('/ropod_query_result')
+def ropod_query_result():
+    features_list = ['Motors','Pose','Sensors','Battery','Busy']
+    return render_template('ropod_query_result.html', features_list=features_list)
+
+@app.route('/ropod_query_result2')
+def ropod_query_result2():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    features_list = request.args.get('features_list', '', type=str)
+    ropod_query_data = [rec1, rec2]
+    return render_template('ropod_query_result.html', features_list=features_list, ropod_id=ropod_id, ropod_query_data=ropod_query_data)
+
+@app.route('/get_ropod_query')
+def get_ropod_query():
+    return jsonify(success=True)
+
 @app.route('/add_ropod')
 def add_ropod():
     hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
@@ -50,6 +205,7 @@ def add_new_ropod():
     data = request.get_json(force=True)
     hospital = data['hospital']
     ropod_id = data['ropod_id']
+    rid = data['ropod_id']
     ip_address = data['ip_address']
     RopodAdminQueries.add_new_ropod(local_db_connection, hospital, ropod_id, ip_address)
     return jsonify(success=True)
@@ -84,4 +240,4 @@ def delete_ropod():
     return jsonify(success=True)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
