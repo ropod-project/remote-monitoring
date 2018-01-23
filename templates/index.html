@@ -7,6 +7,9 @@
 <script>
     var real_time_plot_update_interval = 500;
     var real_time_data = false;
+    var ropod_f = [];
+    // var features_list = [];
+    var ropod_id = undefined;
 
     var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
     var comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
@@ -21,49 +24,41 @@
         $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
 
-        $('#hospitals').change(function() {
-            var hospital = $(this).val();
-            if (hospital != 'none') {
-                $.ajax({
-                    url: SCRIPT_ROOT + '/get_hospital_ropod_ids',
-                    type: 'get',
-                    data: { hospital: hospital },
-                    contentType: 'application/json',
-                    cache: false
-                }).done(function(result) {
-                    var ids = result.ids;
-                    var html_string = '<option value="none">Choose ropod ID</option>';
-                    for (var i=0; i<ids.length; i++) {
-                        html_string += '<option value="' + ids[i] + '">' + ids[i] + '</option>';
-                    }
-                    $('#ropod_ids').html('');
-                    $('#ropod_ids').html(html_string);
-                    $('#ropod_ids').prop('disabled', false);
-                }).fail(function(jqXHR, status, error) {
-                    console.log(error);
-                });
-            }
-            else {
-                $('#ropod_ids').html('');
-                $('#ropod_ids').prop('disabled', 'disabled');
-                $('#data_container').hide();
-                reset_data_panel();
-            }
-        });
-
         $('#ropod_ids').change(function() {
-            var ropod_id = $(this).val();
-            if (ropod_id != 'none') {
-                $('#data_container').show();
-                $('#check_real_time').prop('disabled', false);
-            }
-            else {
-                $('#data_container').hide();
-                $('#check_real_time').prop('disabled', true);
-                reset_data_panel();
-            }
+            ropod_id = $(this).val();
+            var html_string = '';
+
+            // read features from the pyre
+            $.ajax({
+                url: SCRIPT_ROOT + '/get_ropod_features',
+                type: 'get',
+                data: { ropod_id: ropod_id },
+                contentType: 'application/json',
+                cache: false
+                }).done(function(result) {
+                ropod_features = result.ropod_features;
+
+                for (var i = 0; i<result.ropod_features.length; i++){
+                    html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                }
+
+                $('#features_container').html('');
+                $('#features_container').html(html_string);
+                $('#features_container').prop('disabled', false);
+
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+
+            $('#data_container').show();
+            reset_data_panel();
+            $('#btn_display_data').prop('disabled', false);
+            
         });
 
+
+
+        /*
         $('#variables').change(function() {
             if ($(this).val() == 'none') {
                 $('#btn_display_data').prop('disabled', true);
@@ -92,6 +87,7 @@
                 }
             }
         });
+        */
 
         $('#start_date').change(function() {
             var start_date = $(this).val();
@@ -152,10 +148,68 @@
                 $('#btn_display_data_comparison').prop('disabled', true);
             }
         });
+/*
 
+        $("#btn_get_query").click(function(){
+            $("#test_label").text("agdgdmbkdmb"+ropod_id);
+
+            var features_list = [];
+            $.each($("input[name='feature']:checked"), function(){            
+                features_list.push($(this).val());
+            });
+
+            alert("My favourite features are: " + features_list.join(", "));
+            window.location = '/ropod_query_result?ropod_id=' + ropod_id + '&features_list=' + features_list + '&start_timestamp=' + start_timestamp + '&end_timestamp=' + end_timestamp;
+        });
+*/
         $('#btn_display_data').click(function() {
+            // get checked checkboxes
+            var features_list = [];
+            $.each($("input[name='feature']:checked"), function(){            
+                features_list.push($(this).val());
+            });
+
+            // check if the user selected a feature or not
+            if (features_list.length == 0) {
+                alert("please choose at least one feature");
+                return;
+            }
+
+            alert("Start Time: "+$('#start_date').val()+" -- timestamp format: "+date_str_to_timestamp($('#start_date').val()));
+
+
+            // get query
+            $.ajax({
+                url: SCRIPT_ROOT + '/get_ropod_query',
+                type: 'get',
+                data: { ropod_id: ropod_id,
+                        features: features_list
+                 },
+                contentType: 'application/json',
+                cache: false
+                }).done(function(result) {
+                query_result = result.query_result;
+
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+
+            // plotting the query result
             plot_data(this.id);
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         $('#btn_display_data_comparison').click(function() {
             plot_data(this.id);
@@ -169,6 +223,14 @@
             comparison_plot.display_selected_data();
         });
     });
+
+    function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+    }
 
     function plot_data(caller_id) {
         var variable = $('#variables').val();
@@ -230,17 +292,13 @@
     <div class="row">
         <div class="col-lg-2">
             <div class="form-group">
-                <select id="hospitals" class="form-control">
-                    <option value="none">Choose hospital</option>
-                    {% for key in hospitals %}
+                <select id="ropod_ids" class="form-control">
+                    <option value="none">Choose Ropod id</option>
+                    {% for key in ids %}
                         <option value="{{ key }}">{{ key }}</option>
                     {% endfor %}
                 </select>
-            </div>
-        </div>
-        <div class="col-lg-2">
-            <div class="form-group">
-                <select id="ropod_ids" class="form-control" disabled="disabled"></select>
+
             </div>
         </div>
         <div class="col-lg-2">
@@ -253,19 +311,20 @@
     </div>
 </div>
 
+<div id="features_container" disabled="disabled">
+    <div class="panel panel-default">
+        {% for f in ropod_features %}
+            <div class="checkbox">
+                <label><input type="checkbox" value="{{f}}" name="feature">{{f}}</label>
+            </div>
+            <br>
+        {% endfor %}
+    </div>
+</div>
+
 <div id="data_container">
     <div class="row">
-        <div class="col-lg-2">
-            <div class="form-group">
-                <select id="variables" class="form-control">
-                    <option value="none">Choose variable to display</option>
-                    {% for key in variable_keys %}
-                        <option value={{ key }}>{{ variable_labels[loop.index-1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-lg-2">
+            <div class="col-lg-2">
             <div class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
         </div>
         <div class="col-lg-2">

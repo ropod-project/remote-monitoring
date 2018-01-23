@@ -20,9 +20,9 @@ import sys
 import json
 import time
 
-n = Pyre("sender_node")
-n.join("CHAT")
-n.start()
+node = Pyre("sender_node")
+node.join("CHAT")
+node.start()
 
 nodes_list = dict()
 
@@ -111,6 +111,12 @@ rid = str()
 @app.route('/')
 def index():
     variable_keys, variable_labels = VariableConstants.get_logged_variable_list()
+    hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
+    return render_template('index.html', hospitals=hospitals, variable_keys=variable_keys, variable_labels=variable_labels,ids=ids, ip_addresses=ip_addresses)
+
+@app.route('/2')
+def index2():
+    variable_keys, variable_labels = VariableConstants.get_logged_variable_list()
     hospital_names = RopodAdminQueries.get_hospital_names(local_db_connection)
     return render_template('index.html', hospitals=hospital_names, variable_keys=variable_keys, variable_labels=variable_labels)
 
@@ -138,6 +144,13 @@ def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
     return render_template('manage_ropods.html', hospitals=hospitals, ids=ids, ip_addresses=ip_addresses)
 
+@app.route('/get_ropod_features', methods=['GET','POST'])
+def get_ropod_features():
+    ropod_id = request.args.get('ropod_id','', type=str)
+    features = ['Motors','Pose','Sensors','Battery']
+    # features_list = request.args.get('features_list', '', type=str)
+    return jsonify(ropod_features = features)
+
 @app.route('/ropod_info')
 def ropod_info():
     features = ['Motors','Pose','Sensors','Battery','Busy']
@@ -151,7 +164,7 @@ def ropod_info2():
     n.shout("CHAT", msg_name_request.encode('utf-8'))
     while wait>0:
         wait -= 1
-        rec_msg = n.recv()
+        rec_msg = node.recv()
         msg_type = rec_msg[0].decode('utf-8')
         sender_uuid = uuid.UUID(bytes=rec_msg[1])
         sender_name = rec_msg[2].decode('utf-8')
@@ -160,9 +173,9 @@ def ropod_info2():
     msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
     jmsg_data = json.dumps(msg_data).encode('utf-8')
     dest_uuid = nodes_list[ropod_id]
-    n.whisper(dest_uuid, jmsg_data)
+    node.whisper(dest_uuid, jmsg_data)
     while True:
-        rec_msg = n.recv()
+        rec_msg = node.recv()
         msg_type = rec_msg[0].decode('utf-8')
         sender_uuid = uuid.UUID(bytes=rec_msg[1])
         data = rec_msg[-1]
@@ -175,7 +188,7 @@ def ropod_info2():
                     break
             except Exception as e:
                 pass
-    n.stop()
+    # node.stop()
     features = received_answer
     return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
 
@@ -184,16 +197,70 @@ def ropod_query_result():
     features_list = ['Motors','Pose','Sensors','Battery','Busy']
     return render_template('ropod_query_result.html', features_list=features_list)
 
-@app.route('/ropod_query_result2')
-def ropod_query_result2():
-    ropod_id = request.args.get('ropod_id', '', type=str)
-    features_list = request.args.get('features_list', '', type=str)
-    ropod_query_data = [rec1, rec2]
-    return render_template('ropod_query_result.html', features_list=features_list, ropod_id=ropod_id, ropod_query_data=ropod_query_data)
-
-@app.route('/get_ropod_query')
+@app.route('/get_ropod_query', methods=['GET','POST'] )
 def get_ropod_query():
-    return jsonify(success=True)
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    features_list = request.args.get('features_list')
+
+    query_result = [1, 1, 2, 3, 5, 9]
+    # ropod_query_data = 
+    # for val in query_results:
+    	# jq = json.dumps(val, default=json_util.default)
+	# jq2 = json.loads(jq)
+	# print(jq2['sensors'][0]['laser'])
+    return jsonify(query_result)
+    # return render_template('ropod_query_result.html', features_list=features_list, ropod_id=ropod_id, ropod_query_data=ropod_query_data)
+
+@app.route('/get_ropod_query2', methods=['GET','POST'] )
+def get_ropod_query2():
+    # this is the final method which gets the query from the ropod
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    features_list = request.args.get('features_list')
+
+    # getting the query via pyre
+    node.shout("CHAT", msg_name_request.encode('utf-8'))
+    wait = 1000    
+    while wait>0:
+        wait -= 1
+        rec_msg = n.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        sender_name = rec_msg[2].decode('utf-8')
+        nodes_list[sender_name] = sender_uuid
+
+    msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
+    jmsg_data = json.dumps(msg_data).encode('utf-8')
+    dest_uuid = nodes_list[ropod_id]
+    node.whisper(dest_uuid, jmsg_data)
+    while True:
+        rec_msg = node.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        data = rec_msg[-1]
+        data = data.decode('utf-8')
+        if str(msg_type) == 'SHOUT' or str(msg_type) == 'WHISPER':
+            try:
+                jdata = json.loads(data)
+                if jdata['payload']['answerList'][0]['command'] == "ANSWER" and sender_uuid == dest_uuid:
+                    received_answer = jdata['payload']['answerList']
+                    break
+            except Exception as e:
+                pass
+    # node.stop()
+    features_and_vals = received_answer
+
+    # prepare the query result
+    # the query result is a dict with keys that are the desired features 
+    # and values that are a list of values for each feature and we use
+    # this list for plotting
+    query_result = dict()
+    # ropod_query_data = 
+    # for val in query_results:
+    	# jq = json.dumps(val, default=json_util.default)
+	    # jq2 = json.loads(jq)
+	    # print(jq2['sensors'][0]['laser'])
+    return jsonify(query_result)
+    # return render_template('ropod_query_result.html', features_list=features_list, ropod_id=ropod_id, ropod_query_data=ropod_query_data)
 
 @app.route('/add_ropod')
 def add_ropod():
