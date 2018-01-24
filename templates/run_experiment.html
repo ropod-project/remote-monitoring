@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+
+<script>
+    var experiment_list = '{{experiment_list}}';
+    var ropod_id_list = '{{ropod_id_list}}';
+
+    var ropod_id = undefined;
+    var experiment = undefined;
+
+    $(document).ready(function() {
+        
+        $('#ropod_ids').change(function() {
+            ropod_id = $(this).val();
+
+            $('#experiments').prop('disabled', false);
+        });
+
+        $('#experiments').change(function() {
+            experiment = $(this).val();
+
+            $('#btn_exec_exprmnt').prop('disabled', false);
+        });
+
+        $("#btn_exec_exprmnt").click(function(){
+            $.ajax({
+                url: SCRIPT_ROOT + '/exec_expermnt',
+                type: 'get',
+                data: { ropod_id: ropod_id,
+                        experiment: experiment
+                 },
+                contentType: 'application/json',
+                cache: false
+                
+                }).done(function(result) {
+                    alert('Result: ' + result.epermnt_result)
+
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+        });
+    });
+</script>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Run experiment</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="ropod_ids" class="form-control">
+                <option value="none">Choose Ropod id</option>
+                {% for key in ropod_id_list %}
+                    <option value="{{ key }}">{{ key }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="experiments" class="form-control" disabled="disabled">
+                <option value="none">Choose experiment</option>
+                {% for key in experiment_list %}
+                    <option value="{{ key }}">{{ key }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+<button id="btn_exec_exprmnt" disabled="disabled">Execute experimenet</button>
+
+{% endblock %}
+

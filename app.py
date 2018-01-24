@@ -192,6 +192,67 @@ def get_ropod_features2():
     features = ['Motors','Pose','Sensors','Battery']
     return jsonify(ropod_features = features)
 
+@app.route('/run_experiment')
+def run_experiment():
+    experiment_list = ['go to','stop','run in square','go to base']
+    hospitals, ropod_id, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
+
+    # ropod_id = RopodAdminQueries.get_hospital_ropod_ids(local_db_connection)
+    return render_template('run_experiment.html', experiment_list = experiment_list, ropod_id_list=ropod_id)
+
+@app.route('/exec_expermnt', methods=['GET','POST'])
+def exec_expermnt():
+    ropod_id = request.args.get('ropod_id','', type=str)
+    experiment = request.args.get('experiment','', type=str)
+
+    epermnt_result = 'success'
+    return jsonify(epermnt_result = epermnt_result)
+
+@app.route('/exec_expermnt2', methods=['GET','POST'])
+def exec_expermnt2():
+    ropod_id = request.args.get('ropod_id','', type=str)
+    experiment = request.args.get('experiment','', type=str)
+
+    old_time = time.time() # the start time for counting how much time has passed since the start of the query
+
+    n.shout("CHAT", msg_name_request.encode('utf-8'))
+    while True:
+        if time.time() - old_time > 20:
+            break
+        rec_msg = node.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        sender_name = rec_msg[2].decode('utf-8')
+        nodes_list[sender_name] = sender_uuid
+
+    msg_data['payload']['commandList'][0] = {"command": "Exec_Experiment",
+        "experiment": experiment
+        }
+    jmsg_data = json.dumps(msg_data).encode('utf-8')
+    dest_uuid = nodes_list[ropod_id]
+    node.whisper(dest_uuid, jmsg_data)
+    old_time = time.time()
+    while True:
+        if time.time() - old_time > 60:
+            break
+        rec_msg = node.recv()
+        msg_type = rec_msg[0].decode('utf-8')
+        sender_uuid = uuid.UUID(bytes=rec_msg[1])
+        data = rec_msg[-1]
+        data = data.decode('utf-8')
+        if str(msg_type) == 'SHOUT' or str(msg_type) == 'WHISPER':
+            try:
+                jdata = json.loads(data)
+                if jdata['payload']['answerList'][0]['command'] == "ANSWER" and sender_uuid == dest_uuid:
+                    received_answer = jdata['payload']['answerList']
+                    break
+            except Exception as e:
+                pass
+    # node.stop()
+    epermnt_result = received_answer
+    epermnt_result = 'success'
+    return jsonify(epermnt_result = epermnt_result)
+
 @app.route('/ropod_info')
 def ropod_info():
     features = ['Motors','Pose','Sensors','Battery','Busy']
@@ -206,15 +267,19 @@ def ropod_query_result():
 @app.route('/get_ropod_query', methods=['GET','POST'] )
 def get_ropod_query():
     ropod_id = request.args.get('ropod_id', '', type=str)
-    features_list = request.args.get('features_list')
+    features_list = request.args.get('features', type=str)
+    start_query_time = request.args.get('start_timestamp')
+    end_query_time = request.args.get('end_timestamp')
 
-    query_result = [1, 1, 2, 3, 5, 9]
+    test_result = 'ropod_id: '+str(ropod_id)+' -- features_list: '+str(features_list)+' -- start_query_time: '+str(start_query_time)+' -- end_query_time: '+str(end_query_time)
+
+    test_result2 = [1, 1, 2, 3, 5, 9]
     # ropod_query_data = 
     # for val in query_results:
     	# jq = json.dumps(val, default=json_util.default)
 	# jq2 = json.loads(jq)
 	# print(jq2['sensors'][0]['laser'])
-    return jsonify(query_result)
+    return jsonify(query_result = test_result)
 
 @app.route('/get_ropod_query2', methods=['GET','POST'] )
 def get_ropod_query2():

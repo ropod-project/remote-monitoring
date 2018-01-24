@@ -56,39 +56,6 @@
             
         });
 
-
-
-        /*
-        $('#variables').change(function() {
-            if ($(this).val() == 'none') {
-                $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
-            }
-            else {
-                real_time_data = $('#check_real_time').prop('checked');
-                if (real_time_data) {
-                    $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
-                }
-                else {
-                    if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
-                        $('#btn_display_data').prop('disabled', true);
-                        $('#btn_display_data_comparison').prop('disabled', true);
-                    }
-                    else
-                    {
-                        $('#btn_display_data').prop('disabled', false);
-                        if (!plot.is_empty()) {
-                            $('#btn_display_data_comparison').prop('disabled', false);
-                        }
-                    }
-                }
-            }
-        });
-        */
-
         $('#start_date').change(function() {
             var start_date = $(this).val();
             var end_date = $('#end_date').val();
@@ -150,6 +117,7 @@
         });
 
         $('#btn_display_data').click(function() {
+            var query_result = '';
             // get checked checkboxes
             var features_list = [];
             $.each($("input[name='feature']:checked"), function(){            
@@ -162,16 +130,16 @@
                 return;
             }
 
-            alert("Start Time: "+$('#start_date').val()+" -- timestamp format: "+date_str_to_timestamp($('#start_date').val()));
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
             // get query
+            var tmp = null;
             $.ajax({
                 url: SCRIPT_ROOT + '/get_ropod_query',
                 type: 'get',
                 data: { ropod_id: ropod_id,
-                        features: features_list,
+                        features: features_list.join(),
                         start_timestamp: start_time,
                         end_timestamp: end_time
                  },
@@ -180,13 +148,20 @@
                 
                 }).done(function(result) {
                 query_result = result.query_result;
+                // alert("query_result: " + query_result);
+
+                // this is the proper way to have access to vaiables outside of ajax
+                tmp = result;
 
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
             });
 
+            alert("result: " + query_result);
+            alert("tmp-result: " + tmp.query_result);
+
             // plotting the query result
-            plot_data(this.id);
+            // plot_data(this.id);
         });
 
 
