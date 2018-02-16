@@ -23,8 +23,12 @@ import time
 
 
 n = Pyre("sender_node")
-n.join("CHAT")
-n.start()
+n.join("ROPOD")
+try:
+	n.start()
+except:
+	print('cannot start node')
+# print(n)
 
 nodes_list = dict()
 
@@ -38,7 +42,7 @@ end_query_time = "2017-12-10 11:25:40"
 
 msg_data = {
   "header": {
-    "type": "CMD",
+    "type": "VARIABLE_QUERY",
     "version": "0.1.0",
     "metamodel": "ropod-msg-schema.json",
     "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
@@ -57,13 +61,13 @@ msg_data = {
   }
 }
 
-# queries = [
-#       { 
-#         "command": "SENDINFO",
-#         "features": features_list
-#       }]
+queries = [
+      { 
+        "command": "SENDINFO",
+        "features": features_list
+      }]
 
-msg_name_request = 'NameRequest'
+msg_name_request = "NameRequest"
 dest_name = "receiver_node"
 get_info = True
 get_queries = True
@@ -75,7 +79,10 @@ print('press enter to start the program')
 k = input()
 
 # send an order to all nodes(shout) to send their names
-n.shout("CHAT", msg_name_request.encode('utf-8'))
+try:
+	n.shout("ROPOD", msg_name_request.encode('utf-8'))
+except:
+	print('cannot send message')
 
 while get_queries:
 	rec_msg = n.recv()

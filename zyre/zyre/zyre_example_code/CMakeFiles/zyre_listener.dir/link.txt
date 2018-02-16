@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o  -o zyre_listener -rdynamic /usr/local/lib/libzmq.so /usr/local/lib/libczmq.so /usr/local/lib/libzyre.so -Wl,-rpath,/usr/local/lib 

@@ -4,6 +4,30 @@
 <script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='custom/js/plot.js') }}" type="text/javascript"></script>
 
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+    float: left;
+    width: 30%;
+    padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+</style>
+
 <script>
     var real_time_plot_update_interval = 500;
     var real_time_data = false;
@@ -38,8 +62,16 @@
                 }).done(function(result) {
                 ropod_features = result.ropod_features;
 
+                // for (var i = 0; i<result.ropod_features.length; i++){
+                //     html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                // }
+
                 for (var i = 0; i<result.ropod_features.length; i++){
-                    html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                    if ( (i%10) == 0 ){
+                        html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                    } else {
+                        html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                    }
                 }
 
                 $('#features_container').html('');
@@ -164,19 +196,6 @@
             // plot_data(this.id);
         });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         $('#btn_display_data_comparison').click(function() {
             plot_data(this.id);
         });
@@ -279,12 +298,7 @@
 
 <div id="features_container" disabled="disabled">
     <div class="panel panel-default">
-        {% for f in ropod_features %}
-            <div class="checkbox">
-                <label><input type="checkbox" value="{{f}}" name="feature">{{f}}</label>
-            </div>
-            <br>
-        {% endfor %}
+
     </div>
 </div>
 
@@ -317,5 +331,11 @@
         <div id="comparison_plot_variable_selection" class="col-lg-2"></div>
     </div>
 </div>
+
+<!-- <div id="features_container" disabled="disabled">
+    <div class="panel panel-default">
+        
+    </div>
+</div> -->
 
 {% endblock %}

@@ -20,8 +20,11 @@ import sys
 import json
 import time
 
+# node name
 node = Pyre("sender_node")
-node.join("CHAT")
+
+# group name
+node.join("ROPOD")
 node.start()
 
 nodes_list = dict()
@@ -35,7 +38,7 @@ end_query_time = "2017-12-10 11:25:40"
 
 msg_data = {
   "header": {
-    "type": "CMD",
+    "type": "VARIABLE_QUERY",
     "version": "0.1.0",
     "metamodel": "ropod-msg-schema.json",
     "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
@@ -45,7 +48,7 @@ msg_data = {
     "metamodel": "ropod-demo-cmd-schema.json",
     "commandList":[
       { 
-        "command": "GETQUERY",
+        # "command": "GETQUERY",
         "features": features_list,
         "start_time": start_query_time, 
         "end_time": end_query_time
@@ -144,19 +147,20 @@ def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
     return render_template('manage_ropods.html', hospitals=hospitals, ids=ids, ip_addresses=ip_addresses)
 
-@app.route('/get_ropod_features', methods=['GET','POST'])
-def get_ropod_features():
-    ropod_id = request.args.get('ropod_id','', type=str)
-    features = ['Motors','Pose','Sensors','Battery']
-    # features_list = request.args.get('features_list', '', type=str)
-    return jsonify(ropod_features = features)
-
 @app.route('/get_ropod_features2', methods=['GET','POST'])
 def get_ropod_features2():
     ropod_id = request.args.get('ropod_id','', type=str)
+    features = ['Motors','Pose','Sensors','Battery','Motors','Pose','Sensors','Battery','Motors','Pose','Sensors','Battery',
+    'Motors','Pose','Sensors','Battery','Motors','Pose','Sensors','Battery','Motors','Pose','Sensors','Battery']
+    # features_list = request.args.get('features_list', '', type=str)
+    return jsonify(ropod_features = features)
+
+@app.route('/get_ropod_features', methods=['GET','POST'])
+def get_ropod_features():
+    ropod_id = request.args.get('ropod_id','', type=str)
     old_time = time.time() # the start time for counting how much time has passed since the start of the query
 
-    n.shout("CHAT", msg_name_request.encode('utf-8'))
+    node.shout("ROPOD", msg_name_request.encode('utf-8'))
     while True:
         if time.time() - old_time > 20:
             break
@@ -166,7 +170,8 @@ def get_ropod_features2():
         sender_name = rec_msg[2].decode('utf-8')
         nodes_list[sender_name] = sender_uuid
 
-    msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
+    msg_data['type'] = "VARIABLE_QUERY"
+    # msg_data['payload']['commandList'][0] = {"command": "SENDINFO"}
     jmsg_data = json.dumps(msg_data).encode('utf-8')
     dest_uuid = nodes_list[ropod_id]
     node.whisper(dest_uuid, jmsg_data)
@@ -215,7 +220,7 @@ def exec_expermnt2():
 
     old_time = time.time() # the start time for counting how much time has passed since the start of the query
 
-    n.shout("CHAT", msg_name_request.encode('utf-8'))
+    node.shout("CHAT", msg_name_request.encode('utf-8'))
     while True:
         if time.time() - old_time > 20:
             break
@@ -298,7 +303,7 @@ def get_ropod_query2():
     while True:
         if time.time() - old_time > 20:
             break
-        rec_msg = n.recv()
+        rec_msg = node.recv()
         msg_type = rec_msg[0].decode('utf-8')
         sender_uuid = uuid.UUID(bytes=rec_msg[1])
         sender_name = rec_msg[2].decode('utf-8')
