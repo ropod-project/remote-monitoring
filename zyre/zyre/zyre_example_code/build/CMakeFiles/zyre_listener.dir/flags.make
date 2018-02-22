@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/include -I/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/include 
+CXX_INCLUDES = -I/usr/local/include -I/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/include 
 

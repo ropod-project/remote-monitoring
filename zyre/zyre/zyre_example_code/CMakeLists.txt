@@ -39,6 +39,9 @@ include_directories(
   include/
 )
 
+pkg_check_modules(JSONCPP jsoncpp)
+link_libraries(${JSONCPP_LIBRARIES})
+
 add_executable(zyre_listener
   src/event.cpp
   src/node.cpp
@@ -49,4 +52,5 @@ target_compile_features(zyre_listener PRIVATE cxx_range_for)
 target_link_libraries(zyre_listener
   zmq
   ${LIBS}
+  ${JSONCPP_LIBRARIES}
 )

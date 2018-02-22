@@ -4,10 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/zyre_listener.dir/src/event.cpp.o"
-  "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/zyre_listener.dir/src/exception.cpp.o"
-  "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/zyre_listener.dir/src/node.cpp.o"
-  "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o"
+  "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/zyre_listener.dir/src/event.cpp.o"
+  "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/zyre_listener.dir/src/exception.cpp.o"
+  "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/zyre_listener.dir/src/node.cpp.o"
+  "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp" "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

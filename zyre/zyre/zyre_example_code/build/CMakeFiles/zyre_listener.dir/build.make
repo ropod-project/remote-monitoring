@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp
+CMAKE_SOURCE_DIR = /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build
+CMAKE_BINARY_DIR = /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/zyre_listener.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/zyre_listener.dir/flags.make
 
 CMakeFiles/zyre_listener.dir/src/event.cpp.o: CMakeFiles/zyre_listener.dir/flags.make
 CMakeFiles/zyre_listener.dir/src/event.cpp.o: ../src/event.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/zyre_listener.dir/src/event.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/event.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/zyre_listener.dir/src/event.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/event.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp
 
 CMakeFiles/zyre_listener.dir/src/event.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/zyre_listener.dir/src/event.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp > CMakeFiles/zyre_listener.dir/src/event.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp > CMakeFiles/zyre_listener.dir/src/event.cpp.i
 
 CMakeFiles/zyre_listener.dir/src/event.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/zyre_listener.dir/src/event.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp -o CMakeFiles/zyre_listener.dir/src/event.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp -o CMakeFiles/zyre_listener.dir/src/event.cpp.s
 
 CMakeFiles/zyre_listener.dir/src/event.cpp.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/zyre_listener.dir/src/event.cpp.o.provides.build: CMakeFiles/zyre_lis
 
 CMakeFiles/zyre_listener.dir/src/node.cpp.o: CMakeFiles/zyre_listener.dir/flags.make
 CMakeFiles/zyre_listener.dir/src/node.cpp.o: ../src/node.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/zyre_listener.dir/src/node.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/node.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/zyre_listener.dir/src/node.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/node.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp
 
 CMakeFiles/zyre_listener.dir/src/node.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/zyre_listener.dir/src/node.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp > CMakeFiles/zyre_listener.dir/src/node.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp > CMakeFiles/zyre_listener.dir/src/node.cpp.i
 
 CMakeFiles/zyre_listener.dir/src/node.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/zyre_listener.dir/src/node.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp -o CMakeFiles/zyre_listener.dir/src/node.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp -o CMakeFiles/zyre_listener.dir/src/node.cpp.s
 
 CMakeFiles/zyre_listener.dir/src/node.cpp.o.requires:
 
@@ -107,16 +107,16 @@ CMakeFiles/zyre_listener.dir/src/node.cpp.o.provides.build: CMakeFiles/zyre_list
 
 CMakeFiles/zyre_listener.dir/src/exception.cpp.o: CMakeFiles/zyre_listener.dir/flags.make
 CMakeFiles/zyre_listener.dir/src/exception.cpp.o: ../src/exception.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/zyre_listener.dir/src/exception.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/exception.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/zyre_listener.dir/src/exception.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/src/exception.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp
 
 CMakeFiles/zyre_listener.dir/src/exception.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/zyre_listener.dir/src/exception.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp > CMakeFiles/zyre_listener.dir/src/exception.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp > CMakeFiles/zyre_listener.dir/src/exception.cpp.i
 
 CMakeFiles/zyre_listener.dir/src/exception.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/zyre_listener.dir/src/exception.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp -o CMakeFiles/zyre_listener.dir/src/exception.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp -o CMakeFiles/zyre_listener.dir/src/exception.cpp.s
 
 CMakeFiles/zyre_listener.dir/src/exception.cpp.o.requires:
 
@@ -131,16 +131,16 @@ CMakeFiles/zyre_listener.dir/src/exception.cpp.o.provides.build: CMakeFiles/zyre
 
 CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o: CMakeFiles/zyre_listener.dir/flags.make
 CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o: ../zyre_listener.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o"
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp
 
 CMakeFiles/zyre_listener.dir/zyre_listener.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/zyre_listener.dir/zyre_listener.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp > CMakeFiles/zyre_listener.dir/zyre_listener.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp > CMakeFiles/zyre_listener.dir/zyre_listener.cpp.i
 
 CMakeFiles/zyre_listener.dir/zyre_listener.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/zyre_listener.dir/zyre_listener.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp -o CMakeFiles/zyre_listener.dir/zyre_listener.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp -o CMakeFiles/zyre_listener.dir/zyre_listener.cpp.s
 
 CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o.requires:
 
@@ -171,8 +171,11 @@ zyre_listener: CMakeFiles/zyre_listener.dir/build.make
 zyre_listener: /usr/local/lib/libzmq.so
 zyre_listener: /usr/local/lib/libczmq.so
 zyre_listener: /usr/local/lib/libzyre.so
+zyre_listener: /usr/local/lib/libzmq.so
+zyre_listener: /usr/local/lib/libczmq.so
+zyre_listener: /usr/local/lib/libzyre.so
 zyre_listener: CMakeFiles/zyre_listener.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable zyre_listener"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable zyre_listener"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/zyre_listener.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -192,6 +195,6 @@ CMakeFiles/zyre_listener.dir/clean:
 .PHONY : CMakeFiles/zyre_listener.dir/clean
 
 CMakeFiles/zyre_listener.dir/depend:
-	cd /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/zyre_listener.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/zyre_listener.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/zyre_listener.dir/depend
 

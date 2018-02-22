@@ -30,15 +30,27 @@
             <!-- /.panel-heading -->
             <div class="panel-body">
                 <table id="ropods" width="100%" class="table table-striped table-bordered table-hover">
+                    <!-- table header -->
                     <thead>
-                        <tr>
+<!--                         <tr>
                             {% for f in features_list %}
                             <th width="28%">{{f}}</th>
                             {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
+                        </tr> -->
+                        {% for key in features_list[0] %}
+                        <th>{{key}}</th>
+                        {% endfor %}
 
+                    </thead>
+                    <!-- table body -->
+                    <tbody>
+                        {% for dict_item in features_list %}
+                        <tr>
+                            {% for val in dict_item.values() %}
+                            <td> {{val}} </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

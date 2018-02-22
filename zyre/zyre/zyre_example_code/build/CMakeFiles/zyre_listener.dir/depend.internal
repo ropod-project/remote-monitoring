@@ -4,7 +4,7 @@
 CMakeFiles/zyre_listener.dir/src/event.cpp.o
  ../include/event.hpp
  ../include/exception.hpp
- /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp
+ /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp
  /usr/local/include/czmq.h
  /usr/local/include/czmq_library.h
  /usr/local/include/czmq_prelude.h
@@ -49,12 +49,12 @@ CMakeFiles/zyre_listener.dir/src/event.cpp.o
  /usr/local/include/zyre_library.h
 CMakeFiles/zyre_listener.dir/src/exception.cpp.o
  ../include/exception.hpp
- /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp
+ /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp
 CMakeFiles/zyre_listener.dir/src/node.cpp.o
  ../include/event.hpp
  ../include/exception.hpp
  ../include/node.hpp
- /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp
+ /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp
  /usr/local/include/czmq.h
  /usr/local/include/czmq_library.h
  /usr/local/include/czmq_prelude.h
@@ -102,7 +102,7 @@ CMakeFiles/zyre_listener.dir/zyre_listener.cpp.o
  ../include/event.hpp
  ../include/exception.hpp
  ../include/node.hpp
- /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp
+ /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp
  /usr/local/include/czmq.h
  /usr/local/include/czmq_library.h
  /usr/local/include/czmq_prelude.h

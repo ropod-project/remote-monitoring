@@ -1,0 +1,21 @@
+- group name will be hardcoded in the mediator file
+
+
+++++++++++++++++++++++++++++++++++++++++++++++
+
+---working with json in c++
+---sending a list of dictionaries from c++ to python
+---seprate the list and read the first dic and store the keys and store ---the values of all the dics in the list
+---show the list in the interface
+
+flask functions:
+a function for getting the ropod_ids
+a function for getting the ropod_features
+a function for getting the ropod_data
+
+
+zyre functions:
+a function for getting the ropod_ids
+a function for getting the ropod_features
+a function for getting the ropod_data
+

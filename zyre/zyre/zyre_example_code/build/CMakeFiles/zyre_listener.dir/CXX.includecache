@@ -44,19 +44,19 @@ exception.hpp
 event.hpp
 ../include/event.hpp
 
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.cpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.cpp
 event.hpp
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/event.hpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/event.hpp
 
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.cpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.cpp
 exception.hpp
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/exception.hpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/exception.hpp
 
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.cpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.cpp
 node.hpp
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/src/node.hpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/src/node.hpp
 
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/zyre_listener.cpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/zyre_listener.cpp
 string
 -
 iostream
@@ -74,9 +74,25 @@ map
 vector
 -
 node.hpp
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/node.hpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/node.hpp
 config_params.hpp
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/config_params.hpp
+/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/config_params.hpp
+typeinfo
+-
+jsoncpp/json/json.h
+-
+jsoncpp/json/reader.h
+-
+jsoncpp/json/writer.h
+-
+jsoncpp/json/value.h
+-
+fstream
+-
+time.h
+-
+boost/algorithm/string.hpp
+-
 
 /usr/local/include/czmq.h
 czmq_library.h

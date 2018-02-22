@@ -10,7 +10,7 @@ The output was:
 
 Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
 
-The C compiler identification is GNU, found in "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/3.5.1/CompilerIdC/a.out"
+The C compiler identification is GNU, found in "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/3.5.1/CompilerIdC/a.out"
 
 Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
 Compiler: /usr/bin/c++ 
@@ -23,33 +23,33 @@ The output was:
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
 
-The CXX compiler identification is GNU, found in "/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/3.5.1/CompilerIdCXX/a.out"
+The CXX compiler identification is GNU, found in "/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/3.5.1/CompilerIdCXX/a.out"
 
 Determining if the C compiler works passed with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_41587/fast"
-/usr/bin/make -f CMakeFiles/cmTC_41587.dir/build.make CMakeFiles/cmTC_41587.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_41587.dir/testCCompiler.c.o
-/usr/bin/cc     -o CMakeFiles/cmTC_41587.dir/testCCompiler.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp/testCCompiler.c
-Linking C executable cmTC_41587
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_41587.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_41587.dir/testCCompiler.c.o  -o cmTC_41587 -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_35579/fast"
+/usr/bin/make -f CMakeFiles/cmTC_35579.dir/build.make CMakeFiles/cmTC_35579.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_35579.dir/testCCompiler.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_35579.dir/testCCompiler.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_35579
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_35579.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_35579.dir/testCCompiler.c.o  -o cmTC_35579 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
 Detecting C compiler ABI info compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_3dd0f/fast"
-/usr/bin/make -f CMakeFiles/cmTC_3dd0f.dir/build.make CMakeFiles/cmTC_3dd0f.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o
-/usr/bin/cc     -o CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c
-Linking C executable cmTC_3dd0f
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3dd0f.dir/link.txt --verbose=1
-/usr/bin/cc      -v CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o  -o cmTC_3dd0f -rdynamic  
+Run Build Command:"/usr/bin/make" "cmTC_79f95/fast"
+/usr/bin/make -f CMakeFiles/cmTC_79f95.dir/build.make CMakeFiles/cmTC_79f95.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c
+Linking C executable cmTC_79f95
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_79f95.dir/link.txt --verbose=1
+/usr/bin/cc      -v CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o  -o cmTC_79f95 -rdynamic  
 Using built-in specs.
 COLLECT_GCC=/usr/bin/cc
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper
@@ -59,23 +59,23 @@ Thread model: posix
 gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.6) 
 COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/
 LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../:/lib/:/usr/lib/
-COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_3dd0f' '-rdynamic' '-mtune=generic' '-march=x86-64'
- /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccj5XzwZ.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_3dd0f /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_79f95' '-rdynamic' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYzYg9O.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_79f95 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
 Parsed C implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
-  ignore line: [Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp]
+  ignore line: [Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_3dd0f/fast"]
-  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_3dd0f.dir/build.make CMakeFiles/cmTC_3dd0f.dir/build]
-  ignore line: [make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building C object CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o]
-  ignore line: [/usr/bin/cc     -o CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c]
-  ignore line: [Linking C executable cmTC_3dd0f]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3dd0f.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/cc      -v CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o  -o cmTC_3dd0f -rdynamic  ]
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_79f95/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_79f95.dir/build.make CMakeFiles/cmTC_79f95.dir/build]
+  ignore line: [make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/cc     -o CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o   -c /usr/share/cmake-3.5/Modules/CMakeCCompilerABI.c]
+  ignore line: [Linking C executable cmTC_79f95]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_79f95.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/cc      -v CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o  -o cmTC_79f95 -rdynamic  ]
   ignore line: [Using built-in specs.]
   ignore line: [COLLECT_GCC=/usr/bin/cc]
   ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper]
@@ -85,13 +85,13 @@ Parsed C implicit link information from above output:
   ignore line: [gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.6) ]
   ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/]
   ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../:/lib/:/usr/lib/]
-  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_3dd0f' '-rdynamic' '-mtune=generic' '-march=x86-64']
-  link line: [ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccj5XzwZ.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_3dd0f /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_79f95' '-rdynamic' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccYzYg9O.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_79f95 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o]
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/collect2] ==> ignore
     arg [-plugin] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so] ==> ignore
     arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper] ==> ignore
-    arg [-plugin-opt=-fresolution=/tmp/ccj5XzwZ.res] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccYzYg9O.res] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
     arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -109,7 +109,7 @@ Parsed C implicit link information from above output:
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-zrelro] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_3dd0f] ==> ignore
+    arg [cmTC_79f95] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o] ==> ignore
@@ -121,7 +121,7 @@ Parsed C implicit link information from above output:
     arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
     arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
     arg [-L/usr/lib/gcc/x86_64-linux-gnu/5/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/5/../../..]
-    arg [CMakeFiles/cmTC_3dd0f.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [CMakeFiles/cmTC_79f95.dir/CMakeCCompilerABI.c.o] ==> ignore
     arg [-lgcc] ==> lib [gcc]
     arg [--as-needed] ==> ignore
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -153,17 +153,17 @@ Parsed C implicit link information from above output:
 
 
 Detecting C [-std=c11] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_7fb89/fast"
-/usr/bin/make -f CMakeFiles/cmTC_7fb89.dir/build.make CMakeFiles/cmTC_7fb89.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_7fb89.dir/feature_tests.c.o
-/usr/bin/cc    -std=c11 -o CMakeFiles/cmTC_7fb89.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.c
-Linking C executable cmTC_7fb89
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7fb89.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_7fb89.dir/feature_tests.c.o  -o cmTC_7fb89 -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_96d63/fast"
+/usr/bin/make -f CMakeFiles/cmTC_96d63.dir/build.make CMakeFiles/cmTC_96d63.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_96d63.dir/feature_tests.c.o
+/usr/bin/cc    -std=c11 -o CMakeFiles/cmTC_96d63.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_96d63
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_96d63.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_96d63.dir/feature_tests.c.o  -o cmTC_96d63 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: C_FEATURE:1c_function_prototypes
@@ -173,17 +173,17 @@ make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_z
 
 
 Detecting C [-std=c99] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_655fb/fast"
-/usr/bin/make -f CMakeFiles/cmTC_655fb.dir/build.make CMakeFiles/cmTC_655fb.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_655fb.dir/feature_tests.c.o
-/usr/bin/cc    -std=c99 -o CMakeFiles/cmTC_655fb.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.c
-Linking C executable cmTC_655fb
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_655fb.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_655fb.dir/feature_tests.c.o  -o cmTC_655fb -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_56fb5/fast"
+/usr/bin/make -f CMakeFiles/cmTC_56fb5.dir/build.make CMakeFiles/cmTC_56fb5.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_56fb5.dir/feature_tests.c.o
+/usr/bin/cc    -std=c99 -o CMakeFiles/cmTC_56fb5.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_56fb5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_56fb5.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_56fb5.dir/feature_tests.c.o  -o cmTC_56fb5 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: C_FEATURE:1c_function_prototypes
@@ -193,17 +193,17 @@ make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_z
 
 
 Detecting C [-std=c90] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_988fc/fast"
-/usr/bin/make -f CMakeFiles/cmTC_988fc.dir/build.make CMakeFiles/cmTC_988fc.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_988fc.dir/feature_tests.c.o
-/usr/bin/cc    -std=c90 -o CMakeFiles/cmTC_988fc.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.c
-Linking C executable cmTC_988fc
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_988fc.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_988fc.dir/feature_tests.c.o  -o cmTC_988fc -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_3b944/fast"
+/usr/bin/make -f CMakeFiles/cmTC_3b944.dir/build.make CMakeFiles/cmTC_3b944.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_3b944.dir/feature_tests.c.o
+/usr/bin/cc    -std=c90 -o CMakeFiles/cmTC_3b944.dir/feature_tests.c.o   -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.c
+Linking C executable cmTC_3b944
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3b944.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_3b944.dir/feature_tests.c.o  -o cmTC_3b944 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: C_FEATURE:1c_function_prototypes
@@ -211,30 +211,30 @@ make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_z
     Feature record: C_FEATURE:0c_static_assert
     Feature record: C_FEATURE:0c_variadic_macros
 Determining if the CXX compiler works passed with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_7f3ce/fast"
-/usr/bin/make -f CMakeFiles/cmTC_7f3ce.dir/build.make CMakeFiles/cmTC_7f3ce.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_7f3ce.dir/testCXXCompiler.cxx.o
-/usr/bin/c++      -o CMakeFiles/cmTC_7f3ce.dir/testCXXCompiler.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
-Linking CXX executable cmTC_7f3ce
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7f3ce.dir/link.txt --verbose=1
-/usr/bin/c++        CMakeFiles/cmTC_7f3ce.dir/testCXXCompiler.cxx.o  -o cmTC_7f3ce -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_77f09/fast"
+/usr/bin/make -f CMakeFiles/cmTC_77f09.dir/build.make CMakeFiles/cmTC_77f09.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_77f09.dir/testCXXCompiler.cxx.o
+/usr/bin/c++      -o CMakeFiles/cmTC_77f09.dir/testCXXCompiler.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_77f09
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_77f09.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_77f09.dir/testCXXCompiler.cxx.o  -o cmTC_77f09 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
 Detecting CXX compiler ABI info compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_8060f/fast"
-/usr/bin/make -f CMakeFiles/cmTC_8060f.dir/build.make CMakeFiles/cmTC_8060f.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o
-/usr/bin/c++      -o CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp
-Linking CXX executable cmTC_8060f
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8060f.dir/link.txt --verbose=1
-/usr/bin/c++       -v CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_8060f -rdynamic  
+Run Build Command:"/usr/bin/make" "cmTC_841d9/fast"
+/usr/bin/make -f CMakeFiles/cmTC_841d9.dir/build.make CMakeFiles/cmTC_841d9.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++      -o CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_841d9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_841d9.dir/link.txt --verbose=1
+/usr/bin/c++       -v CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_841d9 -rdynamic  
 Using built-in specs.
 COLLECT_GCC=/usr/bin/c++
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper
@@ -244,23 +244,23 @@ Thread model: posix
 gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.6) 
 COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/
 LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../:/lib/:/usr/lib/
-COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_8060f' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
- /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccG48hjj.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_8060f /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_841d9' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/cc21Isq9.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_841d9 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
 Parsed CXX implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
-  ignore line: [Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp]
+  ignore line: [Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_8060f/fast"]
-  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_8060f.dir/build.make CMakeFiles/cmTC_8060f.dir/build]
-  ignore line: [make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building CXX object CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o]
-  ignore line: [/usr/bin/c++      -o CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp]
-  ignore line: [Linking CXX executable cmTC_8060f]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8060f.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/c++       -v CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_8060f -rdynamic  ]
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_841d9/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_841d9.dir/build.make CMakeFiles/cmTC_841d9.dir/build]
+  ignore line: [make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++      -o CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.5/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTC_841d9]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_841d9.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++       -v CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_841d9 -rdynamic  ]
   ignore line: [Using built-in specs.]
   ignore line: [COLLECT_GCC=/usr/bin/c++]
   ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper]
@@ -270,13 +270,13 @@ Parsed CXX implicit link information from above output:
   ignore line: [gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.6) ]
   ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/]
   ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/5/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/5/../../../:/lib/:/usr/lib/]
-  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_8060f' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
-  link line: [ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/ccG48hjj.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_8060f /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_841d9' '-rdynamic' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/5/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper -plugin-opt=-fresolution=/tmp/cc21Isq9.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --sysroot=/ --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z relro -o cmTC_841d9 /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/5 -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/5/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/5/../../.. CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crtn.o]
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/collect2] ==> ignore
     arg [-plugin] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/liblto_plugin.so] ==> ignore
     arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/5/lto-wrapper] ==> ignore
-    arg [-plugin-opt=-fresolution=/tmp/ccG48hjj.res] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/cc21Isq9.res] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
     arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -294,7 +294,7 @@ Parsed CXX implicit link information from above output:
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-zrelro] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_8060f] ==> ignore
+    arg [cmTC_841d9] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crt1.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/../../../x86_64-linux-gnu/crti.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/5/crtbegin.o] ==> ignore
@@ -306,7 +306,7 @@ Parsed CXX implicit link information from above output:
     arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
     arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
     arg [-L/usr/lib/gcc/x86_64-linux-gnu/5/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/5/../../..]
-    arg [CMakeFiles/cmTC_8060f.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [CMakeFiles/cmTC_841d9.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
     arg [-lstdc++] ==> lib [stdc++]
     arg [-lm] ==> lib [m]
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -336,17 +336,17 @@ Parsed CXX implicit link information from above output:
 
 
 Detecting CXX [-std=c++14] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_813f6/fast"
-/usr/bin/make -f CMakeFiles/cmTC_813f6.dir/build.make CMakeFiles/cmTC_813f6.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_813f6.dir/feature_tests.cxx.o
-/usr/bin/c++     -std=c++14 -o CMakeFiles/cmTC_813f6.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_813f6
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_813f6.dir/link.txt --verbose=1
-/usr/bin/c++        CMakeFiles/cmTC_813f6.dir/feature_tests.cxx.o  -o cmTC_813f6 -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_4532f/fast"
+/usr/bin/make -f CMakeFiles/cmTC_4532f.dir/build.make CMakeFiles/cmTC_4532f.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_4532f.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++14 -o CMakeFiles/cmTC_4532f.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_4532f
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4532f.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_4532f.dir/feature_tests.cxx.o  -o cmTC_4532f -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
@@ -409,17 +409,17 @@ make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_z
 
 
 Detecting CXX [-std=c++11] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_fcbfa/fast"
-/usr/bin/make -f CMakeFiles/cmTC_fcbfa.dir/build.make CMakeFiles/cmTC_fcbfa.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_fcbfa.dir/feature_tests.cxx.o
-/usr/bin/c++     -std=c++11 -o CMakeFiles/cmTC_fcbfa.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_fcbfa
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fcbfa.dir/link.txt --verbose=1
-/usr/bin/c++        CMakeFiles/cmTC_fcbfa.dir/feature_tests.cxx.o  -o cmTC_fcbfa -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_fe47b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_fe47b.dir/build.make CMakeFiles/cmTC_fe47b.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fe47b.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++11 -o CMakeFiles/cmTC_fe47b.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_fe47b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fe47b.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_fe47b.dir/feature_tests.cxx.o  -o cmTC_fe47b -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
@@ -482,17 +482,17 @@ make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_z
 
 
 Detecting CXX [-std=c++98] compiler features compiled with the following output:
-Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp
+Change Dir: /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_03fe1/fast"
-/usr/bin/make -f CMakeFiles/cmTC_03fe1.dir/build.make CMakeFiles/cmTC_03fe1.dir/build
-make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_03fe1.dir/feature_tests.cxx.o
-/usr/bin/c++     -std=c++98 -o CMakeFiles/cmTC_03fe1.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_03fe1
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_03fe1.dir/link.txt --verbose=1
-/usr/bin/c++        CMakeFiles/cmTC_03fe1.dir/feature_tests.cxx.o  -o cmTC_03fe1 -rdynamic 
-make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/build/CMakeFiles/CMakeTmp'
+Run Build Command:"/usr/bin/make" "cmTC_22165/fast"
+/usr/bin/make -f CMakeFiles/cmTC_22165.dir/build.make CMakeFiles/cmTC_22165.dir/build
+make[1]: Entering directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_22165.dir/feature_tests.cxx.o
+/usr/bin/c++     -std=c++98 -o CMakeFiles/cmTC_22165.dir/feature_tests.cxx.o -c /home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_22165
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_22165.dir/link.txt --verbose=1
+/usr/bin/c++        CMakeFiles/cmTC_22165.dir/feature_tests.cxx.o  -o cmTC_22165 -rdynamic 
+make[1]: Leaving directory '/home/ali/workspace/remote_monitoring/zyre/zyre/zyre_example_code/build/CMakeFiles/CMakeTmp'
 
 
     Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
