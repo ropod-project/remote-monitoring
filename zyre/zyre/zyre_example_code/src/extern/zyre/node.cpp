@@ -1,4 +1,4 @@
-#include "node.hpp"
+#include "extern/zyre/node.hpp"
 
 namespace zyre
 {

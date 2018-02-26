@@ -1,4 +1,4 @@
-#include "exception.hpp"
+#include "extern/zyre/exception.hpp"
 
 namespace zyre
 {

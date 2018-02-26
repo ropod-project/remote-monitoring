@@ -43,14 +43,17 @@ pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
 
 add_executable(zyre_listener
-  src/event.cpp
-  src/node.cpp
-  src/exception.cpp
-  zyre_listener.cpp
+  src/extern/zyre/event.cpp
+  src/extern/zyre/node.cpp
+  src/extern/zyre/exception.cpp
+  src/zyre_listener.cpp
+  src/zyre_listener_main.cpp
 )
-target_compile_features(zyre_listener PRIVATE cxx_range_for)
+
 target_link_libraries(zyre_listener
   zmq
   ${LIBS}
   ${JSONCPP_LIBRARIES}
 )
+
+target_compile_features(zyre_listener PRIVATE cxx_range_for)

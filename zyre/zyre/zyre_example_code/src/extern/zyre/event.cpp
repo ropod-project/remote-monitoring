@@ -1,4 +1,4 @@
-#include "event.hpp"
+#include "extern/zyre/event.hpp"
 
 namespace zyre
 {

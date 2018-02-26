@@ -54,10 +54,10 @@ msg_data = {
   "payload": {
     "metamodel": "ropod-demo-cmd-schema.json",
     "commandList":[
-      { 
+      {
         # "command": "GETQUERY",
         "features": features_list,
-        "start_time": "02/05/2018", 
+        "start_time": "02/05/2018",
         "end_time": "02/23/2018"
       }
      ]
@@ -65,7 +65,7 @@ msg_data = {
 }
 
 
-ropod_ids = dict()
+ropod_ids = list()
 # Functions
 
 def communicate_zmq(data):
@@ -118,14 +118,13 @@ def index():
 
     ropods = ast.literal_eval(query_reply.decode('ascii'))
 
+    ropod_ids = []
     for node in ropods:
-        sender_uuid = node[1]
         sender_name = node[0]
-        ropod_ids[sender_name] = sender_uuid
+        ropod_ids.append(sender_name)
 
-    ids = ropod_ids.keys()
     # ids = ['5','55','555','5555','4444']
-    return render_template('index.html', ids=ids)
+    return render_template('index.html', ids=ropod_ids)
 
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
@@ -157,7 +156,7 @@ def get_ropod_features():
     ropod_id = request.args.get('ropod_id','', type=str)
     features_list = request.args.get('features_list', '', type=str)
 
-    
+
     msg_data['header']['type'] = "VARIABLE_QUERY"
     msg_data['payload']['commandList'][0] = {"command": "GET_ROPOD_FEATURES"
         }
@@ -175,6 +174,7 @@ def get_ropod_features():
 
 
     reply = communicate_zmq(data)
+    print(reply)
     jreply = json.loads(reply.decode('utf8'))
     # print("jreply: ", jreply)
 
@@ -190,7 +190,7 @@ def get_ropod_features():
 
     # print('after parsing features')
     # print(features)
-        
+
     # features = ['Motors','Pose','Sensors','Battery']
     return jsonify(ropod_features = features)
 
@@ -237,7 +237,7 @@ def ropod_query_result():
     data = "GET_ROPOD_IDs"
     reply = communicate_zmq(data)
     jm = json.loads(reply.decode('utf8'))
-    newlist = sorted(jm, key=lambda k: k['timestamp']) 
+    newlist = sorted(jm, key=lambda k: k['timestamp'])
     features_list = newlist
     return render_template('ropod_query_result.html', features_list=features_list)
 
@@ -273,14 +273,14 @@ def get_ropod_query():
     data = communication_command+"++"+msg_data_string
 
     query_reply = communicate_zmq(data)
-    jquery_reply = json.loads(query_reply.decode('utf8')) 
+    jquery_reply = json.loads(query_reply.decode('utf8'))
 
     print('\n')
     print("jquery_reply: ")
     print(jquery_reply)
     print("jquery_reply End")
     print('\n')
-    # query_result = sorted(jquery_reply, key=lambda k: k['timestamp']) 
+    # query_result = sorted(jquery_reply, key=lambda k: k['timestamp'])
 
     # query_result = ["A", "B", "C", "D"]
     query_result = jquery_reply['payload']['variableList']
