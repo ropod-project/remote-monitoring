@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <algorithm>
 
 #include <jsoncpp/json/json.h>
 #include <jsoncpp/json/reader.h>

@@ -92,7 +92,11 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
             std::string name_str = std::string(name);
             if (name_str.find("query_interface") != std::string::npos)
             {
-                listener->ropod_names_.push_back(name_str);
+                if(std::find(listener->ropod_names_.begin(),
+                             listener->ropod_names_.end(), name_str) == listener->ropod_names_.end())
+                {
+                    listener->ropod_names_.push_back(name_str);
+                }
             }
 
             free (event);
