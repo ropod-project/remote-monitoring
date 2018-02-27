@@ -6,7 +6,8 @@ ZyreListener::ZyreListener(int timeout)
     listener_node_->start();
     listener_node_->join("ROPOD");
     ropod_list_received_ = false;
-    query_result_received_ = false;
+    features_received_ = false;
+    data_received_ = false;
     timeout_ = timeout;
 }
 
@@ -34,23 +35,39 @@ std::vector<std::string> ZyreListener::getRopodList(std::string message)
     return ropod_names_;
 }
 
-std::string ZyreListener::getQuery(std::string msg)
+std::string ZyreListener::getFeatures(std::string msg)
 {
     Json::Value jmsg =  parseMessageJson(msg);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
     ZyreListener::shoutMessage(jmsg);
-    query_actor_ = zactor_new(ZyreListener::receiveQueryResult, this);
+    feature_query_actor_ = zactor_new(ZyreListener::receiveFeatures, this);
 
     std::cout << "Waiting for query results...\n";
-    while (!query_result_received_) {}
-    query_result_received_ = false;
+    while (!features_received_) {}
+    features_received_ = false;
     std::cout << "Query result received\n\n";
 
-    zactor_destroy(&query_actor_);
+    zactor_destroy(&feature_query_actor_);
     return received_msg_;
 }
 
+std::string ZyreListener::getData(std::string msg)
+{
+    Json::Value jmsg =  parseMessageJson(msg);
+    std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
+
+    ZyreListener::shoutMessage(jmsg);
+    data_query_actor_ = zactor_new(ZyreListener::receiveData, this);
+
+    std::cout << "Waiting for query results...\n";
+    while (!data_received_) {}
+    data_received_ = false;
+    std::cout << "Query result received\n\n";
+
+    zactor_destroy(&data_query_actor_);
+    return received_msg_;
+}
 
 void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
 {
@@ -123,7 +140,7 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
     zclock_sleep (100);
 }
 
-void ZyreListener::receiveQueryResult(zsock_t *pipe, void *args)
+void ZyreListener::receiveFeatures(zsock_t *pipe, void *args)
 {
     ZyreListener *listener = (ZyreListener*)args;
 
@@ -193,7 +210,82 @@ void ZyreListener::receiveQueryResult(zsock_t *pipe, void *args)
             }
         }
     }
-    listener->query_result_received_ = true;
+    listener->features_received_ = true;
+    zpoller_destroy (&poller);
+    zclock_sleep (100);
+}
+
+void ZyreListener::receiveData(zsock_t *pipe, void *args)
+{
+    ZyreListener *listener = (ZyreListener*)args;
+
+    Json::Value rec_msg;
+    zsock_signal (pipe, 0);     //  Signal "ready" to caller
+
+    bool terminated = false;
+    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+
+    auto start = std::chrono::high_resolution_clock::now();
+    while (!terminated)
+    {
+        void *which = zpoller_wait (poller, -1);
+        if (which == pipe)
+        {
+            zmsg_t *msg = zmsg_recv (which);
+            if (!msg)
+                break;              //  Interrupted
+
+            char *command = zmsg_popstr (msg);
+
+            if (streq (command, "$TERM"))
+                terminated = true;
+            else
+            {
+                puts ("E: invalid message to actor");
+                assert (false);
+            }
+            free (command);
+            zmsg_destroy (&msg);
+        }
+        else if (which == listener->listener_node_->socket())
+        {
+            zmsg_t *msg = zmsg_recv (which);
+            char *event = zmsg_popstr (msg);
+            char *peer = zmsg_popstr (msg);
+            char *name = zmsg_popstr (msg);
+            char *group = zmsg_popstr (msg);
+            char *message = zmsg_popstr (msg);
+
+            if ((std::string(event) == "SHOUT") && (message != NULL) && (message[0] != '\0'))
+            {
+                std::string name_str(name);
+                if (name_str.find("query_interface") != std::string::npos)
+                {
+                    rec_msg = listener->parseMessageJson(message);
+                    if (!rec_msg["header"]["type"].compare("DATA_QUERY"))
+                    {
+                        listener->received_msg_ = std::string(message);
+                        terminated = true;
+                    }
+                }
+            }
+
+            free (event);
+            free (peer);
+            free (name);
+            free (group);
+            free (message);
+            zmsg_destroy (&msg);
+
+            auto now = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = now - start;
+            if (elapsed.count() > listener->timeout_)
+            {
+                terminated = true;
+            }
+        }
+    }
+    listener->data_received_ = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }

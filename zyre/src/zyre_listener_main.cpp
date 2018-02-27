@@ -57,9 +57,19 @@ int main()
                 memcpy(reply.data (), ropods.c_str(), ropods.size());
                 server.send (reply);
             }
-            else if (!received_zmq_msgs[0].compare("QUERY"))
+            else if (!received_zmq_msgs[0].compare("VARIABLE_QUERY"))
             {
-                query_reply_str = zyre_listener->getQuery(received_zmq_msgs[2]);
+                query_reply_str = zyre_listener->getFeatures(received_zmq_msgs[2]);
+
+                // sending the reply to the interface
+                data_size = query_reply_str.length();
+                zmq::message_t reply (data_size);
+                memcpy(reply.data (), query_reply_str.c_str(), query_reply_str.length());
+                server.send (reply);
+            }
+            else if (!received_zmq_msgs[0].compare("DATA_QUERY"))
+            {
+                query_reply_str = zyre_listener->getData(received_zmq_msgs[2]);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
