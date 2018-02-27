@@ -29,15 +29,10 @@ body {
 </style>
 
 <script>
-    var real_time_plot_update_interval = 500;
-    var real_time_data = false;
-    var ropod_f = [];
+    var ropod_features = [];
     var ropod_id = undefined;
 
-    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
-    var comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
-
-    var tmp_query_result = [];
+    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_ropod_data');
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -46,46 +41,49 @@ body {
         $('#end_date').datepicker();
 
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
 
-        // $('#query_table').prop('disabled', true);
-
-
         $('#ropod_ids').change(function() {
-            ropod_id = $(this).val();
-            var html_string = '';
+            if ($(this).val() == "none") {
+                $('#btn_display_data').prop('disabled', true);
+                $('#feature_container').html('');
+                $('#data_container').hide();
+                plot.reset();
+                return;
+            }
 
-            // read features from the pyre
+            ropod_id = $(this).val();
             $.ajax({
                 url: SCRIPT_ROOT + '/get_ropod_features',
                 type: 'get',
                 data: { ropod_id: ropod_id },
                 contentType: 'application/json',
                 cache: false
-                }).done(function(result) {
+            }).done(function(result) {
                 ropod_features = result.ropod_features;
 
-                for (var i = 0; i<result.ropod_features.length; i++){
-                    if ( (i%10) == 0 ){
+                var html_string = '';
+                for (var i=0; i<result.ropod_features.length; i++) {
+                    if ( (i % 10) == 0 ) {
                         html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
-                    } else {
+                    }
+                    else {
                         html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
                     }
                 }
 
-                $('#features_container').html('');
-                $('#features_container').html(html_string);
-                $('#features_container').prop('disabled', false);
-
+                $('#feature_container').html('');
+                $('#feature_container').html(html_string);
+                $('#feature_container').prop('disabled', false);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
             });
 
+            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
+                $('#btn_display_data').prop('disabled', false);
+            }
             $('#data_container').show();
-            reset_data_panel();
-            $('#btn_display_data').prop('disabled', false);
-            
+            plot.reset();
         });
 
         $('#start_date').change(function() {
@@ -94,14 +92,10 @@ body {
             if (start_date == '') {
                 $(this).val('Start date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (end_date != 'End date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
                 }
             }
         });
@@ -112,148 +106,56 @@ body {
             if (end_date == '') {
                 $(this).val('End date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (start_date != 'Start date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
                 }
-            }
-        });
-
-        $('#check_real_time').change(function() {
-            real_time_data = $(this).prop('checked');
-            if (real_time_data) {
-                $('#start_date').val('Start date');
-                $('#start_date').prop('disabled', 'disabled');
-                $('#end_date').val('End date');
-                $('#end_date').prop('disabled', 'disabled');
-                if ($('#variables').val() != 'none') {
-                    $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
-                }
-            }
-            else {
-                $('#start_date').val('Start date');
-                $('#start_date').prop('disabled', false);
-                $('#end_date').val('End date');
-                $('#end_date').prop('disabled', false);
-                $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
         });
 
         $('#btn_display_data').click(function() {
-            // var tmp_query_result;
-
-            var query_result = '';
-            // get checked checkboxes
-            var features_list = [];
-            $.each($("input[name='feature']:checked"), function(){            
-                features_list.push($(this).val());
+            var variable_list = [];
+            $.each($("input[name='feature']:checked"), function(){
+                variable_list.push($(this).val());
             });
 
             // check if the user selected a feature or not
-            if (features_list.length == 0) {
-                alert("please choose at least one feature");
+            if (variable_list.length == 0) {
+                alert("Please select at least one variable");
                 return;
             }
-
-            // alert("My favourite features are: " + features_list.join());
 
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
-            // get query
-            var tmp = null;
-            $.ajax({
-                url: SCRIPT_ROOT + '/get_ropod_query',
-                type: 'get',
-                data: { ropod_id: ropod_id,
-                        features: features_list.join(),
-                        start_timestamp: start_time,
-                        end_timestamp: end_time
-                 },
-                contentType: 'application/json',
-                cache: false,
-                async: false 
-                
-                }).done(function(result) {
+            if ((start_time == 'Start date') && (end_time == 'End date')) {
+                alert("Please select a start and an end time");
+                return;
+            }
+            else if (start_time == 'Start date') {
+                alert("Please select a start time");
+                return;
+            }
+            else if (end_time == 'End date') {
+                alert("Please select an end time");
+                return;
+            }
 
-                // query_result = result.query_result;
-                tmp_query_result = result.query_result;
-                // $('#query_table').prop('disabled', false);
-
-                // alert("query_result: " + query_result);
-
-                // this is the proper way to have access to vaiables outside of ajax
-                // tmp = result;
-
-            }).fail(function(jqXHR, status, error) {
-                console.log(error);
-            });
-
-            // alert("result: " + query_result);
-            alert("tmp-result: " + tmp_query_result);
-
-            // plotting the query result
-            // plot_data(this.id);
-        });
-
-        $('#btn_display_data_comparison').click(function() {
-            plot_data(this.id);
+            plot_data(variable_list, start_time, end_time);
         });
 
         $(document).on('change', '.plot_variables', function() {
             plot.display_selected_data();
         });
-
-        $(document).on('change', '.comparison_plot_variables', function() {
-            comparison_plot.display_selected_data();
-        });
     });
 
-    function isEmpty(obj) {
-    for(var key in obj) {
-        if(obj.hasOwnProperty(key))
-            return false;
-    }
-    return true;
-    }
+    function plot_data(variable_list, start_time, end_time) {
+        var start_time_ms = date_str_to_timestamp(start_time);
+        var end_time_ms = date_str_to_timestamp(end_time);
 
-    function plot_data(caller_id) {
-        var variable = $('#variables').val();
-        var hospital = $('#hospitals').val();
-        var ropod_id = $('#ropod_ids').val();
-        real_time_data = $('#check_real_time').prop('checked');
-
-        var start_time_ms = 0;
-        var end_time_ms = 0;
-        if (!real_time_data) {
-            start_time_ms = date_str_to_timestamp($('#start_date').val());
-            end_time_ms = date_str_to_timestamp($('#end_date').val());
-            $('#operation_indicator').show();
-        }
-        else {
-            start_time_ms = (new Date()).getTime() - 7260000;
-            end_time_ms = (new Date()).getTime();
-        }
-
-        if (caller_id == 'btn_display_data') {
-            plot.current_variable = variable;
-            plot.update_plot = false;
-            plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
-        }
-        else if (caller_id == 'btn_display_data_comparison') {
-            comparison_plot.current_variable = variable;
-            comparison_plot.update_plot = false;
-            comparison_plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
-        }
+        $('#operation_indicator').show();
+        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
     }
 
     function reset_data_panel() {
@@ -261,11 +163,8 @@ body {
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
-
         plot.reset();
-        comparison_plot.reset();
     }
 
     function date_str_to_timestamp(date_str) {
@@ -292,28 +191,9 @@ body {
                         <option value="{{ key }}">{{ key }}</option>
                     {% endfor %}
                 </select>
-
             </div>
         </div>
         <div class="col-lg-2">
-            <div class="form-group">
-                <div class="checkbox">
-                    <label><input id="check_real_time" class="checkbox" type="checkbox" disabled="disabled" />Real-time data</label>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="features_container" disabled="disabled">
-    <div class="panel panel-default">
-
-    </div>
-</div>
-
-<div id="data_container">
-    <div class="row">
-            <div class="col-lg-2">
             <div class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
         </div>
         <div class="col-lg-2">
@@ -322,30 +202,24 @@ body {
         <div class="col-lg-1">
             <div class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
         </div>
-        <div class="col-lg-2">
-            <div class="form-group"><button id="btn_display_data_comparison" class="btn btn-primary" type="button">Display data in second plot</button></div>
-        </div>
         <div class="col-lg-1">
             <div id="operation_indicator" class="indicator"></div>
         </div>
     </div>
+</div>
 
+<div id="feature_container" disabled="disabled">
+    <div class="panel panel-default">
+
+    </div>
+</div>
+
+<div id="data_container">
     <div class="col-lg-12">
         <div id="plot_placeholder" class="col-lg-10 data-plot"></div>
         <div id="plot_variable_selection" class="col-lg-2"></div>
 
     </div>
-
-    <div class="col-lg-12">
-        <div id="comparison_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="comparison_plot_variable_selection" class="col-lg-2"></div>
-    </div>
 </div>
-
-<!-- <div id="features_container" disabled="disabled">
-    <div class="panel panel-default">
-        
-    </div>
-</div> -->
 
 {% endblock %}

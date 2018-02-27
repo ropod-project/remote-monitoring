@@ -66,56 +66,28 @@ msg_data = {
 
 
 ropod_ids = list()
-# Functions
 
 def communicate_zmq(data):
     # sending data
     socket.send(data.encode('ascii'))
     reply = socket.recv()
-    # print("inside the communication function")
-    # print("reply: ", reply)
-    # print("End of communication function")
-
-
     return reply
-# ----------------------------
 
 
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
 rid = str()
 
-@app.route('/2')
-def index2():
-    variable_keys, variable_labels = VariableConstants.get_logged_variable_list()
-    hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
-    return render_template('index.html', hospitals=hospitals, variable_keys=variable_keys, variable_labels=variable_labels,ids=ids, ip_addresses=ip_addresses)
-
 @app.route('/')
 def index():
-
     msg_data['header']['type'] = "NAME_QUERY"
     communication_command = "GET_ROPOD_LIST"
-    # msg_data['payload']['commandList'][0] = {"command": "GETQUERY",
-    #     "features": features_list,
-    #     "start_time": start_query_time,
-    #     "end_time": end_query_time
-    #     }
-
     msg_data_string = json.dumps(msg_data)
-
-    # msg_data_string = json.dumps(msg_data)
-    # data = communication_command+'++'+msg_data_string
-    data = communication_command+"++"+msg_data_string
+    data = communication_command + "++" + msg_data_string
 
     query_reply = communicate_zmq(data)
-    # print('\n')
-    # print(query_reply)
-    # print('\n')
-
-    if (len(query_reply) == 0):
+    if len(query_reply) == 0:
         return render_template('index.html', ids=dict())
-
     ropods = ast.literal_eval(query_reply.decode('ascii'))
 
     ropod_ids = []
@@ -123,9 +95,7 @@ def index():
         sender_name = node[0]
         ropod_ids.append(sender_name)
 
-    # ids = ['5','55','555','5555','4444']
     return render_template('index.html', ids=ropod_ids)
-
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
 def get_hospital_ropod_ids():
@@ -149,80 +119,60 @@ def get_data():
 @app.route('/manage_ropods')
 def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
-    return render_template('manage_ropods.html', hospitals=hospitals, ids=ids, ip_addresses=ip_addresses)
+    return render_template('manage_ropods.html', hospitals=hospitals,
+                           ids=ids, ip_addresses=ip_addresses)
 
 @app.route('/get_ropod_features', methods=['GET','POST'])
 def get_ropod_features():
-    ropod_id = request.args.get('ropod_id','', type=str)
+    ropod_id = request.args.get('ropod_id', '', type=str)
     features_list = request.args.get('features_list', '', type=str)
 
-
     msg_data['header']['type'] = "VARIABLE_QUERY"
-    msg_data['payload']['commandList'][0] = {"command": "GET_ROPOD_FEATURES"
-        }
+    msg_data['payload']['commandList'][0] = {"command": "GET_ROPOD_FEATURES"}
 
     # communicate_zmq
     msg_data_string = json.dumps(msg_data)
-    communication_command = "QUERY"
-    # target_node_uuid = ropod_ids[ropod_id]
-    # target_node_uuid = "159753645"
-
-    # data = communication_command+'++'+target_node_uuid+'++'+msg_data_string
-    data = communication_command+'++'+msg_data_string
-
-    # data = msg_data_string
-
+    communication_command = "VARIABLE_QUERY"
+    data = communication_command + '++' + msg_data_string
 
     reply = communicate_zmq(data)
-    print(reply)
     jreply = json.loads(reply.decode('utf8'))
-    # print("jreply: ", jreply)
 
-    # features = jreply['payload']
     features = list()
     for interface in jreply['payload']['variableList']:
         values = list(interface.values())
-        for element in values[0]:
-            # print(element)
-            # print('\n')
-            features.append(element)
+        if values is not None and values[0] is not None:
+            for element in values[0]:
+                features.append(element)
 
-
-    # print('after parsing features')
-    # print(features)
-
-    # features = ['Motors','Pose','Sensors','Battery']
-    return jsonify(ropod_features = features)
+    return jsonify(ropod_features=features)
 
 @app.route('/exec_expermnt', methods=['GET','POST'])
 def exec_expermnt():
-    ropod_id = request.args.get('ropod_id','', type=str)
-    experiment = request.args.get('experiment','', type=str)
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    experiment = request.args.get('experiment', '', type=str)
     msg_data['payload']['commandList'][0] = {"command": "Exec_Experiment",
-        "experiment": experiment
-        }
+                                             "experiment": experiment}
 
     # communicate_zmq
     msg_data_string = json.dumps(msg_data)
     communication_command = 'EXECUTE_EXPERIMENT'
-    data = communication_command+'++'+msg_data_string
+    data = communication_command + '++' + msg_data_string
 
     epermnt_result = communicate_zmq(data)
 
-    # DO SOMETHING WITH REPLY
-    # DO SOMETHING WITH REPLY
-    # DO SOMETHING WITH REPLY
-    # DO SOMETHING WITH REPLY
     # prepare the experiment result in the correct format
-    return jsonify(epermnt_result = epermnt_result)
+    return jsonify(epermnt_result=epermnt_result)
 
 @app.route('/run_experiment')
 def run_experiment():
-    experiment_list = ['go to','stop','run in square','go to base']
+    experiment_list = ['go to','stop', 'run in square', 'go to base']
     hospitals, ropod_id, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
 
     # ropod_id = RopodAdminQueries.get_hospital_ropod_ids(local_db_connection)
-    return render_template('run_experiment.html', experiment_list = experiment_list, ropod_id_list=ropod_id)
+    return render_template('run_experiment.html',
+                           experiment_list=experiment_list,
+                           ropod_id_list=ropod_id)
 
 @app.route('/ropod_info')
 def ropod_info():
@@ -230,28 +180,11 @@ def ropod_info():
     ropod_id = request.args.get('ropod_id', '', type=str)
     return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
 
-# what is the difference between "ropod_query_result" and "get_ropod_query"
-@app.route('/ropod_query_result')
-def ropod_query_result():
-    # features_list = ['Motors','Pose','Sensors','Battery','Busy']
-    data = "GET_ROPOD_IDs"
-    reply = communicate_zmq(data)
-    jm = json.loads(reply.decode('utf8'))
-    newlist = sorted(jm, key=lambda k: k['timestamp'])
-    features_list = newlist
-    return render_template('ropod_query_result.html', features_list=features_list)
-
-@app.route('/get_ropod_query', methods=['GET','POST'] )
-def get_ropod_query():
+@app.route('/get_ropod_data', methods=['GET','POST'] )
+def get_ropod_data():
     # this is the final method which gets the query from the ropod
     ropod_id = request.args.get('ropod_id', '', type=str)
-    features_list = request.args.get('features')
-
-    print('\n')
-    print("before the features_list")
-    print(features_list)
-    print("after the features_list")
-    print('\n')
+    feature_list = request.args.get('features').split(',')
 
     # I have to edit the times as the required format for the query
     start_query_time = request.args.get('start_timestamp')
@@ -260,43 +193,30 @@ def get_ropod_query():
     # getting the query via the zmq-mediator
     msg_data['header']['type'] = "DATA_QUERY"
     msg_data['payload']['commandList'][0] = {
-        "features": ["ros_cmd_vel/linear_x","ros_cmd_vel/linear_y","ros_cmd_vel/linear_z"],
-        # "features": features_list,
+        #"features": ["ros_cmd_vel/linear_x", "ros_cmd_vel/linear_y", "ros_cmd_vel/linear_z"],
+        "features": feature_list,
         "start_time": "1517236467",
         "end_time": "1520707779"
         }
 
-
-    communication_command = "QUERY"
-    # target_node_uuid = ropod_ids[ropod_id]
+    communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
-    data = communication_command+"++"+msg_data_string
+    data = communication_command + "++" + msg_data_string
 
     query_reply = communicate_zmq(data)
-    jquery_reply = json.loads(query_reply.decode('utf8'))
+    query_reply_json = json.loads(query_reply.decode('utf8'))
 
-    print('\n')
-    print("jquery_reply: ")
-    print(jquery_reply)
-    print("jquery_reply End")
-    print('\n')
-    # query_result = sorted(jquery_reply, key=lambda k: k['timestamp'])
-
-    # query_result = ["A", "B", "C", "D"]
-    query_result = jquery_reply['payload']['variableList']
-    return jsonify(query_result = query_result)
-
-
-
-
-
-
-
-
-
-
-
-
+    query_result = query_reply_json['payload']['dataList']
+    variables = list()
+    data = list()
+    for data_dict in query_result:
+        for key, value in data_dict.iteritems():
+            variables.append(key)
+            variable_data_list = list()
+            for item in value:
+                variable_data_list.append(ast.literal_eval(item))
+            data.append(variable_data_list)
+    return jsonify(variables=variables, data=data)
 
 @app.route('/add_ropod')
 def add_ropod():
@@ -319,7 +239,11 @@ def edit_ropod():
     original_hospital = request.args.get('hospital', '', type=str)
     original_id = request.args.get('ropod_id', '', type=str)
     original_ip_address = request.args.get('ip_address', '', type=str)
-    return render_template('edit_ropod.html', hospitals=hospital_names, original_hospital=original_hospital, original_id=original_id, original_ip_address=original_ip_address)
+    return render_template('edit_ropod.html',
+                           hospitals=hospital_names,
+                           original_hospital=original_hospital,
+                           original_id=original_id,
+                           original_ip_address=original_ip_address)
 
 @app.route('/update_existing_ropod', methods=['POST'])
 def update_existing_ropod():
@@ -330,7 +254,9 @@ def update_existing_ropod():
     new_hospital = data['new_hospital']
     new_id = data['new_id']
     new_ip_address = data['new_ip_address']
-    RopodAdminQueries.update_existing_ropod(local_db_connection, old_hospital, old_id, old_ip_address, new_hospital, new_id, new_ip_address)
+    RopodAdminQueries.update_existing_ropod(local_db_connection,
+                                            old_hospital, old_id, old_ip_address,
+                                            new_hospital, new_id, new_ip_address)
     return jsonify(success=True)
 
 @app.route('/delete_ropod', methods=['POST'])
