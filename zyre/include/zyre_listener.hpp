@@ -1,6 +1,7 @@
 #ifndef ZYRE_LISTENER_H
 #define ZYRE_LISTENER_H
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <chrono>

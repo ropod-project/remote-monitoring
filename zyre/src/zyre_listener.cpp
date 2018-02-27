@@ -21,12 +21,14 @@ std::vector<std::string> ZyreListener::getRopodList(std::string message)
 {
     // shout to all the nodes and ask them to send their name and uuids
     Json::Value jmsg =  parseMessageJson(message);
+    std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
+    ZyreListener::shoutMessage(jmsg);
     ropod_list_actor_ = zactor_new(ZyreListener::receiveRopodList, this);
 
-    ZyreListener::shoutMessage(jmsg);
-
+    std::cout << "Waiting for ropod list...\n";
     while (!ropod_list_received_) { }
     ropod_list_received_ = false;
+    std::cout << "Ropod list received\n\n";
 
     zactor_destroy(&ropod_list_actor_);
     return ropod_names_;
@@ -35,15 +37,17 @@ std::vector<std::string> ZyreListener::getRopodList(std::string message)
 std::string ZyreListener::getQuery(std::string msg)
 {
     Json::Value jmsg =  parseMessageJson(msg);
-    ZyreListener::shoutMessage(jmsg);
+    std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
-    // receives all replies
+    ZyreListener::shoutMessage(jmsg);
     query_actor_ = zactor_new(ZyreListener::receiveQueryResult, this);
 
+    std::cout << "Waiting for query results...\n";
     while (!query_result_received_) {}
     query_result_received_ = false;
-    zactor_destroy(&query_actor_);
+    std::cout << "Query result received\n\n";
 
+    zactor_destroy(&query_actor_);
     return received_msg_;
 }
 
@@ -155,46 +159,23 @@ void ZyreListener::receiveQueryResult(zsock_t *pipe, void *args)
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
-            if (std::string(event) != "SHOUT")
-            {
-                free (event);
-                zmsg_destroy (&msg);
-                continue;
-            }
-
             char *peer = zmsg_popstr (msg);
             char *name = zmsg_popstr (msg);
             char *group = zmsg_popstr (msg);
             char *message = zmsg_popstr (msg);
 
-            if(message == NULL || ((message != NULL) && (message[0] == '\0')))
+            if ((std::string(event) == "SHOUT") && (message != NULL) && (message[0] != '\0'))
             {
-                free (event);
-                free (peer);
-                free (name);
-                free (group);
-                free (message);
-                zmsg_destroy (&msg);
-                continue;
-            }
-
-            std::string name_str(name);
-            if (name_str.find("query_interface") == std::string::npos)
-            {
-                free (event);
-                free (peer);
-                free (name);
-                free (group);
-                free (message);
-                zmsg_destroy (&msg);
-                continue;
-            }
-
-            rec_msg = listener->parseMessageJson(message);
-            if (!rec_msg["header"]["type"].compare("VARIABLE_QUERY"))
-            {
-                listener->received_msg_ = std::string(message);
-                terminated = true;
+                std::string name_str(name);
+                if (name_str.find("query_interface") != std::string::npos)
+                {
+                    rec_msg = listener->parseMessageJson(message);
+                    if (!rec_msg["header"]["type"].compare("VARIABLE_QUERY"))
+                    {
+                        listener->received_msg_ = std::string(message);
+                        terminated = true;
+                    }
+                }
             }
 
             free (event);
