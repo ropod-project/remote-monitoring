@@ -29,14 +29,6 @@ import time
 
 # Initializations
 port = "5670"
-msg_name_request = 'NameRequest'
-
-t = time.localtime()
-current_time = str(t[0])+"-"+str(t[1])+"-"+str(t[2])+"T"+str(t[3])+":"+str(t[4])+":"+str(t[5])+"Z"
-
-features_list = ['robotID', 'sensors', 'timestamp']
-start_query_time = "2017-12-10 3:55:40"
-end_query_time = "2017-12-10 11:25:40"
 
 # creating a zmq client using zmq.REQ
 context = zmq.Context()
@@ -49,30 +41,25 @@ msg_data = {
     "version": "0.1.0",
     "metamodel": "ropod-msg-schema.json",
     "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
-    "timestamp": current_time
+    "timestamp": ""
   },
   "payload": {
     "metamodel": "ropod-demo-cmd-schema.json",
     "commandList":[
       {
         # "command": "GETQUERY",
-        "features": features_list,
-        "start_time": "02/05/2018",
-        "end_time": "02/23/2018"
+        "features": [],
+        "start_time": "",
+        "end_time": ""
       }
      ]
   }
 }
 
-
-ropod_ids = list()
-
 def communicate_zmq(data):
-    # sending data
     socket.send(data.encode('ascii'))
     reply = socket.recv()
     return reply
-
 
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
@@ -182,22 +169,16 @@ def ropod_info():
 
 @app.route('/get_ropod_data', methods=['GET','POST'] )
 def get_ropod_data():
-    # this is the final method which gets the query from the ropod
     ropod_id = request.args.get('ropod_id', '', type=str)
     feature_list = request.args.get('features').split(',')
 
-    # I have to edit the times as the required format for the query
     start_query_time = request.args.get('start_timestamp')
     end_query_time = request.args.get('end_timestamp')
 
-    # getting the query via the zmq-mediator
     msg_data['header']['type'] = "DATA_QUERY"
-    msg_data['payload']['commandList'][0] = {
-        #"features": ["ros_cmd_vel/linear_x", "ros_cmd_vel/linear_y", "ros_cmd_vel/linear_z"],
-        "features": feature_list,
-        "start_time": "1517236467",
-        "end_time": "1520707779"
-        }
+    msg_data['payload']['commandList'][0] = { "features": feature_list,
+                                              "start_time": start_query_time,
+                                              "end_time": end_query_time }
 
     communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
@@ -206,16 +187,17 @@ def get_ropod_data():
     query_reply = communicate_zmq(data)
     query_reply_json = json.loads(query_reply.decode('utf8'))
 
-    query_result = query_reply_json['payload']['dataList']
     variables = list()
     data = list()
-    for data_dict in query_result:
-        for key, value in data_dict.iteritems():
-            variables.append(key)
-            variable_data_list = list()
-            for item in value:
-                variable_data_list.append(ast.literal_eval(item))
-            data.append(variable_data_list)
+    query_result = query_reply_json['payload']['dataList']
+    if query_result is not None and query_result[0] is not None:
+        for data_dict in query_result:
+            for key, value in data_dict.iteritems():
+                variables.append(key)
+                variable_data_list = list()
+                for item in value:
+                    variable_data_list.append(ast.literal_eval(item))
+                data.append(variable_data_list)
     return jsonify(variables=variables, data=data)
 
 @app.route('/add_ropod')
