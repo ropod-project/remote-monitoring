@@ -24,8 +24,7 @@ import json
 import time
 
 from flask import send_file
-from pathlib import Path
-
+from os.path import expanduser
 
 # Initializations
 port = "5670"
@@ -64,12 +63,13 @@ app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
 rid = str()
 
+################ Black box data interface ################
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/get_ropod_ids', methods=['GET', 'POST'])
-def get_ropod_ids():
+@app.route('/get_blackbox_ids', methods=['GET', 'POST'])
+def get_blackbox_ids():
     msg_data['header']['type'] = "NAME_QUERY"
     communication_command = "GET_ROPOD_LIST"
     msg_data_string = json.dumps(msg_data)
@@ -167,15 +167,61 @@ def download_ropod_data():
     query_reply = communicate_zmq(data)
     query_reply_json = json.loads(query_reply.decode('utf8'))
 
-    home = str(Path.home())
-    root_download_dir = home+'/Downloads/'
-    download_path = root_download_dir+'ropod_query_data.json'
+    home = str(expanduser('~'))
+    root_download_dir = home + '/Downloads/'
+    download_path = root_download_dir + 'ropod_query_data.json'
 
     # save the data
     with open( download_path , 'w') as download_file:
         json.dump(query_reply_json, download_file)
 
     return send_file(download_path , attachment_filename='ropod_query_data.json')
+##########################################################
+
+
+################ Experiment request interface ################
+@app.route('/run_experiment')
+def run_experiment():
+    return render_template('run_experiment.html')
+
+@app.route('/get_ropod_ids', methods=['GET'])
+def get_ropod_ids():
+    msg_data['header']['type'] = "NAME_QUERY"
+    communication_command = "GET_ROPOD_LIST"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+
+    ropod_ids = dict()
+    query_reply = communicate_zmq(data)
+    if query_reply:
+        ropods = ast.literal_eval(query_reply.decode('ascii'))
+        ropod_ids = []
+        for node in ropods:
+            sender_name = node[0]
+            suffix_idx = sender_name.find('_query_interface')
+            ropod_ids.append(sender_name[0:suffix_idx])
+
+    # experiment_list = ['mobidik_elevator_experiment']
+    return jsonify(ropod_ids=ropod_ids)
+
+@app.route('/send_experiment_request', methods=['GET','POST'])
+def send_experiment_request():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    experiment = request.args.get('experiment', '', type=str)
+
+    msg_data['header']['type'] = "RUN_EXPERIMENT"
+    msg_data['payload']['ropod_id'] = ropod_id
+    msg_data['payload']['experiment'] = experiment
+
+
+    communication_command = "DATA_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+    query_reply = communicate_zmq(data)    
+
+    return jsonify(success=True)
+##########################################################
+
 
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
@@ -189,33 +235,6 @@ def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
     return render_template('manage_ropods.html', hospitals=hospitals,
                            ids=ids, ip_addresses=ip_addresses)
-
-@app.route('/exec_expermnt', methods=['GET','POST'])
-def exec_expermnt():
-    ropod_id = request.args.get('ropod_id', '', type=str)
-    experiment = request.args.get('experiment', '', type=str)
-    msg_data['payload']['commandList'][0] = {"command": "Exec_Experiment",
-                                             "experiment": experiment}
-
-    # communicate_zmq
-    msg_data_string = json.dumps(msg_data)
-    communication_command = 'EXECUTE_EXPERIMENT'
-    data = communication_command + '++' + msg_data_string
-
-    epermnt_result = communicate_zmq(data)
-
-    # prepare the experiment result in the correct format
-    return jsonify(epermnt_result=epermnt_result)
-
-@app.route('/run_experiment')
-def run_experiment():
-    experiment_list = ['go to','stop', 'run in square', 'go to base']
-    hospitals, ropod_id, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
-
-    # ropod_id = RopodAdminQueries.get_hospital_ropod_ids(local_db_connection)
-    return render_template('run_experiment.html',
-                           experiment_list=experiment_list,
-                           ropod_id_list=ropod_id)
 
 @app.route('/ropod_info')
 def ropod_info():
