@@ -194,28 +194,42 @@ def manage_ropods():
 def exec_expermnt():
     ropod_id = request.args.get('ropod_id', '', type=str)
     experiment = request.args.get('experiment', '', type=str)
-    msg_data['payload']['commandList'][0] = {"command": "Exec_Experiment",
-                                             "experiment": experiment}
 
-    # communicate_zmq
+    msg_data['header']['type'] = "RUN_EXPERIMENT"
+    msg_data['payload']['ropod_id'] = ropod_id
+    msg_data['payload']['experiment'] = experiment
+
+
+    communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
-    communication_command = 'EXECUTE_EXPERIMENT'
-    data = communication_command + '++' + msg_data_string
+    data = communication_command + "++" + msg_data_string
+    query_reply = communicate_zmq(data)    
 
-    epermnt_result = communicate_zmq(data)
+    return jsonify(success=True)
 
-    # prepare the experiment result in the correct format
-    return jsonify(epermnt_result=epermnt_result)
+
 
 @app.route('/run_experiment')
 def run_experiment():
-    experiment_list = ['go to','stop', 'run in square', 'go to base']
-    hospitals, ropod_id, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
+    msg_data['header']['type'] = "NAME_QUERY"
+    communication_command = "GET_ROPOD_LIST"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
 
-    # ropod_id = RopodAdminQueries.get_hospital_ropod_ids(local_db_connection)
-    return render_template('run_experiment.html',
-                           experiment_list=experiment_list,
-                           ropod_id_list=ropod_id)
+    ropod_ids = dict()
+    query_reply = communicate_zmq(data)
+    if query_reply:
+        ropods = ast.literal_eval(query_reply.decode('ascii'))
+        ropod_ids = []
+        for node in ropods:
+            sender_name = node[0]
+            suffix_idx = sender_name.find('_query_interface')
+            ropod_ids.append(sender_name[0:suffix_idx])
+
+    # ropod_ids = {'A':10,'B':10,'C':10}
+    experiment_list = ['mobidik_elevator_experiment']
+    return render_template('run_experiment.html', experiment_list=experiment_list, ropod_id_list=ropod_ids)
+
 
 @app.route('/ropod_info')
 def ropod_info():
