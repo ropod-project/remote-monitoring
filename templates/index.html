@@ -41,7 +41,25 @@ body {
         $('#end_date').datepicker();
 
         $('#btn_display_data').prop('disabled', true);
-        $('#operation_indicator').hide();
+        $('#operation_indicator').show();
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_ropod_ids',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            $.each(result.ids, function(i, ropod_id){
+                $('#ropod_ids').append($('<option>', {
+                    value: ropod_id,
+                    text: ropod_id
+                }));
+            });
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#operation_indicator').hide();
+        });
 
         $('#ropod_ids').change(function() {
             if ($(this).val() == "none") {
@@ -187,9 +205,9 @@ body {
             <div class="form-group">
                 <select id="ropod_ids" class="form-control">
                     <option value="none">Choose Ropod id</option>
-                    {% for key in ids %}
+                    <!-- {% for key in ids %}
                         <option value="{{ key }}">{{ key }}</option>
-                    {% endfor %}
+                    {% endfor %} -->
                 </select>
             </div>
         </div>
