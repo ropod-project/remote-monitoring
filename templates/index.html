@@ -212,9 +212,9 @@ body {
                 url: SCRIPT_ROOT + '/download_ropod_data',
                 type: 'get',
                 data: { ropod_id: ropod_id,
-                        start_time: start_time,
-                        end_time: end_time,
-                        variable_list: variable_list
+                        start_timestamp: date_str_to_timestamp(start_time),
+                        end_timestamp: date_str_to_timestamp(end_time),
+                        features: variable_list.join()
                  },
                 contentType: 'application/json',
                 cache: false
@@ -285,16 +285,15 @@ body {
         <div class="col-lg-2">
             <div class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
         </div>
-        <div class="col-lg-1">
+
+        <div class="col-lg-2">
             <div class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
         </div>
 
-        <div class="col-lg-1">
-        </div>
-
-        <div class="col-lg-1">
+        <div class="col-lg-2">
             <div class="form-group"><button id="btn_download_data" class="btn btn-primary" type="button">Download data</button></div>
         </div>
+
         <div class="col-lg-1">
             <div id="operation_indicator" class="indicator"></div>
         </div>

@@ -23,6 +23,9 @@ import sys
 import json
 import time
 
+from flask import send_file
+from pathlib import Path
+
 
 # Initializations
 port = "5670"
@@ -134,7 +137,7 @@ def get_ropod_data():
     query_result = query_reply_json['payload']['dataList']
     if query_result is not None and query_result[0] is not None:
         for data_dict in query_result:
-            for key, value in data_dict.iteritems():
+            for key, value in data_dict.items():
                 variables.append(key)
                 variable_data_list = list()
                 for item in value:
@@ -164,30 +167,16 @@ def download_ropod_data():
     query_reply = communicate_zmq(data)
     query_reply_json = json.loads(query_reply.decode('utf8'))
 
-    # This is fir extracting the data from the query_result message
-    # variables = list()
-    # data = list()
-    # query_result = query_reply_json['payload']['dataList']
-    # if query_result is not None and query_result[0] is not None:
-    #     for data_dict in query_result:
-    #         for key, value in data_dict.iteritems():
-    #             variables.append(key)
-    #             variable_data_list = list()
-    #             for item in value:
-    #                 variable_data_list.append(ast.literal_eval(item))
-    #             data.append(variable_data_list)
-
-    # test for downloading the data
-    download_path = '~/Download/'
+    home = str(Path.home())
+    root_download_dir = home+'/Downloads/'
+    download_path = root_download_dir+'ropod_query_data.json'
 
     # save the data
-    with open( download_path+'test.csv', 'w') as download_file:
-        json.dump(feature_list, download_file)
+    with open( download_path , 'w') as download_file:
+        json.dump(query_reply_json, download_file)
 
+    return send_file(download_path , attachment_filename='ropod_query_data.json')
 
-    # return jsonify(variables=variables, data=data)
-    return jsonify(success=True)
-    
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
 def get_hospital_ropod_ids():
