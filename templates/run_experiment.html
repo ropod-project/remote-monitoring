@@ -5,29 +5,60 @@
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
 
 <script>
-    var experiment_list = '{{experiment_list}}';
     var ropod_id_list = '{{ropod_id_list}}';
 
     var ropod_id = undefined;
     var experiment = undefined;
 
     $(document).ready(function() {
+
+        $('#operation_indicator').show();
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_ropod_ids',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            $.each(result.ropod_ids, function(i, ropod_id){
+                $('#ropod_ids').append($('<option>', {
+                    value: ropod_id,
+                    text: ropod_id
+                }));
+            });
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#operation_indicator').hide();
+        });
         
         $('#ropod_ids').change(function() {
             ropod_id = $(this).val();
 
-            $('#experiments').prop('disabled', false);
+            if (ropod_id != 'none') {
+                $('#btn_execute_experiment').prop('disabled', false);
+                $('#experiments').prop('disabled', false);
+            }
+            else {
+                $('#btn_execute_experiment').prop('disabled', true);
+                $('#experiments').prop('disabled', true);
+            }
         });
 
         $('#experiments').change(function() {
             experiment = $(this).val();
 
-            $('#btn_exec_exprmnt').prop('disabled', false);
+            if (experiment != 'none') {
+                $('#btn_execute_experiment').prop('disabled', false);
+            }
+            else {
+                $('#btn_execute_experiment').prop('disabled', true);
+            }
         });
 
-        $("#btn_exec_exprmnt").click(function(){
+        $("#btn_execute_experiment").click(function(){
             $.ajax({
-                url: SCRIPT_ROOT + '/exec_expermnt',
+                url: SCRIPT_ROOT + '/send_experiment_request',
                 type: 'get',
                 data: { ropod_id: ropod_id,
                         experiment: experiment
@@ -36,7 +67,7 @@
                 cache: false
                 
                 }).done(function(result) {
-                    // alert('Result: ' + result.epermnt_result)
+                    alert('Experiment request sent.')
 
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
@@ -56,10 +87,7 @@
     <div class="col-lg-3">
         <div class="form-group">
             <select id="ropod_ids" class="form-control">
-                <option value="none">Choose Ropod id</option>
-                {% for key in ropod_id_list %}
-                    <option value="{{ key }}">{{ key }}</option>
-                {% endfor %}
+                <option value="none">Choose ropod id</option>
             </select>
         </div>
     </div>
@@ -67,15 +95,17 @@
         <div class="form-group">
             <select id="experiments" class="form-control" disabled="disabled">
                 <option value="none">Choose experiment</option>
-                {% for key in experiment_list %}
-                    <option value="{{ key }}">{{ key }}</option>
-                {% endfor %}
+                    <option value="mobidik_elevator_experiment">Mobidik elevator</option>
             </select>
         </div>
     </div>
+
+    <div class="col-lg-1">
+        <div id="operation_indicator" class="indicator"></div>
+    </div>
 </div>
 
-<button id="btn_exec_exprmnt" disabled="disabled">Execute experimenet</button>
+<button id="btn_execute_experiment" disabled="disabled" class="btn btn-primary" type="button">Execute experiment</button>
 
 {% endblock %}
 
