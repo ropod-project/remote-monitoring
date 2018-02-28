@@ -143,6 +143,52 @@ def get_ropod_data():
 
     return jsonify(variables=variables, data=data)
 
+@app.route('/download_ropod_data', methods=['GET','POST'] )
+def download_ropod_data():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    feature_list = request.args.get('features').split(',')
+
+    start_query_time = request.args.get('start_timestamp')
+    end_query_time = request.args.get('end_timestamp')
+
+    msg_data['header']['type'] = "DATA_QUERY"
+    msg_data['payload']['ropod_id'] = ropod_id
+    msg_data['payload']['commandList'][0] = {"features": feature_list,
+                                             "start_time": start_query_time,
+                                             "end_time": end_query_time}
+
+    communication_command = "DATA_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+
+    query_reply = communicate_zmq(data)
+    query_reply_json = json.loads(query_reply.decode('utf8'))
+
+    # This is fir extracting the data from the query_result message
+    # variables = list()
+    # data = list()
+    # query_result = query_reply_json['payload']['dataList']
+    # if query_result is not None and query_result[0] is not None:
+    #     for data_dict in query_result:
+    #         for key, value in data_dict.iteritems():
+    #             variables.append(key)
+    #             variable_data_list = list()
+    #             for item in value:
+    #                 variable_data_list.append(ast.literal_eval(item))
+    #             data.append(variable_data_list)
+
+    # test for downloading the data
+    download_path = '~/Download/'
+
+    # save the data
+    with open( download_path+'test.csv', 'w') as download_file:
+        json.dump(feature_list, download_file)
+
+
+    # return jsonify(variables=variables, data=data)
+    return jsonify(success=True)
+    
+
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
 def get_hospital_ropod_ids():
     hospital = request.args.get('hospital', '', type=str)
