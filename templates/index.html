@@ -41,6 +41,9 @@ body {
         $('#end_date').datepicker();
 
         $('#btn_display_data').prop('disabled', true);
+        $('#btn_download_data').prop('disabled', true);
+
+
         $('#operation_indicator').show();
 
         $.ajax({
@@ -64,6 +67,8 @@ body {
         $('#ropod_ids').change(function() {
             if ($(this).val() == "none") {
                 $('#btn_display_data').prop('disabled', true);
+                $('#btn_download_data').prop('disabled', true);
+
                 $('#feature_container').html('');
                 $('#data_container').hide();
                 plot.reset();
@@ -99,6 +104,8 @@ body {
 
             if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
                 $('#btn_display_data').prop('disabled', false);
+                $('#btn_download_data').prop('disabled', false);
+
             }
             $('#data_container').show();
             plot.reset();
@@ -110,10 +117,14 @@ body {
             if (start_date == '') {
                 $(this).val('Start date');
                 $('#btn_display_data').prop('disabled', true);
+                $('#btn_download_data').prop('disabled', true);
+
             }
             else {
                 if (end_date != 'End date') {
                     $('#btn_display_data').prop('disabled', false);
+                    $('#btn_download_data').prop('disabled', false);
+
                 }
             }
         });
@@ -124,10 +135,14 @@ body {
             if (end_date == '') {
                 $(this).val('End date');
                 $('#btn_display_data').prop('disabled', true);
+                $('#btn_download_data').prop('disabled', true);
+
             }
             else {
                 if (start_date != 'Start date') {
                     $('#btn_display_data').prop('disabled', false);
+                    $('#btn_download_data').prop('disabled', false);
+
                 }
             }
         });
@@ -163,10 +178,61 @@ body {
             plot_data(variable_list, start_time, end_time);
         });
 
+        $('#btn_download_data').click(function() {
+            var variable_list = [];
+            $.each($("input[name='feature']:checked"), function(){
+                variable_list.push($(this).val());
+            });
+
+            // check if the user selected a feature or not
+            if (variable_list.length == 0) {
+                alert("Please select at least one variable");
+                return;
+            }
+
+            var start_time = $('#start_date').val();
+            var end_time = $('#end_date').val();
+
+            if ((start_time == 'Start date') && (end_time == 'End date')) {
+                alert("Please select a start and an end time");
+                return;
+            }
+            else if (start_time == 'Start date') {
+                alert("Please select a start time");
+                return;
+            }
+            else if (end_time == 'End date') {
+                alert("Please select an end time");
+                return;
+            }
+
+            // plot_data(variable_list, start_time, end_time);
+            // This is the part that I have to save the data
+            $.ajax({
+                url: SCRIPT_ROOT + '/download_ropod_data',
+                type: 'get',
+                data: { ropod_id: ropod_id,
+                        start_timestamp: date_str_to_timestamp(start_time),
+                        end_timestamp: date_str_to_timestamp(end_time),
+                        features: variable_list.join()
+                 },
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                alert("Data downloaded to ... ");
+
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+
+        });
+
         $(document).on('change', '.plot_variables', function() {
             plot.display_selected_data();
         });
     });
+
+
 
     function plot_data(variable_list, start_time, end_time) {
         var start_time_ms = date_str_to_timestamp(start_time);
@@ -181,6 +247,8 @@ body {
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
+        $('#btn_download_data').prop('disabled', true);
+
         $('#operation_indicator').hide();
         plot.reset();
     }
@@ -217,9 +285,15 @@ body {
         <div class="col-lg-2">
             <div class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
         </div>
-        <div class="col-lg-1">
+
+        <div class="col-lg-2">
             <div class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
         </div>
+
+        <div class="col-lg-2">
+            <div class="form-group"><button id="btn_download_data" class="btn btn-primary" type="button">Download data</button></div>
+        </div>
+
         <div class="col-lg-1">
             <div id="operation_indicator" class="indicator"></div>
         </div>

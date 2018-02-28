@@ -23,6 +23,9 @@ import sys
 import json
 import time
 
+from flask import send_file
+from pathlib import Path
+
 
 # Initializations
 port = "5670"
@@ -134,7 +137,7 @@ def get_ropod_data():
     query_result = query_reply_json['payload']['dataList']
     if query_result is not None and query_result[0] is not None:
         for data_dict in query_result:
-            for key, value in data_dict.iteritems():
+            for key, value in data_dict.items():
                 variables.append(key)
                 variable_data_list = list()
                 for item in value:
@@ -142,6 +145,38 @@ def get_ropod_data():
                 data.append(variable_data_list)
 
     return jsonify(variables=variables, data=data)
+
+@app.route('/download_ropod_data', methods=['GET','POST'] )
+def download_ropod_data():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    feature_list = request.args.get('features').split(',')
+
+    start_query_time = request.args.get('start_timestamp')
+    end_query_time = request.args.get('end_timestamp')
+
+    msg_data['header']['type'] = "DATA_QUERY"
+    msg_data['payload']['ropod_id'] = ropod_id
+    msg_data['payload']['commandList'][0] = {"features": feature_list,
+                                             "start_time": start_query_time,
+                                             "end_time": end_query_time}
+
+    communication_command = "DATA_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+
+    query_reply = communicate_zmq(data)
+    query_reply_json = json.loads(query_reply.decode('utf8'))
+
+    home = str(Path.home())
+    root_download_dir = home+'/Downloads/'
+    download_path = root_download_dir+'ropod_query_data.json'
+
+    # save the data
+    with open( download_path , 'w') as download_file:
+        json.dump(query_reply_json, download_file)
+
+    return send_file(download_path , attachment_filename='ropod_query_data.json')
+
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
 def get_hospital_ropod_ids():
