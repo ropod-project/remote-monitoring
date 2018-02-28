@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+
+<script>
+
+    var features_list = [];
+    var start_timestamp = '';
+    var end_timestamp = '';
+    var ropod_id = '{{ropod_id}}';
+
+
+    $(document).ready(function() {
+
+        $("#btn_get_query").click(function(){
+            $("#test_label").text("agdgdmbkdmb"+ropod_id);
+
+            var features_list = [];
+            $.each($("input[name='feature']:checked"), function(){            
+                features_list.push($(this).val());
+            });
+
+            alert("My favourite features are: " + features_list.join(", "));
+            window.location = '/ropod_query_result?ropod_id=' + ropod_id + '&features_list=' + features_list + '&start_timestamp=' + start_timestamp + '&end_timestamp=' + end_timestamp;
+        });
+
+        $('#get_query').click(function() {
+
+            var start_timestamp = $('#start_timestamp').val();
+            var end_timestamp = $('#end_timestamp').val();
+            
+            for (var i = 0; i < form.elements.length; i++ ) {
+                if (form.elements[i].type == 'checkbox') {
+                    if (form.elements[i].checked == true) {
+                        features_list.push(form.elements[i].value);
+                    }
+                }
+            }
+
+            $.ajax({
+                url: SCRIPT_ROOT + '/get_ropod_query',
+                type: 'post',
+                data: JSON.stringify({ }),
+                data: JSON.stringify({ ropod_id: ropod_id, start_timestamp: start_timestamp, end_timestamp: end_timestamp, features_list: features_list }),
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                window.location = '/ropod_query_result';
+            });
+        });
+    });
+</script>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Ropod "{{ropod_id}}" info</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">Format: 21-06-2017 11:55:20</div>
+    </div>
+    <div class="col-lg-2" >
+        <div class="form-group">Start timestamp</div>
+    </div>
+    <div class="col-lg-2">
+         <div class="form-group"><input id="start_timestamp" class="form-control" type="text" value="" /></div>
+    </div>
+    <div class="col-lg-2" >
+        <div class="form-group">End timestamp</div>
+    </div>
+    <div class="col-lg-2">
+         <div class="form-group"><input id="end_timestamp" class="form-control" type="text" value="" /></div>
+    </div>
+</div>
+
+<button id="btn_get_query">Get query</button>
+
+
+<div id="test_label" class="form-group">test</div>
+<div class="panel panel-default">
+    {% for f in features %}
+        <div class="checkbox">
+            <label><input type="checkbox" value="{{f}}" name="feature">{{f}}</label>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+

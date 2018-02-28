@@ -9,34 +9,32 @@ function Plot(container_name, variable_selection_container_name, variable_select
     this.current_variable = null;
 }
 
-Plot.prototype.display_data = function(variable, start_time, end_time, hospital, ropod_id) {
+Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_time) {
     var parent_obj = this;
+
     $.ajax({
         url: SCRIPT_ROOT + parent_obj.data_route,
         type: 'get',
-        data: { variable: variable, start_time: start_time, end_time: end_time, hospital: hospital, ropod_id: ropod_id },
+        data:
+        {
+            ropod_id: ropod_id,
+            features: variable_list.join(),
+            start_timestamp: start_time,
+            end_timestamp: end_time
+        },
         contentType: 'application/json',
-        cache: false
+        cache: false,
+        async: false
     }).done(function(result) {
+        parent_obj.data_labels = result.variables;
         parent_obj.data = result.data;
-        parent_obj.data_labels = result.data_labels;
+        $('#operation_indicator').hide();
 
         if (!parent_obj.update_plot) {
             $('#' + parent_obj.plot_container_name).html('');
             parent_obj.add_variable_selection_checkboxes();
         }
         parent_obj.display_selected_data();
-
-        if (real_time_data && (variable == parent_obj.current_variable)) {
-            parent_obj.update_plot = true;
-            setTimeout(function() {
-                var start_time_ms = (new Date()).getTime() - 7260000;
-                var end_time_ms = (new Date()).getTime();
-                parent_obj.display_data(variable, start_time_ms, end_time_ms, server_ip);
-            }, real_time_plot_update_interval);
-        }
-
-        $('#operation_indicator').hide();
     }).fail(function(jqXHR, status, error) {
         console.log(error);
         $('#operation_indicator').hide();

@@ -19,6 +19,12 @@
             window.location = '/add_ropod';
         });
 
+        $('.btn_get_data').click(function() {
+            var parent_row = $(this).closest('tr');
+            var ropod_id = $(parent_row).children('.ropod_id').first().html();
+            window.location = '/ropod_info?ropod_id=' + ropod_id ;
+        });
+
         $('.btn_edit').click(function() {
             var parent_row = $(this).closest('tr');
             var hospital = $(parent_row).children('.hospital').first().html();
@@ -77,6 +83,7 @@
                             <td class='ropod_id'>{{ ids[loop.index-1] }}</td>
                             <td class='ip_address'>{{ ip_addresses[loop.index-1] }}</td>
                             <td>
+                                <input type="button" class="btn btn-primary btn_get_data" value="Get data" />
                                 <input type="button" class="btn btn-primary btn_edit" value="Edit ropod" />
                                 <input type="button" class="btn btn-primary btn-danger btn_delete" value="Delete ropod" />
                             </td>

@@ -4,12 +4,35 @@
 <script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='custom/js/plot.js') }}" type="text/javascript"></script>
 
-<script>
-    var real_time_plot_update_interval = 500;
-    var real_time_data = false;
+<style>
+* {
+    box-sizing: border-box;
+}
 
-    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_data');
-    var comparison_plot = new Plot('comparison_plot_placeholder', 'comparison_plot_variable_selection', 'comparison_plot_variables', '/get_data');
+body {
+    margin: 0;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+    float: left;
+    width: 30%;
+    padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+</style>
+
+<script>
+    var ropod_features = [];
+    var ropod_id = undefined;
+
+    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_ropod_data');
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -18,79 +41,67 @@
         $('#end_date').datepicker();
 
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_display_data_comparison').prop('disabled', true);
-        $('#operation_indicator').hide();
+        $('#operation_indicator').show();
 
-        $('#hospitals').change(function() {
-            var hospital = $(this).val();
-            if (hospital != 'none') {
-                $.ajax({
-                    url: SCRIPT_ROOT + '/get_hospital_ropod_ids',
-                    type: 'get',
-                    data: { hospital: hospital },
-                    contentType: 'application/json',
-                    cache: false
-                }).done(function(result) {
-                    var ids = result.ids;
-                    var html_string = '<option value="none">Choose ropod ID</option>';
-                    for (var i=0; i<ids.length; i++) {
-                        html_string += '<option value="' + ids[i] + '">' + ids[i] + '</option>';
-                    }
-                    $('#ropod_ids').html('');
-                    $('#ropod_ids').html(html_string);
-                    $('#ropod_ids').prop('disabled', false);
-                }).fail(function(jqXHR, status, error) {
-                    console.log(error);
-                });
-            }
-            else {
-                $('#ropod_ids').html('');
-                $('#ropod_ids').prop('disabled', 'disabled');
-                $('#data_container').hide();
-                reset_data_panel();
-            }
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_ropod_ids',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            $.each(result.ids, function(i, ropod_id){
+                $('#ropod_ids').append($('<option>', {
+                    value: ropod_id,
+                    text: ropod_id
+                }));
+            });
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#operation_indicator').hide();
         });
 
         $('#ropod_ids').change(function() {
-            var ropod_id = $(this).val();
-            if (ropod_id != 'none') {
-                $('#data_container').show();
-                $('#check_real_time').prop('disabled', false);
-            }
-            else {
-                $('#data_container').hide();
-                $('#check_real_time').prop('disabled', true);
-                reset_data_panel();
-            }
-        });
-
-        $('#variables').change(function() {
-            if ($(this).val() == 'none') {
+            if ($(this).val() == "none") {
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
+                $('#feature_container').html('');
+                $('#data_container').hide();
+                plot.reset();
+                return;
             }
-            else {
-                real_time_data = $('#check_real_time').prop('checked');
-                if (real_time_data) {
-                    $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
+
+            ropod_id = $(this).val();
+            $.ajax({
+                url: SCRIPT_ROOT + '/get_ropod_features',
+                type: 'get',
+                data: { ropod_id: ropod_id },
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                ropod_features = result.ropod_features;
+
+                var html_string = '';
+                for (var i=0; i<result.ropod_features.length; i++) {
+                    if ( (i % 10) == 0 ) {
+                        html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                    }
+                    else {
+                        html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
                     }
                 }
-                else {
-                    if ($('#start_date').val() == 'Start date' || $('#end_date').val() == 'End date') {
-                        $('#btn_display_data').prop('disabled', true);
-                        $('#btn_display_data_comparison').prop('disabled', true);
-                    }
-                    else
-                    {
-                        $('#btn_display_data').prop('disabled', false);
-                        if (!plot.is_empty()) {
-                            $('#btn_display_data_comparison').prop('disabled', false);
-                        }
-                    }
-                }
+
+                $('#feature_container').html('');
+                $('#feature_container').html(html_string);
+                $('#feature_container').prop('disabled', false);
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+            });
+
+            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
+                $('#btn_display_data').prop('disabled', false);
             }
+            $('#data_container').show();
+            plot.reset();
         });
 
         $('#start_date').change(function() {
@@ -99,14 +110,10 @@
             if (start_date == '') {
                 $(this).val('Start date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (end_date != 'End date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
                 }
             }
         });
@@ -117,87 +124,56 @@
             if (end_date == '') {
                 $(this).val('End date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
             else {
                 if (start_date != 'Start date') {
                     $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
                 }
-            }
-        });
-
-        $('#check_real_time').change(function() {
-            real_time_data = $(this).prop('checked');
-            if (real_time_data) {
-                $('#start_date').val('Start date');
-                $('#start_date').prop('disabled', 'disabled');
-                $('#end_date').val('End date');
-                $('#end_date').prop('disabled', 'disabled');
-                if ($('#variables').val() != 'none') {
-                    $('#btn_display_data').prop('disabled', false);
-                    if (!plot.is_empty()) {
-                        $('#btn_display_data_comparison').prop('disabled', false);
-                    }
-                }
-            }
-            else {
-                $('#start_date').val('Start date');
-                $('#start_date').prop('disabled', false);
-                $('#end_date').val('End date');
-                $('#end_date').prop('disabled', false);
-                $('#btn_display_data').prop('disabled', true);
-                $('#btn_display_data_comparison').prop('disabled', true);
             }
         });
 
         $('#btn_display_data').click(function() {
-            plot_data(this.id);
-        });
+            var variable_list = [];
+            $.each($("input[name='feature']:checked"), function(){
+                variable_list.push($(this).val());
+            });
 
-        $('#btn_display_data_comparison').click(function() {
-            plot_data(this.id);
+            // check if the user selected a feature or not
+            if (variable_list.length == 0) {
+                alert("Please select at least one variable");
+                return;
+            }
+
+            var start_time = $('#start_date').val();
+            var end_time = $('#end_date').val();
+
+            if ((start_time == 'Start date') && (end_time == 'End date')) {
+                alert("Please select a start and an end time");
+                return;
+            }
+            else if (start_time == 'Start date') {
+                alert("Please select a start time");
+                return;
+            }
+            else if (end_time == 'End date') {
+                alert("Please select an end time");
+                return;
+            }
+
+            plot_data(variable_list, start_time, end_time);
         });
 
         $(document).on('change', '.plot_variables', function() {
             plot.display_selected_data();
         });
-
-        $(document).on('change', '.comparison_plot_variables', function() {
-            comparison_plot.display_selected_data();
-        });
     });
 
-    function plot_data(caller_id) {
-        var variable = $('#variables').val();
-        var hospital = $('#hospitals').val();
-        var ropod_id = $('#ropod_ids').val();
-        real_time_data = $('#check_real_time').prop('checked');
+    function plot_data(variable_list, start_time, end_time) {
+        var start_time_ms = date_str_to_timestamp(start_time);
+        var end_time_ms = date_str_to_timestamp(end_time);
 
-        var start_time_ms = 0;
-        var end_time_ms = 0;
-        if (!real_time_data) {
-            start_time_ms = date_str_to_timestamp($('#start_date').val());
-            end_time_ms = date_str_to_timestamp($('#end_date').val());
-            $('#operation_indicator').show();
-        }
-        else {
-            start_time_ms = (new Date()).getTime() - 7260000;
-            end_time_ms = (new Date()).getTime();
-        }
-
-        if (caller_id == 'btn_display_data') {
-            plot.current_variable = variable;
-            plot.update_plot = false;
-            plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
-        }
-        else if (caller_id == 'btn_display_data_comparison') {
-            comparison_plot.current_variable = variable;
-            comparison_plot.update_plot = false;
-            comparison_plot.display_data(variable, start_time_ms, end_time_ms, hospital, ropod_id);
-        }
+        $('#operation_indicator').show();
+        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
     }
 
     function reset_data_panel() {
@@ -205,17 +181,14 @@
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_display_data_comparison').prop('disabled', true);
         $('#operation_indicator').hide();
-
         plot.reset();
-        comparison_plot.reset();
     }
 
     function date_str_to_timestamp(date_str) {
         var date_components = date_str.split('/');
         var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
-        var time_ms = date_obj.getTime();
+        var time_ms = date_obj.getTime() / 1000.;
         return time_ms;
     }
 </script>
@@ -230,38 +203,11 @@
     <div class="row">
         <div class="col-lg-2">
             <div class="form-group">
-                <select id="hospitals" class="form-control">
-                    <option value="none">Choose hospital</option>
-                    {% for key in hospitals %}
+                <select id="ropod_ids" class="form-control">
+                    <option value="none">Choose Ropod id</option>
+                    <!-- {% for key in ids %}
                         <option value="{{ key }}">{{ key }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-lg-2">
-            <div class="form-group">
-                <select id="ropod_ids" class="form-control" disabled="disabled"></select>
-            </div>
-        </div>
-        <div class="col-lg-2">
-            <div class="form-group">
-                <div class="checkbox">
-                    <label><input id="check_real_time" class="checkbox" type="checkbox" disabled="disabled" />Real-time data</label>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="data_container">
-    <div class="row">
-        <div class="col-lg-2">
-            <div class="form-group">
-                <select id="variables" class="form-control">
-                    <option value="none">Choose variable to display</option>
-                    {% for key in variable_keys %}
-                        <option value={{ key }}>{{ variable_labels[loop.index-1] }}</option>
-                    {% endfor %}
+                    {% endfor %} -->
                 </select>
             </div>
         </div>
@@ -274,22 +220,23 @@
         <div class="col-lg-1">
             <div class="form-group"><button id="btn_display_data" class="btn btn-primary" type="button">Display data</button></div>
         </div>
-        <div class="col-lg-2">
-            <div class="form-group"><button id="btn_display_data_comparison" class="btn btn-primary" type="button">Display data in second plot</button></div>
-        </div>
         <div class="col-lg-1">
             <div id="operation_indicator" class="indicator"></div>
         </div>
     </div>
+</div>
 
+<div id="feature_container" disabled="disabled">
+    <div class="panel panel-default">
+
+    </div>
+</div>
+
+<div id="data_container">
     <div class="col-lg-12">
         <div id="plot_placeholder" class="col-lg-10 data-plot"></div>
         <div id="plot_variable_selection" class="col-lg-2"></div>
-    </div>
 
-    <div class="col-lg-12">
-        <div id="comparison_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="comparison_plot_variable_selection" class="col-lg-2"></div>
     </div>
 </div>
 
