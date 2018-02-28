@@ -1,3 +1,0 @@
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/CMakeFiles/edit_cache.dir
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/CMakeFiles/rebuild_cache.dir
-/home/ali/workspace/remote_monitoring/zyre/zyre/my_zyre_cpp/CMakeFiles/zyre_listener.dir
