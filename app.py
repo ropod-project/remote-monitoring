@@ -56,7 +56,7 @@ msg_data = {
 
 ropod_status_msg = {
   "header": {
-    "type": "status",
+    "type": "STATUS",
     "version": "0.1.0",
     "metamodel": "ropod-msg-schema.json",
     "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
@@ -260,7 +260,7 @@ def send_experiment_request():
     communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
-    query_reply = communicate_zmq(data)    
+    query_reply = communicate_zmq(data)
 
     return jsonify(success=True)
 ##########################################################
@@ -270,15 +270,28 @@ def send_experiment_request():
 
 @app.route('/ropod_info')
 def ropod_info():
-    # features = ['Motors','Pose','Sensors','Battery','Busy']
-    # ropod_id = request.args.get('ropod_id', '', type=str)
-    # return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
     return render_template('ropod_info.html')
 
-@app.route('/get_ropod_status')
-def get_ropod_status():
+@app.route('/get_ropod_status2', methods=['GET','POST'])
+def get_ropod_status2():
     status_list = ropod_status_msg
     return jsonify(status_list = status_list)
+
+@app.route('/get_ropod_status', methods=['GET','POST'])
+def get_ropod_status():
+    ropod_id = request.args.get('ropod_id', '', type=str)
+
+    msg_data['header']['type'] = "STATUS"
+    msg_data['payload']['ropod_id'] = ropod_id
+
+    communication_command = "DATA_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+    query_reply = communicate_zmq(data)
+
+    query_reply_json = json.loads(query_reply.decode('utf8'))
+
+    return jsonify(status_list = query_reply_json)
 ##########################################################
 
 
