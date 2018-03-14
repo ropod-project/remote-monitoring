@@ -54,6 +54,49 @@ msg_data = {
   }
 }
 
+ropod_status_msg = {
+  "header": {
+    "type": "status",
+    "version": "0.1.0",
+    "metamodel": "ropod-msg-schema.json",
+    "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
+    "timestamp": ""
+  },
+  "payload": {
+    "metamodel": "ropod-status-schema.json",
+    "status":
+    {
+        "hardware_devices":
+        {
+            "battery": 56.4,
+            "motors_on": True,
+            "wheel1": True,
+            "wheel2": True,
+            "wheel3": True,
+            "wheel4": False,
+            "wifi": 89
+        },
+        "sensors":
+        {
+            "joypad": False,
+            "laser_front": True,
+            "laser_back": True
+        },
+        "software":
+        {
+            "ros_master": True,
+            "ros_nodes":
+            {
+                "node_1": False,
+                "node_n": True
+            },
+            "localised": True,
+            "laser_map_matching": 66.5
+        }
+    }
+  }
+}
+
 def communicate_zmq(data):
     socket.send(data.encode('ascii'))
     reply = socket.recv()
@@ -223,6 +266,21 @@ def send_experiment_request():
 ##########################################################
 
 
+################ Get ropod status interface ################
+
+@app.route('/ropod_info')
+def ropod_info():
+    # features = ['Motors','Pose','Sensors','Battery','Busy']
+    # ropod_id = request.args.get('ropod_id', '', type=str)
+    # return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
+    return render_template('ropod_info.html')
+
+@app.route('/get_ropod_status')
+def get_ropod_status():
+    status_list = ropod_status_msg
+    return jsonify(status_list = status_list)
+##########################################################
+
 
 @app.route('/get_hospital_ropod_ids', methods=['GET', 'POST'])
 def get_hospital_ropod_ids():
@@ -235,12 +293,6 @@ def manage_ropods():
     hospitals, ids, ip_addresses = RopodAdminQueries.get_all_ropods(local_db_connection)
     return render_template('manage_ropods.html', hospitals=hospitals,
                            ids=ids, ip_addresses=ip_addresses)
-
-@app.route('/ropod_info')
-def ropod_info():
-    features = ['Motors','Pose','Sensors','Battery','Busy']
-    ropod_id = request.args.get('ropod_id', '', type=str)
-    return render_template('ropod_info.html', features=features, ropod_id=ropod_id)
 
 @app.route('/add_ropod')
 def add_ropod():
