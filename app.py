@@ -288,8 +288,9 @@ def get_ropod_status():
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
     query_reply = communicate_zmq(data)
-
+    # print('query_reply: ', query_reply)
     query_reply_json = json.loads(query_reply.decode('utf8'))
+    print('query_reply: ', query_reply_json)
 
     return jsonify(status_list = query_reply_json)
 ##########################################################

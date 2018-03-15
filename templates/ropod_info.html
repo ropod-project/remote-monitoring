@@ -73,6 +73,7 @@
                 cache: false
             }).done(function(result){
 
+                // status = result.status_list['payload']['status'];
                 status = result.status_list.payload.status;
                 $.each(status, function(key, val){
                     html_string += '<tr><td><h3>' + key + '</h3></td></tr>';
