@@ -102,6 +102,78 @@ def communicate_zmq(data):
     reply = socket.recv()
     return reply
 
+def get_one_ropod_status(ropod_id):
+    """This function connects to zmq/zyre mediator and gets a status query for one ropod and returns the reply
+    """
+    msg_data['header']['type'] = "STATUS"
+    msg_data['payload']['ropod_id'] = ropod_id
+
+    communication_command = "STATUS_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+    query_reply = communicate_zmq(data)
+    
+    return query_reply
+
+def check_ropod_overal_status(ropod_status):
+    """This function checks the status of a single ropod and if everything are working and above thershod returns True otherwise returns False 
+    """
+    ropod_overal_status = True
+    status = ropod_status['payload']['status']
+
+    thershold = 30
+
+    for key, value in status.items():
+        for key2, value2 in status[key].items():
+            if key2=='ros_nodes':
+                for key3, value3 in status[key][key2].items():
+                    if isinstance(value3, bool):
+                        if value3==False:
+                            print('ropod_overal_status changed')
+                            ropod_overal_status = False
+                            break
+                    else:
+                        if key3=='wifi' and value3<thershold:
+                            print('ropod_overal_status changed')
+                            ropod_overal_status = False
+                            break
+                        elif key3=='battery' and value3<thershold:
+                            print('ropod_overal_status changed')
+                            ropod_overal_status = False
+                            break
+                        elif key3=='laser_map_matching' and value3<thershold:
+                            print('ropod_overal_status changed')
+                            ropod_overal_status = False
+                            break
+            else:
+                if isinstance(value2, bool):
+                    if value2==False:
+                        print('ropod_overal_status changed')
+                        ropod_overal_status = False
+                        break
+                else:
+                    if key2=='wifi' and value2<thershold:
+                        print('ropod_overal_status changed')
+                        ropod_overal_status = False
+                        break
+                    elif key2=='battery' and value2<thershold:
+                        print('ropod_overal_status changed')
+                        ropod_overal_status = False
+                        break
+                    elif key2=='laser_map_matching' and value2<thershold:
+                        print('ropod_overal_status changed')
+                        ropod_overal_status = False
+                        break
+    return ropod_overal_status
+
+
+
+
+################ Flask codes #############################
+
+ropod_id_list = list()      # for storing the list of ropods (Ropod info page)
+ropod_status_list = dict()  # for storing the status reply for each ropod
+
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
 rid = str()
@@ -268,17 +340,10 @@ def send_experiment_request():
 
 ################ Get ropod status interface ################
 
-@app.route('/ropod_info')
-def ropod_info():
-    return render_template('ropod_info.html')
-
-@app.route('/get_ropod_status2', methods=['GET','POST'])
-def get_ropod_status2():
-    status_list = ropod_status_msg
-    return jsonify(status_list = status_list)
-
 @app.route('/get_ropod_status', methods=['GET','POST'])
 def get_ropod_status():
+    """ This is the old function for getting a status query from one ropod and returns the status query result
+    """
     ropod_id = request.args.get('ropod_id', '', type=str)
 
     msg_data['header']['type'] = "STATUS"
@@ -293,6 +358,91 @@ def get_ropod_status():
     print('query_reply: ', query_reply_json)
 
     return jsonify(status_list = query_reply_json)
+
+@app.route('/ropod_info')
+def ropod_info():
+    return render_template('ropod_info.html')
+
+# ++++++++++++++++++++++ test functions ++++++++++++++++++++++
+
+
+# test_ropod_ids = ['ropod_1', 'ropod_2', 'ropod3']
+# test_overal_status = {'ropod_1': True, 'ropod_2':False, 'ropod3':True}
+
+
+# @app.route('/new_get_ropod_ids', methods=['GET'])
+# def new_get_ropod_ids():
+#     return jsonify(ropod_ids=test_ropod_ids)
+
+# @app.route('/get_all_ropods_status', methods=['GET','POST'])
+# def get_all_ropods_status():
+#     return jsonify(status_list = test_overal_status)
+
+# @app.route('/read_ropod_status', methods=['GET', 'POST'])
+# def read_ropod_status():
+#     return jsonify(ropod_status = ropod_status_msg)
+# ++++++++++++++++++++++ test functions ++++++++++++++++++++++
+
+@app.route('/new_get_ropod_ids', methods=['GET'])
+def new_get_ropod_ids2():
+    msg_data['header']['type'] = "NAME_QUERY"
+    communication_command = "GET_ROPOD_IDs"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+
+    ropod_id_list.clear()
+
+    # ropod_id_list = dict()
+    query_reply = communicate_zmq(data)
+    if query_reply:
+        ropods = ast.literal_eval(query_reply.decode('ascii'))
+        # ropod_id_list = []
+        for node in ropods:
+            sender_name = node[0]
+            suffix_idx = sender_name.find('_ropod')
+            ropod_id_list.append(sender_name[0:suffix_idx])
+
+    return jsonify(ropod_ids=ropod_id_list)
+
+@app.route('/get_all_ropods_status', methods=['GET','POST'])
+def get_all_ropods_status2():
+    """This function receives a list of ropod_ids and gets status query for each of them and check their status and returns the result
+    """
+
+    all_ropods_status = dict()
+
+    # get ropod_id list
+    for ropod in ropod_id_list:
+        # get status query for each ropod in a loop
+        status_reply = get_one_ropod_status(ropod)
+        
+        # transform the result to json and store it into ropod_status_list
+        status_reply_json = json.loads(status_reply.decode('utf8'))
+        print('\n')
+        print('before update: ',status_reply_json)
+        ropod_status_list[ropod] = status_reply_json
+        print('\n')
+        print('After update: ',ropod_status_list[ropod])
+        print('\n')
+
+        # check for the ropod situation
+        ropod_overal_status = check_ropod_overal_status(status_reply_json)
+
+        # fill and returns a dictionary which its keys are ropod_ids and its values are bool reply from function
+        all_ropods_status[ropod] = ropod_overal_status
+
+
+    return jsonify(status_list = all_ropods_status)
+
+@app.route('/read_ropod_status', methods=['GET', 'POST'])
+def read_ropod_status():
+    """For reading one ropod status from ropod_status_list
+    """
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    ropod_status = ropod_status_list[ropod_id]
+
+    return jsonify(ropod_status = ropod_status)
+
 ##########################################################
 
 

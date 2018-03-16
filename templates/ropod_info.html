@@ -25,40 +25,74 @@
 
     $(document).ready(function() {
 
-        // ==================== get ropod ids =====================
         $('#operation_indicator').show();
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_ropod_ids',
+            url: SCRIPT_ROOT + '/new_get_ropod_ids',
             type: 'get',
             contentType: 'application/json',
             cache: false
         }).done(function(result) {
-            $.each(result.ropod_ids, function(i, ropod_id){
-                $('#ropod_ids').append($('<option>', {
-                    value: ropod_id,
-                    text: ropod_id
-                }));
-            });
-            $('#operation_indicator').hide();
+            console.log('Ropods ID list created');
+            
         }).fail(function(jqXHR, status, error) {
             console.log(error);
             $('#operation_indicator').hide();
         });
-        
-        $('#ropod_ids').change(function() {
-            ropod_id = $(this).val();
 
-            if (ropod_id != 'none') {
-                $('#btn_status').prop('disabled', false);
-            }
-            else {
-                $('#btn_status').prop('disabled', true);
-            }
-        });
 
-        // ==================== status button =====================
-        $("#btn_status").click(function(){
+        setTimeout(execute_query, 1000);
+
+        // ==================== get ropod ids NEW =====================
+        function execute_query() {
+            var html_string = '';
+            html_string += '<div class="panel-heading">Ropods overall status results</div><div class="panel-body"><table id="ropods" width="100%" class="table table-striped table-bordered table-hover"><thead><th>Ropod</th><th>Status</th><th>Detailed status</th></thead><tbody>';
+            var green_circle = '<span class="green_dot"></span>';
+            var red_circle = '<span class="red_dot"></span>';
+
+            $.ajax({
+                url: SCRIPT_ROOT + '/get_all_ropods_status',
+                type: 'get',
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                $.each(result.status_list, function(ropod, ropod_status){
+                    console.log('reading ropod_ids - ropod: '+ropod)
+                    html_string += '<tr><td>' + ropod + '</td>';
+                    if (ropod_status == true) 
+                    {
+                        html_string += '<td>' + green_circle +'</td>';
+                    } 
+                    else if (ropod_status == false)
+                    {
+                        html_string += '<td>' + red_circle +'</td>';
+                    }
+                    html_string += '<td><button id="' + ropod + '" value="' + ropod + '" class="btn btn-primary" type="button">Get detailed status</button></td></tr>';
+                });
+
+                $('#operation_indicator').hide();
+
+                html_string += '</tbody></table></div>';
+
+                $('#overall_ropod_status_container').html('');
+                $('#overall_ropod_status_container').html(html_string);
+                $('#overall_ropod_status_container').prop('disabled', false);
+
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+                $('#operation_indicator').hide();
+            });
+
+            setTimeout(execute_query, 1000);
+        }
+
+        // ==================== dynamic status button from table =====================
+
+        $('.ropod_table').on('click', 'button', function(){
+            console.log($(this).val());
+
+            var ropod_id = $(this).val();
+            
             var status = undefined;
             var html_string = '';
             html_string += '<div class="panel-heading">Ropod status results</div><div class="panel-body"><table id="ropods" width="100%" class="table table-striped table-bordered table-hover"><thead><th>Fields</th><th>Status</th></thead><tbody>';
@@ -66,7 +100,7 @@
             var red_circle = '<span class="red_dot"></span>';
 
             $.ajax({
-                url: SCRIPT_ROOT + '/get_ropod_status',
+                url: SCRIPT_ROOT + '/read_ropod_status',
                 type: 'get',
                 data: {ropod_id: ropod_id},
                 contentType: 'application/json',
@@ -74,7 +108,7 @@
             }).done(function(result){
 
                 // status = result.status_list['payload']['status'];
-                status = result.status_list.payload.status;
+                status = result.ropod_status.payload.status;
                 $.each(status, function(key, val){
                     html_string += '<tr><td><h3>' + key + '</h3></td></tr>';
 
@@ -139,18 +173,14 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-3">
-        <div class="form-group">
-            <select id="ropod_ids" class="form-control">
-                <option value="none">Choose ropod id</option>
-            </select>
-        </div>
-    </div>
-
-    <button id="btn_status" disabled="disabled" class="btn btn-primary" type="button">Get status</button>
-
     <div class="col-lg-1">
         <div id="operation_indicator" class="indicator"></div>
+    </div>
+</div>
+
+<div id="overall_ropod_status_container" class="ropod_table" disabled="disabled">
+    <div class="panel panel-default">
+
     </div>
 </div>
 
