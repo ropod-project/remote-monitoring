@@ -1,15 +1,10 @@
 #!/usr/bin/env python
 
-"""
-This is a version for communiating with zmq-mediator
-
-"""
-
 import os
 import ast
 from flask import send_from_directory
 from flask import Flask, jsonify, render_template, request, redirect, url_for
-# from datetime import datetime
+
 from calendar import datetime
 
 from constants import LocalDbConstants, DbConstants, VariableConstants
@@ -32,69 +27,74 @@ port = "5670"
 # creating a zmq client using zmq.REQ
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
-socket.connect ("tcp://localhost:%s" % port)
+socket.connect("tcp://localhost:%s" % port)
 
 msg_data = {
-  "header": {
-    "type": "VARIABLE_QUERY",
-    "version": "0.1.0",
-    "metamodel": "ropod-msg-schema.json",
-    "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
-    "timestamp": ""
-  },
-  "payload": {
-    "metamodel": "ropod-demo-cmd-schema.json",
-    "commandList":[
-      {
-        "features": [],
-        "start_time": "",
-        "end_time": ""
-      }
-     ]
-  }
+    "header":
+    {
+        "type": "VARIABLE_QUERY",
+        "version": "0.1.0",
+        "metamodel": "ropod-msg-schema.json",
+        "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
+        "timestamp": ""
+    },
+    "payload":
+    {
+        "metamodel": "ropod-demo-cmd-schema.json",
+        "commandList":
+        [
+            {
+                "features": [],
+                "start_time": "",
+                "end_time": ""
+            }
+        ]
+    }
 }
 
 ropod_status_msg = {
-  "header": {
-    "type": "STATUS",
-    "version": "0.1.0",
-    "metamodel": "ropod-msg-schema.json",
-    "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
-    "timestamp": ""
-  },
-  "payload": {
-    "metamodel": "ropod-status-schema.json",
-    "status":
+    "header":
     {
-        "hardware_devices":
+        "type": "STATUS",
+        "version": "0.1.0",
+        "metamodel": "ropod-msg-schema.json",
+        "msg_id": "0d05d0bc-f1d2-4355-bd88-edf44e2475c8",
+        "timestamp": ""
+    },
+    "payload":
+    {
+        "metamodel": "ropod-status-schema.json",
+        "status":
         {
-            "battery": 56.4,
-            "motors_on": True,
-            "wheel1": True,
-            "wheel2": True,
-            "wheel3": True,
-            "wheel4": False,
-            "wifi": 89
-        },
-        "sensors":
-        {
-            "joypad": False,
-            "laser_front": True,
-            "laser_back": True
-        },
-        "software":
-        {
-            "ros_master": True,
-            "ros_nodes":
+            "hardware_devices":
             {
-                "node_1": False,
-                "node_n": True
+                "battery": 56.4,
+                "motors_on": True,
+                "wheel1": True,
+                "wheel2": True,
+                "wheel3": True,
+                "wheel4": False,
+                "wifi": 89
             },
-            "localised": True,
-            "laser_map_matching": 66.5
+            "sensors":
+            {
+                "joypad": False,
+                "laser_front": True,
+                "laser_back": True
+            },
+            "software":
+            {
+                "ros_master": True,
+                "ros_nodes":
+                {
+                    "node_1": False,
+                    "node_n": True
+                },
+                "localised": True,
+                "laser_map_matching": 66.5
+            }
         }
     }
-  }
 }
 
 def communicate_zmq(data):
@@ -109,7 +109,6 @@ ropod_status_list = dict()  # for storing the status reply for each ropod
 
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
-rid = str()
 
 ################ Black box data interface ################
 @app.route('/')
@@ -220,10 +219,10 @@ def download_ropod_data():
     download_path = root_download_dir + 'ropod_query_data.json'
 
     # save the data
-    with open( download_path , 'w') as download_file:
+    with open(download_path, 'w') as download_file:
         json.dump(query_reply_json, download_file)
 
-    return send_file(download_path , attachment_filename='ropod_query_data.json')
+    return send_file(download_path, attachment_filename='ropod_query_data.json')
 ##########################################################
 
 
@@ -261,11 +260,9 @@ def send_experiment_request():
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['experiment'] = experiment
 
-
     communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
-    query_reply = communicate_zmq(data)
 
     return jsonify(success=True)
 ##########################################################
@@ -290,8 +287,7 @@ def get_ropod_status_ids():
         # ropod_id_list = []
         for node in ropods:
             sender_name = node[0]
-            suffix_idx = sender_name.find('_ropod')
-            ropod_id_list.append(sender_name[0:suffix_idx])
+            ropod_id_list.append(sender_name)
 
     return jsonify(ropod_ids=ropod_id_list)
 
@@ -312,7 +308,7 @@ def get_status_of_all_ropods():
         status_reply_json = json.loads(status_reply.decode('utf8'))
         ropod_status_list[ropod] = status_reply_json
 
-        # check for the ropod situation
+        # check the ropod status
         ropod_overall_status = check_ropod_overall_status(status_reply_json)
 
         # fill and returns a dictionary whose keys are ropod_ids
@@ -412,7 +408,6 @@ def add_new_ropod():
     data = request.get_json(force=True)
     hospital = data['hospital']
     ropod_id = data['ropod_id']
-    rid = data['ropod_id']
     ip_address = data['ip_address']
     RopodAdminQueries.add_new_ropod(local_db_connection, hospital, ropod_id, ip_address)
     return jsonify(success=True)
