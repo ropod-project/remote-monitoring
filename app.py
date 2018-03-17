@@ -351,19 +351,19 @@ def check_ropod_overall_status(ropod_status):
     for category, _ in status.items():
         for variable, value in status[category].items():
             if variable == 'ros_nodes':
-                for key3, value3 in status[category][variable].items():
-                    if isinstance(value3, bool):
-                        if not value3:
+                for list_item, item_value in status[category][variable].items():
+                    if isinstance(item_value, bool):
+                        if not item_value:
                             ropod_overall_status = False
                             break
                     else:
-                        if key3 == 'wifi' and value3 < threshold:
+                        if list_item == 'wifi' and item_value < threshold:
                             ropod_overall_status = False
                             break
-                        elif key3 == 'battery' and value3 < threshold:
+                        elif list_item == 'battery' and item_value < threshold:
                             ropod_overall_status = False
                             break
-                        elif key3 == 'laser_map_matching' and value3 < threshold:
+                        elif list_item == 'laser_map_matching' and item_value < threshold:
                             ropod_overall_status = False
                             break
             else:
