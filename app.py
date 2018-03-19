@@ -1,22 +1,15 @@
 #!/usr/bin/env python
 
-import os
+from __future__ import print_function
 import ast
-from flask import send_from_directory
-from flask import Flask, jsonify, render_template, request, redirect, url_for
-
-from calendar import datetime
+from flask import Flask, jsonify, render_template, request
 
 from constants import LocalDbConstants, DbConstants, VariableConstants
 from db import DbConnection, DbQueries
 from local_db import RopodAdminQueries
 
 import zmq
-import uuid
-import logging
-import sys
 import json
-import time
 
 from flask import send_file
 from os.path import expanduser
@@ -123,15 +116,20 @@ def get_blackbox_ids():
     data = communication_command + "++" + msg_data_string
 
     ropod_ids = dict()
-    query_reply = communicate_zmq(data)
-    if query_reply:
-        ropods = ast.literal_eval(query_reply.decode('ascii'))
-        ropod_ids = []
-        for node in ropods:
-            sender_name = node[0]
-            suffix_idx = sender_name.find('_query_interface')
-            ropod_ids.append(sender_name[0:suffix_idx])
-    return jsonify(ids=ropod_ids)
+    message = ''
+    try:
+        query_reply = communicate_zmq(data)
+        if query_reply:
+            ropods = ast.literal_eval(query_reply.decode('ascii'))
+            ropod_ids = []
+            for node in ropods:
+                sender_name = node[0]
+                suffix_idx = sender_name.find('_query_interface')
+                ropod_ids.append(sender_name[0:suffix_idx])
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Black box list could not be retrieved'
+    return jsonify(ids=ropod_ids, message=message)
 
 @app.route('/get_ropod_features', methods=['GET','POST'])
 def get_ropod_features():
@@ -146,17 +144,20 @@ def get_ropod_features():
     communication_command = "VARIABLE_QUERY"
     data = communication_command + '++' + msg_data_string
 
-    reply = communicate_zmq(data)
-    jreply = json.loads(reply.decode('utf8'))
-
     features = list()
-    for interface in jreply['payload']['variableList']:
-        values = list(interface.values())
-        if values is not None and values[0] is not None:
-            for element in values[0]:
-                features.append(element)
-
-    return jsonify(ropod_features=features)
+    message = ''
+    try:
+        reply = communicate_zmq(data)
+        jreply = json.loads(reply.decode('utf8'))
+        for interface in jreply['payload']['variableList']:
+            values = list(interface.values())
+            if values is not None and values[0] is not None:
+                for element in values[0]:
+                    features.append(element)
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Feature list could not be retrieved'
+    return jsonify(ropod_features=features, message=message)
 
 @app.route('/get_ropod_data', methods=['GET','POST'] )
 def get_ropod_data():
@@ -174,24 +175,27 @@ def get_ropod_data():
 
     communication_command = "DATA_QUERY"
     msg_data_string = json.dumps(msg_data)
-    data = communication_command + "++" + msg_data_string
-
-    query_reply = communicate_zmq(data)
-    query_reply_json = json.loads(query_reply.decode('utf8'))
+    data_query = communication_command + "++" + msg_data_string
 
     variables = list()
     data = list()
-    query_result = query_reply_json['payload']['dataList']
-    if query_result is not None and query_result[0] is not None:
-        for data_dict in query_result:
-            for key, value in data_dict.items():
-                variables.append(key)
-                variable_data_list = list()
-                for item in value:
-                    variable_data_list.append(ast.literal_eval(item))
-                data.append(variable_data_list)
-
-    return jsonify(variables=variables, data=data)
+    message = ''
+    try:
+        query_reply = communicate_zmq(data_query)
+        query_reply_json = json.loads(query_reply.decode('utf8'))
+        query_result = query_reply_json['payload']['dataList']
+        if query_result is not None and query_result[0] is not None:
+            for data_dict in query_result:
+                for key, value in data_dict.items():
+                    variables.append(key)
+                    variable_data_list = list()
+                    for item in value:
+                        variable_data_list.append(ast.literal_eval(item))
+                    data.append(variable_data_list)
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Data could not be retrieved'
+    return jsonify(variables=variables, data=data, message=message)
 
 @app.route('/download_ropod_data', methods=['GET','POST'] )
 def download_ropod_data():
@@ -211,18 +215,22 @@ def download_ropod_data():
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
 
-    query_reply = communicate_zmq(data)
-    query_reply_json = json.loads(query_reply.decode('utf8'))
-
     home = str(expanduser('~'))
     root_download_dir = home + '/Downloads/'
     download_path = root_download_dir + 'ropod_query_data.json'
+    message = ''
+    try:
+        query_reply = communicate_zmq(data)
+        query_reply_json = json.loads(query_reply.decode('utf8'))
 
-    # save the data
-    with open(download_path, 'w') as download_file:
-        json.dump(query_reply_json, download_file)
-
-    return send_file(download_path, attachment_filename='ropod_query_data.json')
+        # save the data
+        with open(download_path, 'w') as download_file:
+            json.dump(query_reply_json, download_file)
+        return send_file(download_path, attachment_filename='ropod_query_data.json')
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Data could not be retrieved'
+        return jsonify(message=message)
 ##########################################################
 
 
@@ -239,17 +247,20 @@ def get_ropod_ids():
     data = communication_command + "++" + msg_data_string
 
     ropod_ids = dict()
-    query_reply = communicate_zmq(data)
-    if query_reply:
-        ropods = ast.literal_eval(query_reply.decode('ascii'))
-        ropod_ids = []
-        for node in ropods:
-            sender_name = node[0]
-            suffix_idx = sender_name.find('_query_interface')
-            ropod_ids.append(sender_name[0:suffix_idx])
-
-    # experiment_list = ['mobidik_elevator_experiment']
-    return jsonify(ropod_ids=ropod_ids)
+    message = ''
+    try:
+        query_reply = communicate_zmq(data)
+        if query_reply:
+            ropods = ast.literal_eval(query_reply.decode('ascii'))
+            ropod_ids = []
+            for node in ropods:
+                sender_name = node[0]
+                suffix_idx = sender_name.find('_query_interface')
+                ropod_ids.append(sender_name[0:suffix_idx])
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Ropod list could not be retrieved'
+    return jsonify(ropod_ids=ropod_ids, message=message)
 
 @app.route('/send_experiment_request', methods=['GET','POST'])
 def send_experiment_request():
@@ -260,11 +271,16 @@ def send_experiment_request():
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['experiment'] = experiment
 
-    communication_command = "DATA_QUERY"
-    msg_data_string = json.dumps(msg_data)
-    data = communication_command + "++" + msg_data_string
-
-    return jsonify(success=True)
+    message = ''
+    try:
+        communication_command = "DATA_QUERY"
+        msg_data_string = json.dumps(msg_data)
+        data = communication_command + "++" + msg_data_string
+        _ = communicate_zmq(data)
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Command could not be sent'
+    return jsonify(success=True, message=message)
 ##########################################################
 
 
@@ -280,51 +296,47 @@ def get_ropod_status_ids():
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
 
-    # ropod_id_list = dict()
-    query_reply = communicate_zmq(data)
-    if query_reply:
-        ropods = ast.literal_eval(query_reply.decode('ascii'))
-        # ropod_id_list = []
-        for node in ropods:
-            sender_name = node[0]
-            ropod_id_list.append(sender_name)
-
-    return jsonify(ropod_ids=ropod_id_list)
+    message = ''
+    try:
+        query_reply = communicate_zmq(data)
+        if query_reply:
+            ropods = ast.literal_eval(query_reply.decode('ascii'))
+            for node in ropods:
+                sender_name = node[0]
+                ropod_id_list.append(sender_name)
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Ropod list could not be retrieved'
+    return jsonify(ropod_ids=ropod_id_list, message=message)
 
 @app.route('/get_status_of_all_ropods', methods=['GET','POST'])
 def get_status_of_all_ropods():
-    """This function receives a list of ropod_ids and makes a status query
+    '''Receives a list of ropod_ids and makes a status query
     for each of them, checks the status, and returns the result
-    """
+    '''
 
     all_ropods_status = dict()
+    message = ''
+    try:
+        # get ropod_id list
+        for ropod in ropod_id_list:
+            # get status query for each ropod in a loop
+            status_reply = get_one_ropod_status(ropod)
 
-    # get ropod_id list
-    for ropod in ropod_id_list:
-        # get status query for each ropod in a loop
-        status_reply = get_one_ropod_status(ropod)
+            # transform the result to json and store it into ropod_status_list
+            status_reply_json = json.loads(status_reply.decode('utf8'))
+            ropod_status_list[ropod] = status_reply_json
 
-        # transform the result to json and store it into ropod_status_list
-        status_reply_json = json.loads(status_reply.decode('utf8'))
-        ropod_status_list[ropod] = status_reply_json
+            # check the ropod status
+            ropod_overall_status = check_ropod_overall_status(status_reply_json)
 
-        # check the ropod status
-        ropod_overall_status = check_ropod_overall_status(status_reply_json)
-
-        # fill and returns a dictionary whose keys are ropod_ids
-        # and values are bool reply from function
-        all_ropods_status[ropod] = ropod_overall_status
-
-    return jsonify(status_list=all_ropods_status)
-
-@app.route('/read_ropod_status', methods=['GET', 'POST'])
-def read_ropod_status():
-    """For reading one ropod status from ropod_status_list
-    """
-    ropod_id = request.args.get('ropod_id', '', type=str)
-    ropod_status = ropod_status_list[ropod_id]
-
-    return jsonify(ropod_status=ropod_status)
+            # fill and returns a dictionary whose keys are ropod_ids
+            # and values are bool reply from function
+            all_ropods_status[ropod] = ropod_overall_status
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Status could not be retrieved'
+    return jsonify(status_list=all_ropods_status, message=message)
 
 def get_one_ropod_status(ropod_id):
     """Returns a status query for one ropod
@@ -336,7 +348,6 @@ def get_one_ropod_status(ropod_id):
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
     query_reply = communicate_zmq(data)
-
     return query_reply
 
 def check_ropod_overall_status(ropod_status):
@@ -385,6 +396,20 @@ def check_ropod_overall_status(ropod_status):
                         break
 
     return ropod_overall_status
+
+@app.route('/read_ropod_status', methods=['GET', 'POST'])
+def read_ropod_status():
+    '''Reads the status of a single ropod from 'ropod_status_list'
+    '''
+    message = ''
+    try:
+        ropod_id = request.args.get('ropod_id', '', type=str)
+        ropod_status = ropod_status_list[ropod_id]
+        return jsonify(ropod_status=ropod_status, message=message)
+    except Exception, exc:
+        print('%s' % str(exc))
+        message = 'Status could not be retrieved'
+        return jsonify(ropod_status=None, message=message)
 ##########################################################
 
 

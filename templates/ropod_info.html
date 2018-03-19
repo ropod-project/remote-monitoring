@@ -26,6 +26,7 @@
     var ropod_status_timeout = null;
 
     $(document).ready(function() {
+        $('#error_message_container').hide();
         $('#operation_indicator').show();
         $.ajax({
             url: SCRIPT_ROOT + '/get_ropod_status_ids',
@@ -34,8 +35,15 @@
             cache: false
         }).done(function(result) {
             $('#operation_indicator').hide();
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+            }
         }).fail(function(jqXHR, status, error) {
             console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
             $('#operation_indicator').hide();
         });
 
@@ -55,6 +63,13 @@
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
+
                 $.each(result.status_list, function(ropod, ropod_status){
                     html_string += '<tr><td>' + ropod + '</td>';
                     if (ropod_status == true)
@@ -74,6 +89,8 @@
                 $('#overall_ropod_status_container').prop('disabled', false);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
                 $('#operation_indicator').hide();
             });
 
@@ -101,6 +118,13 @@
             }).done(function(result) {
                 if (ropod_id == '')
                 {
+                    return;
+                }
+
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
                     return;
                 }
 
@@ -151,6 +175,8 @@
                 $('#status_container').prop('disabled', false);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
             });
 
             if (ropod_id != '')
@@ -178,7 +204,6 @@
     });
 </script>
 
-
 <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Ropod info</h1>
@@ -189,6 +214,11 @@
     <div class="col-lg-1">
         <div id="operation_indicator" class="indicator"></div>
     </div>
+</div>
+
+<div id="error_message_container" class="alert alert-danger alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="error_message_container_content"></p>
 </div>
 
 <div id="overall_ropod_status_container" class="ropod_table" disabled="disabled">
