@@ -346,7 +346,9 @@ def check_ropod_overall_status(ropod_status):
     ropod_overall_status = True
     status = ropod_status['payload']['status']
 
-    threshold = 30
+    wifi_threshold = -70
+    battery_threshold = 21
+    laser_map_threshold = 90
 
     for category, _ in status.items():
         for variable, value in status[category].items():
@@ -357,13 +359,13 @@ def check_ropod_overall_status(ropod_status):
                             ropod_overall_status = False
                             break
                     else:
-                        if list_item == 'wifi' and item_value < threshold:
+                        if list_item == 'wifi' and item_value < wifi_threshold:
                             ropod_overall_status = False
                             break
-                        elif list_item == 'battery' and item_value < threshold:
+                        elif list_item == 'battery' and item_value < battery_threshold:
                             ropod_overall_status = False
                             break
-                        elif list_item == 'laser_map_matching' and item_value < threshold:
+                        elif list_item == 'laser_map_matching' and item_value < laser_map_threshold:
                             ropod_overall_status = False
                             break
             else:
@@ -372,13 +374,13 @@ def check_ropod_overall_status(ropod_status):
                         ropod_overall_status = False
                         break
                 else:
-                    if variable == 'wifi' and value < threshold:
+                    if variable == 'wifi' and value < wifi_threshold:
                         ropod_overall_status = False
                         break
-                    elif variable == 'battery' and value < threshold:
+                    elif variable == 'battery' and value < battery_threshold:
                         ropod_overall_status = False
                         break
-                    elif variable == 'laser_map_matching' and value < threshold:
+                    elif variable == 'laser_map_matching' and value < laser_map_threshold:
                         ropod_overall_status = False
                         break
 
