@@ -43,7 +43,8 @@ body {
         $('#btn_display_data').prop('disabled', true);
         $('#btn_download_data').prop('disabled', true);
 
-
+        $('#error_message_container').hide();
+        $('#info_message_container').hide();
         $('#operation_indicator').show();
 
         $.ajax({
@@ -52,6 +53,13 @@ body {
             contentType: 'application/json',
             cache: false
         }).done(function(result) {
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
+            }
+
             $.each(result.ids, function(i, ropod_id){
                 $('#ropod_ids').append($('<option>', {
                     value: ropod_id,
@@ -61,11 +69,14 @@ body {
             $('#operation_indicator').hide();
         }).fail(function(jqXHR, status, error) {
             console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
             $('#operation_indicator').hide();
         });
 
         $('#ropod_ids').change(function() {
-            if ($(this).val() == "none") {
+            if ($(this).val() == "none")
+            {
                 $('#btn_display_data').prop('disabled', true);
                 $('#btn_download_data').prop('disabled', true);
 
@@ -83,8 +94,14 @@ body {
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
-                ropod_features = result.ropod_features;
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
 
+                ropod_features = result.ropod_features;
                 var html_string = '';
                 for (var i=0; i<result.ropod_features.length; i++) {
                     if ( (i % 10) == 0 ) {
@@ -100,6 +117,8 @@ body {
                 $('#feature_container').prop('disabled', false);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
             });
 
             if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
@@ -114,14 +133,17 @@ body {
         $('#start_date').change(function() {
             var start_date = $(this).val();
             var end_date = $('#end_date').val();
-            if (start_date == '') {
+            if (start_date == '')
+            {
                 $(this).val('Start date');
                 $('#btn_display_data').prop('disabled', true);
                 $('#btn_download_data').prop('disabled', true);
 
             }
-            else {
-                if (end_date != 'End date') {
+            else
+            {
+                if (end_date != 'End date' && $('#ropod_ids').val() != 'none')
+                {
                     $('#btn_display_data').prop('disabled', false);
                     $('#btn_download_data').prop('disabled', false);
 
@@ -132,14 +154,17 @@ body {
         $('#end_date').change(function() {
             var end_date = $(this).val();
             var start_date = $('#start_date').val();
-            if (end_date == '') {
+            if (end_date == '')
+            {
                 $(this).val('End date');
                 $('#btn_display_data').prop('disabled', true);
                 $('#btn_download_data').prop('disabled', true);
 
             }
-            else {
-                if (start_date != 'Start date') {
+            else
+            {
+                if (start_date != 'Start date' && $('#ropod_ids').val() != 'none')
+                {
                     $('#btn_display_data').prop('disabled', false);
                     $('#btn_download_data').prop('disabled', false);
 
@@ -154,24 +179,32 @@ body {
             });
 
             // check if the user selected a feature or not
-            if (variable_list.length == 0) {
-                alert("Please select at least one variable");
+            if (variable_list.length == 0)
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select at least one variable');
                 return;
             }
 
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
-            if ((start_time == 'Start date') && (end_time == 'End date')) {
-                alert("Please select a start and an end time");
+            if ((start_time == 'Start date') && (end_time == 'End date'))
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select a start and an end time');
                 return;
             }
-            else if (start_time == 'Start date') {
-                alert("Please select a start time");
+            else if (start_time == 'Start date')
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select a start time');
                 return;
             }
-            else if (end_time == 'End date') {
-                alert("Please select an end time");
+            else if (end_time == 'End date')
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select an end time');
                 return;
             }
 
@@ -180,29 +213,37 @@ body {
 
         $('#btn_download_data').click(function() {
             var variable_list = [];
-            $.each($("input[name='feature']:checked"), function(){
+            $.each($("input[name='feature']:checked"), function() {
                 variable_list.push($(this).val());
             });
 
             // check if the user selected a feature or not
-            if (variable_list.length == 0) {
-                alert("Please select at least one variable");
+            if (variable_list.length == 0)
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select at least one variable');
                 return;
             }
 
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
-            if ((start_time == 'Start date') && (end_time == 'End date')) {
-                alert("Please select a start and an end time");
+            if ((start_time == 'Start date') && (end_time == 'End date'))
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select a start and an end time');
                 return;
             }
-            else if (start_time == 'Start date') {
-                alert("Please select a start time");
+            else if (start_time == 'Start date')
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select a start time');
                 return;
             }
-            else if (end_time == 'End date') {
-                alert("Please select an end time");
+            else if (end_time == 'End date')
+            {
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select an end time');
                 return;
             }
 
@@ -219,12 +260,19 @@ body {
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
-                alert("Data downloaded to ... ");
-
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Data downloaded as "ropod_query_data.json"');
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
             });
-
         });
 
         $(document).on('change', '.plot_variables', function() {
@@ -232,9 +280,8 @@ body {
         });
     });
 
-
-
-    function plot_data(variable_list, start_time, end_time) {
+    function plot_data(variable_list, start_time, end_time)
+    {
         var start_time_ms = date_str_to_timestamp(start_time);
         var end_time_ms = date_str_to_timestamp(end_time);
 
@@ -242,7 +289,8 @@ body {
         plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
     }
 
-    function reset_data_panel() {
+    function reset_data_panel()
+    {
         $('#variables').val('none');
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
@@ -253,7 +301,8 @@ body {
         plot.reset();
     }
 
-    function date_str_to_timestamp(date_str) {
+    function date_str_to_timestamp(date_str)
+    {
         var date_components = date_str.split('/');
         var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
         var time_ms = date_obj.getTime() / 1000.;
@@ -267,15 +316,22 @@ body {
     </div>
 </div>
 
+<div id="error_message_container" class="alert alert-danger alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="error_message_container_content"></p>
+</div>
+
+<div id="info_message_container" class="alert alert-info alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="info_message_container_content"></p>
+</div>
+
 <div id="ropod_selection_container">
     <div class="row">
         <div class="col-lg-2">
             <div class="form-group">
                 <select id="ropod_ids" class="form-control">
-                    <option value="none">Choose Ropod id</option>
-                    <!-- {% for key in ids %}
-                        <option value="{{ key }}">{{ key }}</option>
-                    {% endfor %} -->
+                    <option value="none">Choose ropod id</option>
                 </select>
             </div>
         </div>
