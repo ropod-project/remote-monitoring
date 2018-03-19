@@ -39,6 +39,7 @@ int main()
 
         try
         {
+            // this must changed into get_interface_list
             if (!received_zmq_msgs[0].compare("GET_ROPOD_LIST"))
             {
                 std::vector<std::string> ropod_names = zyre_listener->getRopodList(received_zmq_msgs[2]);
@@ -70,6 +71,37 @@ int main()
             else if (!received_zmq_msgs[0].compare("DATA_QUERY"))
             {
                 query_reply_str = zyre_listener->getData(received_zmq_msgs[2]);
+
+                // sending the reply to the interface
+                data_size = query_reply_str.length();
+                zmq::message_t reply (data_size);
+                memcpy(reply.data (), query_reply_str.c_str(), query_reply_str.length());
+                server.send (reply);
+            }
+            // Here I have to add another part for getting the ropod lists
+            // and getting the status
+            else if (!received_zmq_msgs[0].compare("GET_ROPOD_IDs"))
+            {
+                // This part must be editted
+                std::vector<std::string> ropod_ids = zyre_listener->getRopodIDs(received_zmq_msgs[2]);
+
+                std::string ropods = "[";
+                for (size_t i=0; i<ropod_ids.size(); i++)
+                {
+                    ropods = ropods + "[\"" + ropod_ids[i] + "\"]";
+                    if (i != ropod_ids.size() - 1)
+                        ropods += ", ";
+                }
+                ropods += "]";
+
+                data_size = ropods.size();
+                zmq::message_t reply (data_size);
+                memcpy(reply.data (), ropods.c_str(), ropods.size());
+                server.send (reply);
+            }
+            else if (!received_zmq_msgs[0].compare("STATUS_QUERY"))
+            {
+                query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2]);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
