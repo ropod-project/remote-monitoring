@@ -20,8 +20,13 @@ ZyreListener::~ZyreListener()
     delete listener_node_;
 }
 
-std::vector<std::string> ZyreListener::getRopodList(std::string message)
+std::vector<std::string> ZyreListener::getRopodList(std::string message, double timeout)
 {
+    if (timeout > 0)
+    {
+        timeout_ = timeout;
+    }
+
     // shout to all the nodes and ask them to send their name and uuids
     Json::Value jmsg =  parseMessageJson(message);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
@@ -39,8 +44,13 @@ std::vector<std::string> ZyreListener::getRopodList(std::string message)
 
 // ============================ ropod info related ============================================
 
-std::vector<std::string> ZyreListener::getRopodIDs(std::string message)
+std::vector<std::string> ZyreListener::getRopodIDs(std::string message, double timeout)
 {
+    if (timeout > 0)
+    {
+        timeout_ = timeout;
+    }
+
     // shout to all the nodes and ask them to send their name and uuids
     Json::Value jmsg =  parseMessageJson(message);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
@@ -56,8 +66,13 @@ std::vector<std::string> ZyreListener::getRopodIDs(std::string message)
     return ropod_ids_;
 }
 
-std::string ZyreListener::getStatus(std::string msg)
+std::string ZyreListener::getStatus(std::string msg, double timeout)
 {
+    if (timeout > 0)
+    {
+        timeout_ = timeout;
+    }
+
     Json::Value jmsg =  parseMessageJson(msg);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
@@ -75,8 +90,13 @@ std::string ZyreListener::getStatus(std::string msg)
 
 // ========================================================================
 
-std::string ZyreListener::getFeatures(std::string msg)
+std::string ZyreListener::getFeatures(std::string msg, double timeout)
 {
+    if (timeout > 0)
+    {
+        timeout_ = timeout;
+    }
+
     Json::Value jmsg =  parseMessageJson(msg);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
@@ -92,8 +112,13 @@ std::string ZyreListener::getFeatures(std::string msg)
     return received_msg_;
 }
 
-std::string ZyreListener::getData(std::string msg)
+std::string ZyreListener::getData(std::string msg, double timeout)
 {
+    if (timeout > 0)
+    {
+        timeout_ = timeout;
+    }
+
     Json::Value jmsg =  parseMessageJson(msg);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 

@@ -20,14 +20,12 @@ class ZyreListener
         ZyreListener(int timeout);
         ~ZyreListener();
 
-        std::vector<std::string> getRopodList(std::string message);
-        std::string getFeatures(std::string msg);
-        std::string getData(std::string msg);
+        std::vector<std::string> getRopodList(std::string message, double timeout=-1);
+        std::string getFeatures(std::string msg, double timeout=-1);
+        std::string getData(std::string msg, double timeout=-1);
 
-        // ropod info related
-        std::vector<std::string> getRopodIDs(std::string message);
-        std::string getStatus(std::string msg);
-        // ropod info end
+        std::vector<std::string> getRopodIDs(std::string message, double timeout=-1);
+        std::string getStatus(std::string msg, double timeout=-1);
 
     private:
         static void receiveRopodList(zsock_t *pipe, void *args);
@@ -49,11 +47,8 @@ class ZyreListener
         zactor_t *feature_query_actor_;
         zactor_t *data_query_actor_;
 
-        // ropod info related
         zactor_t *ropod_id_actor_;
         zactor_t *status_query_actor_;
-        // ropod info end
-
 
         Json::StreamWriterBuilder json_stream_builder_;
 

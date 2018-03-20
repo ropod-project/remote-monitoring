@@ -17,6 +17,9 @@ int main()
 {
     std::unique_ptr<ZyreListener> zyre_listener(new ZyreListener(5));
 
+    double name_query_timeout = 5;
+    double data_query_timeout = 20;
+
     // creating the zmq server
     zmq::context_t context(1);
     zmq::socket_t server(context, ZMQ_REP);
@@ -42,7 +45,7 @@ int main()
             // this must changed into get_interface_list
             if (!received_zmq_msgs[0].compare("GET_ROPOD_LIST"))
             {
-                std::vector<std::string> ropod_names = zyre_listener->getRopodList(received_zmq_msgs[2]);
+                std::vector<std::string> ropod_names = zyre_listener->getRopodList(received_zmq_msgs[2], name_query_timeout);
 
                 std::string ropods = "[";
                 for (size_t i=0; i<ropod_names.size(); i++)
@@ -60,7 +63,7 @@ int main()
             }
             else if (!received_zmq_msgs[0].compare("VARIABLE_QUERY"))
             {
-                query_reply_str = zyre_listener->getFeatures(received_zmq_msgs[2]);
+                query_reply_str = zyre_listener->getFeatures(received_zmq_msgs[2], name_query_timeout);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
@@ -70,7 +73,7 @@ int main()
             }
             else if (!received_zmq_msgs[0].compare("DATA_QUERY"))
             {
-                query_reply_str = zyre_listener->getData(received_zmq_msgs[2]);
+                query_reply_str = zyre_listener->getData(received_zmq_msgs[2], data_query_timeout);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
@@ -83,7 +86,7 @@ int main()
             else if (!received_zmq_msgs[0].compare("GET_ROPOD_IDs"))
             {
                 // This part must be editted
-                std::vector<std::string> ropod_ids = zyre_listener->getRopodIDs(received_zmq_msgs[2]);
+                std::vector<std::string> ropod_ids = zyre_listener->getRopodIDs(received_zmq_msgs[2], name_query_timeout);
 
                 std::string ropods = "[";
                 for (size_t i=0; i<ropod_ids.size(); i++)
@@ -101,7 +104,7 @@ int main()
             }
             else if (!received_zmq_msgs[0].compare("STATUS_QUERY"))
             {
-                query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2]);
+                query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2], data_query_timeout);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
