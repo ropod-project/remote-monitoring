@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 import ast
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 
 from constants import LocalDbConstants, DbConstants, VariableConstants
 from db import DbConnection, DbQueries
@@ -109,7 +109,8 @@ def index():
 @app.route('/get_blackbox_ids', methods=['GET', 'POST'])
 def get_blackbox_ids():
     msg_data['header']['type'] = "NAME_QUERY"
-    communication_command = "GET_ROPOD_LIST"
+    msg_data['payload']['sender_id'] = session['uid'].hex
+    communication_command = "GET_QUERY_INTERFACE_LIST"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
 
@@ -134,6 +135,7 @@ def get_ropod_features():
     ropod_id = request.args.get('ropod_id', '', type=str)
 
     msg_data['header']['type'] = "VARIABLE_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['commandList'][0] = {"command": "GET_ROPOD_FEATURES"}
 
@@ -166,6 +168,7 @@ def get_ropod_data():
     end_query_time = request.args.get('end_timestamp')
 
     msg_data['header']['type'] = "DATA_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['commandList'][0] = {"features": feature_list,
                                              "start_time": start_query_time,
@@ -204,6 +207,7 @@ def download_ropod_data():
     end_query_time = request.args.get('end_timestamp')
 
     msg_data['header']['type'] = "DATA_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['commandList'][0] = {"features": feature_list,
                                              "start_time": start_query_time,
@@ -240,6 +244,7 @@ def run_experiment():
 @app.route('/get_ropod_ids', methods=['GET'])
 def get_ropod_ids():
     msg_data['header']['type'] = "NAME_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     communication_command = "GET_ROPOD_LIST"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
@@ -266,6 +271,7 @@ def send_experiment_request():
     experiment = request.args.get('experiment', '', type=str)
 
     msg_data['header']['type'] = "RUN_EXPERIMENT"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
     msg_data['payload']['experiment'] = experiment
 
@@ -290,6 +296,7 @@ def ropod_info():
 @app.route('/get_ropod_status_ids', methods=['GET'])
 def get_ropod_status_ids():
     msg_data['header']['type'] = "NAME_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     communication_command = "GET_ROPOD_IDs"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
@@ -302,6 +309,7 @@ def get_ropod_status_ids():
             for node in ropods:
                 sender_name = node[0]
                 ropod_id_list.append(sender_name)
+        print(ropod_id_list)
     except Exception, exc:
         print('[get_ropod_status_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
@@ -340,6 +348,7 @@ def get_one_ropod_status(ropod_id):
     """Returns a status query for one ropod
     """
     msg_data['header']['type'] = "STATUS"
+    msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
 
     communication_command = "STATUS_QUERY"
@@ -474,6 +483,8 @@ def delete_ropod():
 
 if __name__ == '__main__':
     try:
-        app.run(debug=True, threaded=True)
+        app.secret_key = 'area5142'
+        app.config['SESSION_TYPE'] = 'filesystem'
+        app.run(debug=True, threaded=True, host='0.0.0.0')
     finally:
         context.term()

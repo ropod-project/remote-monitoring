@@ -5,11 +5,6 @@ ZyreListener::ZyreListener(int timeout)
     listener_node_ = new zyre::node_t("z_listener_node");
     listener_node_->start();
     listener_node_->join("ROPOD");
-    ropod_list_received_ = false;
-    features_received_ = false;
-    data_received_ = false;
-    ropod_ids_received_ = false;
-    status_received_ = false;
     timeout_ = timeout;
 }
 
@@ -20,7 +15,7 @@ ZyreListener::~ZyreListener()
     delete listener_node_;
 }
 
-std::vector<std::string> ZyreListener::getRopodList(std::string message, double timeout)
+std::vector<std::string> ZyreListener::getQueryInterfaceList(std::string message, double timeout)
 {
     if (timeout > 0)
     {
@@ -31,15 +26,24 @@ std::vector<std::string> ZyreListener::getRopodList(std::string message, double 
     Json::Value jmsg =  parseMessageJson(message);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
     ZyreListener::shoutMessage(jmsg);
-    ropod_list_actor_ = zactor_new(ZyreListener::receiveRopodList, this);
+    std::string sender_id = jmsg["payload"]["sender_id"].asString();
+
+    ListenerParams listener_params(this, sender_id);
+    actors_[sender_id] = zactor_new(ZyreListener::receiveQueryInterfaceList, &listener_params);
+    reply_received_[sender_id] = false;
+    query_interface_names_[sender_id] = std::vector<std::string>();
 
     std::cout << "Waiting for ropod list...\n";
-    while (!ropod_list_received_) { }
-    ropod_list_received_ = false;
-    std::cout << "Ropod list received\n\n";
+    while (!reply_received_[sender_id]) { }
+    reply_received_.erase(sender_id);
+    std::cout << "Query interface list received\n\n";
 
-    zactor_destroy(&ropod_list_actor_);
-    return ropod_names_;
+    zactor_destroy(&actors_[sender_id]);
+    actors_.erase(sender_id);
+
+    std::vector<std::string> query_interface_names = query_interface_names_[sender_id];
+    query_interface_names_.erase(sender_id);
+    return query_interface_names;
 }
 
 // ============================ ropod info related ============================================
@@ -55,15 +59,24 @@ std::vector<std::string> ZyreListener::getRopodIDs(std::string message, double t
     Json::Value jmsg =  parseMessageJson(message);
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
     ZyreListener::shoutMessage(jmsg);
-    ropod_id_actor_ = zactor_new(ZyreListener::receiveRopodIDs, this);
+    std::string sender_id = jmsg["payload"]["sender_id"].asString();
+
+    ListenerParams listener_params(this, sender_id);
+    actors_[sender_id] = zactor_new(ZyreListener::receiveRopodIDs, &listener_params);
+    reply_received_[sender_id] = false;
+    ropod_ids_[sender_id] = std::vector<std::string>();
 
     std::cout << "Waiting for ropod IDs...\n";
-    while (!ropod_ids_received_) { }
-    ropod_ids_received_ = false;
+    while (!reply_received_[sender_id]) { }
+    reply_received_.erase(sender_id);
     std::cout << "Ropod IDs received\n\n";
 
-    zactor_destroy(&ropod_id_actor_);
-    return ropod_ids_;
+    zactor_destroy(&actors_[sender_id]);
+    actors_.erase(sender_id);
+
+    std::vector<std::string> ropod_ids = ropod_ids_[sender_id];
+    ropod_ids_.erase(sender_id);
+    return ropod_ids;
 }
 
 std::string ZyreListener::getStatus(std::string msg, double timeout)
@@ -77,15 +90,26 @@ std::string ZyreListener::getStatus(std::string msg, double timeout)
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
     ZyreListener::shoutMessage(jmsg);
-    status_query_actor_ = zactor_new(ZyreListener::receiveStatus, this);
+    std::string sender_id = jmsg["payload"]["sender_id"].asString();
+    ListenerParams listener_params(this, sender_id);
+    actors_[sender_id] = zactor_new(ZyreListener::receiveStatus, &listener_params);
+    reply_received_[sender_id] = false;
 
     std::cout << "Waiting for status results...\n";
-    while (!status_received_) {}
-    status_received_ = false;
+    while (!reply_received_[sender_id]) {}
+    reply_received_.erase(sender_id);
     std::cout << "Status result received\n\n";
 
-    zactor_destroy(&status_query_actor_);
-    return received_status_;
+    zactor_destroy(&actors_[sender_id]);
+    actors_.erase(sender_id);
+
+    std::string received_status;
+    if (received_status_.count(sender_id) > 0)
+    {
+        received_status = received_status_[sender_id];
+        received_status_.erase(sender_id);
+    }
+    return received_status;
 }
 
 // ========================================================================
@@ -101,15 +125,27 @@ std::string ZyreListener::getFeatures(std::string msg, double timeout)
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
     ZyreListener::shoutMessage(jmsg);
-    feature_query_actor_ = zactor_new(ZyreListener::receiveFeatures, this);
+    std::string sender_id = jmsg["payload"]["sender_id"].asString();
+
+    ListenerParams listener_params(this, sender_id);
+    actors_[sender_id] = zactor_new(ZyreListener::receiveFeatures, &listener_params);
+    reply_received_[sender_id] = false;
 
     std::cout << "Waiting for query results...\n";
-    while (!features_received_) {}
-    features_received_ = false;
+    while (!reply_received_[sender_id]) {}
+    reply_received_.erase(sender_id);
     std::cout << "Query result received\n\n";
 
-    zactor_destroy(&feature_query_actor_);
-    return received_msg_;
+    zactor_destroy(&actors_[sender_id]);
+    actors_.erase(sender_id);
+
+    std::string received_msg = received_msg_[sender_id];
+    if (received_msg_.count(sender_id) > 0)
+    {
+        received_msg = received_msg_[sender_id];
+        received_msg_.erase(sender_id);
+    }
+    return received_msg;
 }
 
 std::string ZyreListener::getData(std::string msg, double timeout)
@@ -123,27 +159,38 @@ std::string ZyreListener::getData(std::string msg, double timeout)
     std::cout << "Received a '" << jmsg["header"]["type"].asString() << "' request\n";
 
     ZyreListener::shoutMessage(jmsg);
-    data_query_actor_ = zactor_new(ZyreListener::receiveData, this);
+    std::string sender_id = jmsg["payload"]["sender_id"].asString();
+
+    ListenerParams listener_params(this, sender_id);
+    actors_[sender_id] = zactor_new(ZyreListener::receiveData, &listener_params);
+    reply_received_[sender_id] = false;
 
     std::cout << "Waiting for query results...\n";
-    while (!data_received_) {}
-    data_received_ = false;
+    while (!reply_received_[sender_id]) {}
+    reply_received_.erase(sender_id);
     std::cout << "Query result received\n\n";
 
-    zactor_destroy(&data_query_actor_);
-    return received_msg_;
+    zactor_destroy(&actors_[sender_id]);
+    actors_.erase(sender_id);
+
+    std::string received_msg = received_msg_[sender_id];
+    if (received_msg_.count(sender_id) > 0)
+    {
+        received_msg = received_msg_[sender_id];
+        received_msg_.erase(sender_id);
+    }
+    return received_msg;
 }
 
-void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
+void ZyreListener::receiveQueryInterfaceList(zsock_t *pipe, void *args)
 {
-    ZyreListener *listener = (ZyreListener*)args;
+    ListenerParams *listener_params = (ListenerParams*)args;
 
     zsock_signal (pipe, 0);     //  Signal "ready" to caller
 
     bool terminated = false;
-    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+    zpoller_t *poller = zpoller_new (pipe, listener_params->listener->listener_node_->socket(), NULL);
 
-    listener->ropod_names_.clear();
     auto start = std::chrono::high_resolution_clock::now();
     while (!terminated)
     {
@@ -166,7 +213,7 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
             free (command);
             zmsg_destroy (&msg);
         }
-        else if (which == listener->listener_node_->socket())
+        else if (which == listener_params->listener->listener_node_->socket())
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
@@ -178,10 +225,11 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
             std::string name_str = std::string(name);
             if (name_str.find("query_interface") != std::string::npos)
             {
-                if(std::find(listener->ropod_names_.begin(),
-                             listener->ropod_names_.end(), name_str) == listener->ropod_names_.end())
+                if(std::find(listener_params->listener->query_interface_names_[listener_params->sender_id].begin(),
+                             listener_params->listener->query_interface_names_[listener_params->sender_id].end(), name_str) ==
+                             listener_params->listener->query_interface_names_[listener_params->sender_id].end())
                 {
-                    listener->ropod_names_.push_back(name_str);
+                    listener_params->listener->query_interface_names_[listener_params->sender_id].push_back(name_str);
                 }
             }
 
@@ -194,13 +242,13 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
 
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            if (elapsed.count() > listener->timeout_)
+            if (elapsed.count() > listener_params->listener->timeout_)
             {
                 terminated = true;
             }
         }
     }
-    listener->ropod_list_received_ = true;
+    listener_params->listener->reply_received_[listener_params->sender_id] = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }
@@ -209,14 +257,13 @@ void ZyreListener::receiveRopodList(zsock_t *pipe, void *args)
 
 void ZyreListener::receiveRopodIDs(zsock_t *pipe, void *args)
 {
-    ZyreListener *listener = (ZyreListener*)args;
+    ListenerParams *listener_params = (ListenerParams*)args;
 
     zsock_signal (pipe, 0);     //  Signal "ready" to caller
 
     bool terminated = false;
-    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+    zpoller_t *poller = zpoller_new (pipe, listener_params->listener->listener_node_->socket(), NULL);
 
-    listener->ropod_ids_.clear();
     auto start = std::chrono::high_resolution_clock::now();
     while (!terminated)
     {
@@ -239,7 +286,7 @@ void ZyreListener::receiveRopodIDs(zsock_t *pipe, void *args)
             free (command);
             zmsg_destroy (&msg);
         }
-        else if (which == listener->listener_node_->socket())
+        else if (which == listener_params->listener->listener_node_->socket())
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
@@ -253,10 +300,11 @@ void ZyreListener::receiveRopodIDs(zsock_t *pipe, void *args)
             // Filters the received messages based on their senders names and keeps just the messages from ropods
             if (name_str.find("ropod") != std::string::npos)
             {
-                if(std::find(listener->ropod_ids_.begin(),
-                             listener->ropod_ids_.end(), name_str) == listener->ropod_ids_.end())
+                if(std::find(listener_params->listener->ropod_ids_[listener_params->sender_id].begin(),
+                             listener_params->listener->ropod_ids_[listener_params->sender_id].end(), name_str) ==
+                             listener_params->listener->ropod_ids_[listener_params->sender_id].end())
                 {
-                    listener->ropod_ids_.push_back(name_str);
+                    listener_params->listener->ropod_ids_[listener_params->sender_id].push_back(name_str);
                 }
             }
 
@@ -269,26 +317,26 @@ void ZyreListener::receiveRopodIDs(zsock_t *pipe, void *args)
 
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            if (elapsed.count() > listener->timeout_)
+            if (elapsed.count() > listener_params->listener->timeout_)
             {
                 terminated = true;
             }
         }
     }
-    listener->ropod_ids_received_ = true;
+    listener_params->listener->reply_received_[listener_params->sender_id] = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }
 
 void ZyreListener::receiveStatus(zsock_t *pipe, void *args)
 {
-    ZyreListener *listener = (ZyreListener*)args;
+    ListenerParams *listener_params = (ListenerParams*)args;
 
     Json::Value rec_msg;
     zsock_signal (pipe, 0);     //  Signal "ready" to caller
 
     bool terminated = false;
-    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+    zpoller_t *poller = zpoller_new (pipe, listener_params->listener->listener_node_->socket(), NULL);
 
     auto start = std::chrono::high_resolution_clock::now();
     while (!terminated)
@@ -312,7 +360,7 @@ void ZyreListener::receiveStatus(zsock_t *pipe, void *args)
             free (command);
             zmsg_destroy (&msg);
         }
-        else if (which == listener->listener_node_->socket())
+        else if (which == listener_params->listener->listener_node_->socket())
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
@@ -327,10 +375,11 @@ void ZyreListener::receiveStatus(zsock_t *pipe, void *args)
                 std::string name_str(name);
                 if (name_str.find("ropod") != std::string::npos)
                 {
-                    rec_msg = listener->parseMessageJson(message);
-                    if (!rec_msg["header"]["type"].compare("STATUS"))
+                    rec_msg = listener_params->listener->parseMessageJson(message);
+                    if (!rec_msg["header"]["type"].compare("STATUS") &&
+                        !rec_msg["payload"]["sender_id"].compare(listener_params->sender_id))
                     {
-                        listener->received_status_ = std::string(message);
+                        listener_params->listener->received_status_[listener_params->sender_id] = std::string(message);
                         terminated = true;
                     }
                 }
@@ -345,13 +394,13 @@ void ZyreListener::receiveStatus(zsock_t *pipe, void *args)
 
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            if (elapsed.count() > listener->timeout_)
+            if (elapsed.count() > listener_params->listener->timeout_)
             {
                 terminated = true;
             }
         }
     }
-    listener->status_received_ = true;
+    listener_params->listener->reply_received_[listener_params->sender_id] = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }
@@ -360,13 +409,13 @@ void ZyreListener::receiveStatus(zsock_t *pipe, void *args)
 
 void ZyreListener::receiveFeatures(zsock_t *pipe, void *args)
 {
-    ZyreListener *listener = (ZyreListener*)args;
+    ListenerParams *listener_params = (ListenerParams*)args;
 
     Json::Value rec_msg;
     zsock_signal (pipe, 0);     //  Signal "ready" to caller
 
     bool terminated = false;
-    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+    zpoller_t *poller = zpoller_new (pipe, listener_params->listener->listener_node_->socket(), NULL);
 
     auto start = std::chrono::high_resolution_clock::now();
     while (!terminated)
@@ -390,7 +439,7 @@ void ZyreListener::receiveFeatures(zsock_t *pipe, void *args)
             free (command);
             zmsg_destroy (&msg);
         }
-        else if (which == listener->listener_node_->socket())
+        else if (which == listener_params->listener->listener_node_->socket())
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
@@ -413,44 +462,52 @@ void ZyreListener::receiveFeatures(zsock_t *pipe, void *args)
                 std::string name_str(name);
                 if (name_str.find("query_interface") != std::string::npos)
                 {
-                    rec_msg = listener->parseMessageJson(message);
-                    if (!rec_msg["header"]["type"].compare("VARIABLE_QUERY"))
+                    rec_msg = listener_params->listener->parseMessageJson(message);
+                    if (!rec_msg["header"]["type"].compare("VARIABLE_QUERY") &&
+                        !rec_msg["payload"]["sender_id"].compare(listener_params->sender_id))
                     {
-                        listener->received_msg_ = std::string(message);
+                        listener_params->listener->received_msg_[listener_params->sender_id] = std::string(message);
                         terminated = true;
                     }
                 }
             }
 
+            if (std::string(event) == "WHISPER")
+            {
+                free (message);
+            }
+            else
+            {
+                free (group);
+                free (message);
+            }
             free (event);
             free (peer);
             free (name);
-            free (group);
-            free (message);
             zmsg_destroy (&msg);
 
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            if (elapsed.count() > listener->timeout_)
+            if (elapsed.count() > listener_params->listener->timeout_)
             {
                 terminated = true;
             }
         }
     }
-    listener->features_received_ = true;
+    listener_params->listener->reply_received_[listener_params->sender_id] = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }
 
 void ZyreListener::receiveData(zsock_t *pipe, void *args)
 {
-    ZyreListener *listener = (ZyreListener*)args;
+    ListenerParams *listener_params = (ListenerParams*)args;
 
     Json::Value rec_msg;
     zsock_signal (pipe, 0);     //  Signal "ready" to caller
 
     bool terminated = false;
-    zpoller_t *poller = zpoller_new (pipe, listener->listener_node_->socket(), NULL);
+    zpoller_t *poller = zpoller_new (pipe, listener_params->listener->listener_node_->socket(), NULL);
 
     auto start = std::chrono::high_resolution_clock::now();
     while (!terminated)
@@ -474,7 +531,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             free (command);
             zmsg_destroy (&msg);
         }
-        else if (which == listener->listener_node_->socket())
+        else if (which == listener_params->listener->listener_node_->socket())
         {
             zmsg_t *msg = zmsg_recv (which);
             char *event = zmsg_popstr (msg);
@@ -497,31 +554,39 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
                 std::string name_str(name);
                 if (name_str.find("query_interface") != std::string::npos)
                 {
-                    rec_msg = listener->parseMessageJson(message);
-                    if (!rec_msg["header"]["type"].compare("DATA_QUERY"))
+                    rec_msg = listener_params->listener->parseMessageJson(message);
+                    if (!rec_msg["header"]["type"].compare("DATA_QUERY") &&
+                        !rec_msg["payload"]["sender_id"].compare(listener_params->sender_id))
                     {
-                        listener->received_msg_ = std::string(message);
+                        listener_params->listener->received_msg_[listener_params->sender_id] = std::string(message);
                         terminated = true;
                     }
                 }
             }
 
+            if (std::string(event) == "WHISPER")
+            {
+                free (message);
+            }
+            else
+            {
+                free (group);
+                free (message);
+            }
             free (event);
             free (peer);
             free (name);
-            free (group);
-            free (message);
             zmsg_destroy (&msg);
 
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = now - start;
-            if (elapsed.count() > listener->timeout_)
+            if (elapsed.count() > listener_params->listener->timeout_)
             {
                 terminated = true;
             }
         }
     }
-    listener->data_received_ = true;
+    listener_params->listener->reply_received_[listener_params->sender_id] = true;
     zpoller_destroy (&poller);
     zclock_sleep (100);
 }

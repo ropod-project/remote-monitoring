@@ -20,52 +20,61 @@ class ZyreListener
         ZyreListener(int timeout);
         ~ZyreListener();
 
-        std::vector<std::string> getRopodList(std::string message, double timeout=-1);
+        ///////////////////////////////////////////////////////////////////////
+        // data queries
+        std::vector<std::string> getQueryInterfaceList(std::string message, double timeout=-1);
         std::string getFeatures(std::string msg, double timeout=-1);
         std::string getData(std::string msg, double timeout=-1);
+        ///////////////////////////////////////////////////////////////////////
 
+        ///////////////////////////////////////////////////////////////////////
+        // status queries
         std::vector<std::string> getRopodIDs(std::string message, double timeout=-1);
         std::string getStatus(std::string msg, double timeout=-1);
+        ///////////////////////////////////////////////////////////////////////
 
     private:
-        static void receiveRopodList(zsock_t *pipe, void *args);
+        ///////////////////////////////////////////////////////////////////////
+        // data queries
+        static void receiveQueryInterfaceList(zsock_t *pipe, void *args);
         static void receiveFeatures(zsock_t *pipe, void *args);
         static void receiveData(zsock_t *pipe, void *args);
+        ///////////////////////////////////////////////////////////////////////
 
-        // ropod info related
+        ///////////////////////////////////////////////////////////////////////
+        // data queries
         static void receiveRopodIDs(zsock_t *pipe, void *args);
         static void receiveStatus(zsock_t *pipe, void *args);
-        // ropod info end
-
+        ///////////////////////////////////////////////////////////////////////
 
         Json::Value parseMessageJson(std::string msg);
         void shoutMessage(const Json::Value &json_msg);
         zmsg_t* stringToZmsg(std::string msg);
 
         zyre::node_t *listener_node_;
-        zactor_t *ropod_list_actor_;
-        zactor_t *feature_query_actor_;
-        zactor_t *data_query_actor_;
-
-        zactor_t *ropod_id_actor_;
-        zactor_t *status_query_actor_;
+        std::map<std::string, zactor_t*> actors_;
+        std::map<std::string, bool> reply_received_;
 
         Json::StreamWriterBuilder json_stream_builder_;
 
-        std::string received_msg_;
-        bool ropod_list_received_;
-        bool features_received_;
-        bool data_received_;
+        std::map<std::string, std::vector<std::string>> query_interface_names_;
+        std::map<std::string, std::vector<std::string>> ropod_ids_;
+        std::map<std::string, std::string> received_status_;
+        std::map<std::string, std::string> received_msg_;
+
         int timeout_;
-        std::vector<std::string> ropod_names_;
+};
 
-        // ropod info related
-        bool ropod_ids_received_;
-        bool status_received_;
+struct ListenerParams
+{
+    ListenerParams(ZyreListener *listener, std::string sender_id)
+    {
+        this->listener = listener;
+        this->sender_id = sender_id;
+    }
 
-        std::string received_status_;
-        std::vector<std::string> ropod_ids_;
-        // ropod info end
+    ZyreListener *listener;
+    std::string sender_id;
 };
 
 #endif

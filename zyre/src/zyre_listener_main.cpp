@@ -43,22 +43,22 @@ int main()
         try
         {
             // this must changed into get_interface_list
-            if (!received_zmq_msgs[0].compare("GET_ROPOD_LIST"))
+            if (!received_zmq_msgs[0].compare("GET_QUERY_INTERFACE_LIST"))
             {
-                std::vector<std::string> ropod_names = zyre_listener->getRopodList(received_zmq_msgs[2], name_query_timeout);
+                std::vector<std::string> query_interface_names = zyre_listener->getQueryInterfaceList(received_zmq_msgs[2], name_query_timeout);
 
-                std::string ropods = "[";
-                for (size_t i=0; i<ropod_names.size(); i++)
+                std::string query_interfaces = "[";
+                for (size_t i=0; i<query_interface_names.size(); i++)
                 {
-                    ropods = ropods + "[\"" + ropod_names[i] + "\"]";
-                    if (i != ropod_names.size() - 1)
-                        ropods += ", ";
+                    query_interfaces = query_interfaces + "[\"" + query_interface_names[i] + "\"]";
+                    if (i != query_interface_names.size() - 1)
+                        query_interfaces += ", ";
                 }
-                ropods += "]";
+                query_interfaces += "]";
 
-                data_size = ropods.size();
+                data_size = query_interfaces.size();
                 zmq::message_t reply (data_size);
-                memcpy(reply.data (), ropods.c_str(), ropods.size());
+                memcpy(reply.data (), query_interfaces.c_str(), query_interfaces.size());
                 server.send (reply);
             }
             else if (!received_zmq_msgs[0].compare("VARIABLE_QUERY"))
