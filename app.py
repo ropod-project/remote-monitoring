@@ -15,12 +15,8 @@ from flask import send_file
 from os.path import expanduser
 
 # Initializations
-port = "5670"
-
-# creating a zmq client using zmq.REQ
 context = zmq.Context()
-socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:%s" % port)
+port = "5670"
 
 msg_data = {
     "header":
@@ -91,6 +87,8 @@ ropod_status_msg = {
 }
 
 def communicate_zmq(data):
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://localhost:%s" % port)
     socket.send(data.encode('ascii'))
     reply = socket.recv()
     return reply
@@ -127,7 +125,7 @@ def get_blackbox_ids():
                 suffix_idx = sender_name.find('_query_interface')
                 ropod_ids.append(sender_name[0:suffix_idx])
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_blackbox_ids] %s' % str(exc))
         message = 'Black box list could not be retrieved'
     return jsonify(ids=ropod_ids, message=message)
 
@@ -155,7 +153,7 @@ def get_ropod_features():
                 for element in values[0]:
                     features.append(element)
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_ropod_features] %s' % str(exc))
         message = 'Feature list could not be retrieved'
     return jsonify(ropod_features=features, message=message)
 
@@ -193,7 +191,7 @@ def get_ropod_data():
                         variable_data_list.append(ast.literal_eval(item))
                     data.append(variable_data_list)
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_ropod_data] %s' % str(exc))
         message = 'Data could not be retrieved'
     return jsonify(variables=variables, data=data, message=message)
 
@@ -228,7 +226,7 @@ def download_ropod_data():
             json.dump(query_reply_json, download_file)
         return send_file(download_path, attachment_filename='ropod_query_data.json')
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[download_ropod_data] %s' % str(exc))
         message = 'Data could not be retrieved'
         return jsonify(message=message)
 ##########################################################
@@ -258,7 +256,7 @@ def get_ropod_ids():
                 suffix_idx = sender_name.find('_query_interface')
                 ropod_ids.append(sender_name[0:suffix_idx])
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_ropod_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
     return jsonify(ropod_ids=ropod_ids, message=message)
 
@@ -278,7 +276,7 @@ def send_experiment_request():
         data = communication_command + "++" + msg_data_string
         _ = communicate_zmq(data)
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[send_experiment_request] %s' % str(exc))
         message = 'Command could not be sent'
     return jsonify(success=True, message=message)
 ##########################################################
@@ -305,7 +303,7 @@ def get_ropod_status_ids():
                 sender_name = node[0]
                 ropod_id_list.append(sender_name)
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_ropod_status_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
     return jsonify(ropod_ids=ropod_id_list, message=message)
 
@@ -334,7 +332,7 @@ def get_status_of_all_ropods():
             # and values are bool reply from function
             all_ropods_status[ropod] = ropod_overall_status
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[get_status_of_all_ropods] %s' % str(exc))
         message = 'Status could not be retrieved'
     return jsonify(status_list=all_ropods_status, message=message)
 
@@ -407,7 +405,7 @@ def read_ropod_status():
         ropod_status = ropod_status_list[ropod_id]
         return jsonify(ropod_status=ropod_status, message=message)
     except Exception, exc:
-        print('%s' % str(exc))
+        print('[read_ropod_status] %s' % str(exc))
         message = 'Status could not be retrieved'
         return jsonify(ropod_status=None, message=message)
 ##########################################################
@@ -475,4 +473,7 @@ def delete_ropod():
     return jsonify(success=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True, threaded=True)
+    finally:
+        context.term()
