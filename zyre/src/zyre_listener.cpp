@@ -396,10 +396,19 @@ void ZyreListener::receiveFeatures(zsock_t *pipe, void *args)
             char *event = zmsg_popstr (msg);
             char *peer = zmsg_popstr (msg);
             char *name = zmsg_popstr (msg);
-            char *group = zmsg_popstr (msg);
-            char *message = zmsg_popstr (msg);
+            char * group;
+            char * message;
+            if (streq(event, "WHISPER"))
+            {
+                message = zmsg_popstr(msg);
+            }
+            else
+            {
+                group = zmsg_popstr(msg);
+                message = zmsg_popstr(msg);
+            }
 
-            if ((std::string(event) == "SHOUT") && (message != NULL) && (message[0] != '\0'))
+            if ((std::string(event) == "WHISPER") && (message != NULL) && (message[0] != '\0'))
             {
                 std::string name_str(name);
                 if (name_str.find("query_interface") != std::string::npos)
@@ -471,10 +480,19 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             char *event = zmsg_popstr (msg);
             char *peer = zmsg_popstr (msg);
             char *name = zmsg_popstr (msg);
-            char *group = zmsg_popstr (msg);
-            char *message = zmsg_popstr (msg);
+            char * group;
+            char * message;
+            if (streq(event, "WHISPER"))
+            {
+                message = zmsg_popstr(msg);
+            }
+            else
+            {
+                group = zmsg_popstr(msg);
+                message = zmsg_popstr(msg);
+            }
 
-            if ((std::string(event) == "SHOUT") && (message != NULL) && (message[0] != '\0'))
+            if ((std::string(event) == "WHISPER") && (message != NULL) && (message[0] != '\0'))
             {
                 std::string name_str(name);
                 if (name_str.find("query_interface") != std::string::npos)
