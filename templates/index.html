@@ -260,7 +260,7 @@ body {
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
-                if (result.message != '')
+                if (typeof(result.message) != 'undefined' && result.message != '')
                 {
                     $('#error_message_container').show();
                     $('#error_message_container_content').html(result.message);
