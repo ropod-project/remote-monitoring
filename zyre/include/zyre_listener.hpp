@@ -42,7 +42,7 @@ class ZyreListener
         ///////////////////////////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////////////////////////
-        // data queries
+        // status queries
         static void receiveRopodIDs(zsock_t *pipe, void *args);
         static void receiveStatus(zsock_t *pipe, void *args);
         ///////////////////////////////////////////////////////////////////////
@@ -51,18 +51,43 @@ class ZyreListener
         void shoutMessage(const Json::Value &json_msg);
         zmsg_t* stringToZmsg(std::string msg);
 
-        zyre::node_t *listener_node_;
+        /**
+         * a dictionary in which the keys represent request sender IDs and the
+         * values represent zyre actors
+         */
         std::map<std::string, zactor_t*> actors_;
+
+        /**
+         * a dictionary in which the keys represent request sender IDs and the
+         * values indicate whether a response has been received
+         */
         std::map<std::string, bool> reply_received_;
 
-        Json::StreamWriterBuilder json_stream_builder_;
-
+        /**
+         * a dictionary in which the keys represent request sender IDs and the
+         * values represent lists of black box query interface IDs
+         */
         std::map<std::string, std::vector<std::string>> query_interface_names_;
+
+        /**
+         * a dictionary in which the keys represent request sender IDs and the
+         * values represent lists of ropod IDs
+         */
         std::map<std::string, std::vector<std::string>> ropod_ids_;
-        std::map<std::string, std::string> received_status_;
+
+        /**
+         * a dictionary in which the keys represent request sender IDs and the
+         * values represent the messages received as responses to those requests
+         */
         std::map<std::string, std::string> received_msg_;
 
+        /**
+         * message callback timeout
+         */
         int timeout_;
+
+        zyre::node_t *listener_node_;
+        Json::StreamWriterBuilder json_stream_builder_;
 };
 
 struct ListenerParams
