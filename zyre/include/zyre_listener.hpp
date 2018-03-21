@@ -41,12 +41,6 @@ class ZyreListener
 
         /**
          * a dictionary in which the keys represent request sender IDs and the
-         * values represent zyre actors
-         */
-        std::map<std::string, zactor_t*> actors_;
-
-        /**
-         * a dictionary in which the keys represent request sender IDs and the
          * values indicate whether a response has been received
          */
         std::map<std::string, bool> reply_received_;
@@ -63,11 +57,17 @@ class ZyreListener
          */
         std::map<std::string, std::string> received_msg_;
 
+        std::map<std::string, std::string> query_info_;
+        std::map<std::string, std::string> user_ropod_ids_;
+
+        std::vector<std::string> status_node_names_;
+
         /**
          * message callback timeout
          */
         int timeout_;
 
+        zactor_t* actor_;
         zyre::node_t *listener_node_;
         Json::StreamWriterBuilder json_stream_builder_;
 };

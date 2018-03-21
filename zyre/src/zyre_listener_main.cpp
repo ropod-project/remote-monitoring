@@ -104,7 +104,7 @@ int main()
             }
             else if (!received_zmq_msgs[0].compare("STATUS_QUERY"))
             {
-                query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2], data_query_timeout);
+                query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2], name_query_timeout);
 
                 // sending the reply to the interface
                 data_size = query_reply_str.length();
