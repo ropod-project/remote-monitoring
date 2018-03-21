@@ -284,8 +284,6 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
 
         auto now = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = now - start;
-        std::cout << "checking elapsed time\n";
-        std::cout << elapsed.count() << " " << listener_params->listener->timeout_ << std::endl << std::endl;
         if (elapsed.count() > listener_params->listener->timeout_)
         {
             terminated = true;
