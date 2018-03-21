@@ -10,6 +10,7 @@ from local_db import RopodAdminQueries
 
 import zmq
 import json
+import uuid
 
 from flask import send_file
 from os.path import expanduser
@@ -104,6 +105,7 @@ local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, Local
 ################ Black box data interface ################
 @app.route('/')
 def index():
+    session['uid'] = uuid.uuid4()
     return render_template('index.html')
 
 @app.route('/get_blackbox_ids', methods=['GET', 'POST'])
@@ -239,6 +241,7 @@ def download_ropod_data():
 ################ Experiment request interface ################
 @app.route('/run_experiment')
 def run_experiment():
+    session['uid'] = uuid.uuid4()
     return render_template('run_experiment.html')
 
 @app.route('/get_ropod_ids', methods=['GET'])
@@ -291,6 +294,7 @@ def send_experiment_request():
 ################ Ropod status interface ##################
 @app.route('/ropod_info')
 def ropod_info():
+    session['uid'] = uuid.uuid4()
     return render_template('ropod_info.html')
 
 @app.route('/get_ropod_status_ids', methods=['GET'])
