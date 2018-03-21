@@ -230,7 +230,6 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
                 && (message != NULL) && (message[0] != '\0'))
             {
                 std::string name_str = std::string(name);
-                std::cout << name_str << std::endl;
                 if ((name_str.find("query_interface") != std::string::npos) ||
                     (name_str.find("ropod") != std::string::npos))
                 {
