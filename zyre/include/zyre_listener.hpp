@@ -34,19 +34,7 @@ class ZyreListener
         ///////////////////////////////////////////////////////////////////////
 
     private:
-        ///////////////////////////////////////////////////////////////////////
-        // data queries
-        static void receiveQueryInterfaceList(zsock_t *pipe, void *args);
-        static void receiveFeatures(zsock_t *pipe, void *args);
         static void receiveData(zsock_t *pipe, void *args);
-        ///////////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////////////////////////
-        // status queries
-        static void receiveRopodIDs(zsock_t *pipe, void *args);
-        static void receiveStatus(zsock_t *pipe, void *args);
-        ///////////////////////////////////////////////////////////////////////
-
         Json::Value parseMessageJson(std::string msg);
         void shoutMessage(const Json::Value &json_msg);
         zmsg_t* stringToZmsg(std::string msg);
@@ -65,15 +53,9 @@ class ZyreListener
 
         /**
          * a dictionary in which the keys represent request sender IDs and the
-         * values represent lists of black box query interface IDs
+         * values represent lists of node names
          */
-        std::map<std::string, std::vector<std::string>> query_interface_names_;
-
-        /**
-         * a dictionary in which the keys represent request sender IDs and the
-         * values represent lists of ropod IDs
-         */
-        std::map<std::string, std::vector<std::string>> ropod_ids_;
+        std::map<std::string, std::vector<std::string>> node_names_;
 
         /**
          * a dictionary in which the keys represent request sender IDs and the
