@@ -14,6 +14,7 @@ import uuid
 
 from flask import send_file
 from os.path import expanduser
+from gevent.wsgi import WSGIServer
 
 # Initializations
 context = zmq.Context()
@@ -299,7 +300,7 @@ def ropod_info():
 
 @app.route('/get_ropod_status_ids', methods=['GET'])
 def get_ropod_status_ids():
-    msg_data['header']['type'] = "NAME_QUERY"
+    msg_data['header']['type'] = "STATUS_NAME_QUERY"
     msg_data['payload']['sender_id'] = session['uid'].hex
     communication_command = "GET_ROPOD_IDs"
     msg_data_string = json.dumps(msg_data)
@@ -489,6 +490,7 @@ if __name__ == '__main__':
     try:
         app.secret_key = 'area5142'
         app.config['SESSION_TYPE'] = 'filesystem'
-        app.run(debug=True, threaded=True, host='0.0.0.0')
+        http_server = WSGIServer(('', 5000), app)
+        http_server.serve_forever()
     finally:
         context.term()
