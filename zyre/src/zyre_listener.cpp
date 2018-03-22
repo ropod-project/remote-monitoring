@@ -144,7 +144,7 @@ std::vector<std::string> ZyreListener::getRopodIDs(std::string message, double t
     std::string query_type = jmsg["header"]["type"].asString();
     std::cout << "Received a '" << query_type << "' request\n";
     std::cout << "Returning ropod IDs\n\n";
-    return status_node_names_;
+    return std::vector<std::string>(status_node_names_.begin(), status_node_names_.end());
 }
 
 std::string ZyreListener::getStatus(std::string msg, double timeout)
@@ -269,11 +269,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
                 std::string name_str = std::string(name);
                 if (name_str.find("local_status_monitor") != std::string::npos)
                 {
-                    if (std::find(listener->status_node_names_.begin(),
-                                  listener->status_node_names_.end(), name_str) == listener->status_node_names_.end())
-                    {
-                        listener->status_node_names_.push_back(name_str);
-                    }
+                    listener->status_node_names_.insert(name_str);
                 }
             }
             else if (streq(event, "LEAVE") || streq(event, "EXIT"))
@@ -281,9 +277,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
                 std::string name_str = std::string(name);
                 if (name_str.find("local_status_monitor") != std::string::npos)
                 {
-                    listener->status_node_names_.erase(std::remove(listener->status_node_names_.begin(),
-                                                                   listener->status_node_names_.end(), name),
-                                                                   listener->status_node_names_.end());
+                    listener->status_node_names_.erase(name_str);
                 }
             }
 

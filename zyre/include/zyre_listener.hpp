@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 #include <chrono>
 #include <algorithm>
 
@@ -60,7 +61,7 @@ class ZyreListener
         std::map<std::string, std::string> query_info_;
         std::map<std::string, std::string> user_ropod_ids_;
 
-        std::vector<std::string> status_node_names_;
+        std::set<std::string> status_node_names_;
 
         /**
          * message callback timeout
