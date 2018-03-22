@@ -314,7 +314,6 @@ def get_ropod_status_ids():
             for node in ropods:
                 sender_name = node[0]
                 ropod_id_list.append(sender_name)
-        print(ropod_id_list)
     except Exception, exc:
         print('[get_ropod_status_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
