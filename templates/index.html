@@ -308,6 +308,72 @@ body {
         var time_ms = date_obj.getTime() / 1000.;
         return time_ms;
     }
+
+    function form_download_function()
+    {
+        var variable_list = [];
+        $.each($("input[name='feature']:checked"), function() {
+            variable_list.push($(this).val());
+        });
+
+        // check if the user selected a feature or not
+        if (variable_list.length == 0)
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select at least one variable');
+            return;
+        }
+
+        var start_time = $('#start_date').val();
+        var end_time = $('#end_date').val();
+
+        if ((start_time == 'Start date') && (end_time == 'End date'))
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select a start and an end time');
+            return;
+        }
+        else if (start_time == 'Start date')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select a start time');
+            return;
+        }
+        else if (end_time == 'End date')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select an end time');
+            return;
+        }
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_download_query',
+            type: 'get',
+            data: { ropod_id: ropod_id,
+                    start_timestamp: date_str_to_timestamp(start_time),
+                    end_timestamp: date_str_to_timestamp(end_time),
+                    features: variable_list.join()
+             },
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            console.log("Data received and stored successfully");
+            document.getElementById("download_form").submit();
+
+            // if (typeof(result.message) != 'undefined' && result.message != '')
+            // {
+            //     $('#error_message_container').show();
+            //     $('#error_message_container_content').html(result.message);
+            //     return;
+            // }
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Data downloaded as "ropod_query_data.json"');
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+        });
+    }
 </script>
 
 <div class="row">
@@ -348,6 +414,14 @@ body {
 
         <div class="col-lg-2">
             <div class="form-group"><button id="btn_download_data" class="btn btn-primary" type="button">Download data</button></div>
+        </div>
+
+        <div class="col-lg-2">
+            <div class="form-group">
+                <form id="download_form" action="/send_download_file">
+                    <input type="button" name="download_btn_form" onclick="form_download_function()" value="Download (new)">
+                </form>
+            </div>
         </div>
 
         <div class="col-lg-1">

@@ -13,6 +13,10 @@ import json
 import uuid
 
 from flask import send_file
+from flask import Response
+
+from io import BytesIO
+
 from os.path import expanduser
 from gevent.wsgi import WSGIServer
 
@@ -100,6 +104,10 @@ def communicate_zmq(data):
 ropod_id_list = list()      # for storing the list of ropods (Ropod info page)
 ropod_status_list = dict()  # for storing the status reply for each ropod
 
+# the path and file name for storing the query result for downloading data
+query_result_file_path = './tmp_downloaded_data/ropod_query_data.json'
+
+
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
 
@@ -128,7 +136,8 @@ def get_blackbox_ids():
                 sender_name = node[0]
                 suffix_idx = sender_name.find('_query_interface')
                 ropod_ids.append(sender_name[0:suffix_idx])
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_blackbox_ids] %s' % str(exc))
         message = 'Black box list could not be retrieved'
     return jsonify(ids=ropod_ids, message=message)
@@ -157,7 +166,8 @@ def get_ropod_features():
             if values is not None and values[0] is not None:
                 for element in values[0]:
                     features.append(element)
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_ropod_features] %s' % str(exc))
         message = 'Feature list could not be retrieved'
     return jsonify(ropod_features=features, message=message)
@@ -196,13 +206,16 @@ def get_ropod_data():
                     for item in value:
                         variable_data_list.append(ast.literal_eval(item))
                     data.append(variable_data_list)
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_ropod_data] %s' % str(exc))
         message = 'Data could not be retrieved'
     return jsonify(variables=variables, data=data, message=message)
 
 @app.route('/download_ropod_data', methods=['GET','POST'] )
 def download_ropod_data():
+    """This is the old function that cannot execute the download because of the ajax
+    """ 
     ropod_id = request.args.get('ropod_id', '', type=str)
     feature_list = request.args.get('features').split(',')
 
@@ -232,10 +245,65 @@ def download_ropod_data():
         with open(download_path, 'w') as download_file:
             json.dump(query_reply_json, download_file)
         return send_file(download_path, attachment_filename='ropod_query_data.json')
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[download_ropod_data] %s' % str(exc))
         message = 'Data could not be retrieved'
         return jsonify(message=message)
+
+@app.route('/get_download_query', methods=['GET', 'POST'])
+def get_download_query():
+    """Method for getting data query for download.
+    This method gets a query from the blackbox and store it in a file and returns a success response to ajax
+    """
+    ropod_id = request.args.get('ropod_id', '', type=str)
+    feature_list = request.args.get('features').split(',')
+
+    start_query_time = request.args.get('start_timestamp')
+    end_query_time = request.args.get('end_timestamp')
+
+    msg_data['header']['type'] = "DATA_QUERY"
+    msg_data['payload']['sender_id'] = session['uid'].hex
+    msg_data['payload']['ropod_id'] = ropod_id
+    msg_data['payload']['commandList'][0] = {"features": feature_list,
+                                             "start_time": start_query_time,
+                                             "end_time": end_query_time}
+
+    communication_command = "DATA_QUERY"
+    msg_data_string = json.dumps(msg_data)
+    data = communication_command + "++" + msg_data_string
+
+    # home = str(expanduser('~'))
+    # root_download_dir = home + '/Downloads/'
+    # download_path = root_download_dir + 'ropod_query_data.json'
+    # query_result_file_path = './tmp_downloaded_data/ropod_query_data.json'
+    message = ''
+    try:
+        query_reply = communicate_zmq(data)
+        query_reply_json = json.loads(query_reply.decode('utf8'))
+
+        with open(query_result_file_path, 'w') as download_file:
+            json.dump(query_reply_json, download_file)
+        # return send_file(download_path, attachment_filename='ropod_query_data.json')
+        return jsonify(success=True)
+    # except Exception, exc:
+    except Exception as exc:
+        print('[get_download_query_ropod_data] %s' % str(exc))
+        message = 'Data could not be retrieved'
+        return jsonify(message=message)
+
+@app.route('/send_download_file', methods=['GET','POST'])
+def send_download_file():
+    """This method sends the stored query result to the client for download
+    """
+    print('before sending the file')
+    try:
+        return send_file(query_result_file_path, as_attachment=True, attachment_filename='ropod_query_result.json')
+    except Exception as exc:
+        print('[send_download_file_ropod_data] %s' % str(exc))
+        message = 'File could not be sent'
+        return jsonify(message=message)
+
 ##########################################################
 
 
@@ -264,7 +332,8 @@ def get_ropod_ids():
                 sender_name = node[0]
                 suffix_idx = sender_name.find('_query_interface')
                 ropod_ids.append(sender_name[0:suffix_idx])
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_ropod_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
     return jsonify(ropod_ids=ropod_ids, message=message)
@@ -285,7 +354,8 @@ def send_experiment_request():
         msg_data_string = json.dumps(msg_data)
         data = communication_command + "++" + msg_data_string
         _ = communicate_zmq(data)
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[send_experiment_request] %s' % str(exc))
         message = 'Command could not be sent'
     return jsonify(success=True, message=message)
@@ -314,7 +384,8 @@ def get_ropod_status_ids():
             for node in ropods:
                 sender_name = node[0]
                 ropod_id_list.append(sender_name)
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_ropod_status_ids] %s' % str(exc))
         message = 'Ropod list could not be retrieved'
     return jsonify(ropod_ids=ropod_id_list, message=message)
@@ -343,7 +414,8 @@ def get_status_of_all_ropods():
             # fill and returns a dictionary whose keys are ropod_ids
             # and values are bool reply from function
             all_ropods_status[ropod] = ropod_overall_status
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[get_status_of_all_ropods] %s' % str(exc))
         message = 'Status could not be retrieved'
     return jsonify(status_list=all_ropods_status, message=message)
@@ -417,10 +489,51 @@ def read_ropod_status():
         ropod_id = request.args.get('ropod_id', '', type=str)
         ropod_status = ropod_status_list[ropod_id]
         return jsonify(ropod_status=ropod_status, message=message)
-    except Exception, exc:
+    # except Exception, exc:
+    except Exception as exc:
         print('[read_ropod_status] %s' % str(exc))
         message = 'Status could not be retrieved'
         return jsonify(ropod_status=None, message=message)
+##########################################################
+
+################ Ropod issue download test page ##################
+@app.route('/download')
+def download():
+    session['uid'] = uuid.uuid4()
+    return render_template('download.html')
+
+
+@app.route('/ajax_download', methods=['GET', 'POST'])
+def ajax_download():
+    ropod_id = request.args.get('ropod_id','', type=str)
+    ajax_msg = request.args.get('ajax_msg','',type=str)
+
+    print('ropod_id: ',ropod_id)
+    print('ajax_msg: ',ajax_msg)
+
+    return jsonify(success=True)
+
+
+@app.route('/send_download_file_test', methods=['GET','POST'])
+def send_download_file_test():
+    print('Before send file')
+    try:
+        print('ajdfdgjlsddgjldj')
+        return send_file('./tmp_downloaded_data/test_file.json' ,as_attachment=True, attachment_filename='downloaded_data.json')
+        # return jsonify(success=True)
+
+    except Exception as e:
+        return str(e)
+
+    # nutrition = jsonify(ropod_status_msg)
+    # nutrition.headers['Content-Disposition'] = 'attachment;filename=nutrition.json'
+    # return nutrition
+
+    # content = str(ropod_status_msg)
+    # return Response(content, 
+    #         mimetype='application/json',
+    #         headers={'Content-Disposition':'attachment;attachment_filename=zones.json'})
+
 ##########################################################
 
 
