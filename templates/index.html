@@ -297,7 +297,7 @@ body {
             document.getElementById("download_form").submit();  //sending the stored data file to the client
 
             $('#info_message_container').show();
-            $('#info_message_container_content').html('Data downloaded as "ropod_query_data.json"');
+            $('#info_message_container_content').html('Data downloaded successfully');
         }).fail(function(jqXHR, status, error) {
             console.log(error);
             $('#error_message_container').show();

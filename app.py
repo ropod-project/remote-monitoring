@@ -252,7 +252,6 @@ def get_download_query():
 def send_download_file():
     """This method sends the stored query result to the client for download
     """
-    print('before sending the file')
     try:
         return send_file(query_result_file_path, as_attachment=True, attachment_filename='ropod_query_result.json')
     except Exception as exc:
