@@ -41,7 +41,7 @@ body {
         $('#end_date').datepicker();
 
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_download_data').prop('disabled', true);
+        $('#download_btn_form').prop('disabled', true);
 
         $('#error_message_container').hide();
         $('#info_message_container').hide();
@@ -78,7 +78,7 @@ body {
             if ($(this).val() == "none")
             {
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_download_data').prop('disabled', true);
+                $('#download_btn_form').prop('disabled', true);
 
                 $('#feature_container').html('');
                 $('#data_container').hide();
@@ -123,7 +123,7 @@ body {
 
             if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
                 $('#btn_display_data').prop('disabled', false);
-                $('#btn_download_data').prop('disabled', false);
+                $('#download_btn_form').prop('disabled', false);
 
             }
             $('#data_container').show();
@@ -137,7 +137,7 @@ body {
             {
                 $(this).val('Start date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_download_data').prop('disabled', true);
+                $('#download_btn_form').prop('disabled', true);
 
             }
             else
@@ -145,7 +145,7 @@ body {
                 if (end_date != 'End date' && $('#ropod_ids').val() != 'none')
                 {
                     $('#btn_display_data').prop('disabled', false);
-                    $('#btn_download_data').prop('disabled', false);
+                    $('#download_btn_form').prop('disabled', false);
 
                 }
             }
@@ -158,7 +158,7 @@ body {
             {
                 $(this).val('End date');
                 $('#btn_display_data').prop('disabled', true);
-                $('#btn_download_data').prop('disabled', true);
+                $('#download_btn_form').prop('disabled', true);
 
             }
             else
@@ -166,7 +166,7 @@ body {
                 if (start_date != 'Start date' && $('#ropod_ids').val() != 'none')
                 {
                     $('#btn_display_data').prop('disabled', false);
-                    $('#btn_download_data').prop('disabled', false);
+                    $('#download_btn_form').prop('disabled', false);
 
                 }
             }
@@ -211,70 +211,6 @@ body {
             plot_data(variable_list, start_time, end_time);
         });
 
-        $('#btn_download_data').click(function() {
-            var variable_list = [];
-            $.each($("input[name='feature']:checked"), function() {
-                variable_list.push($(this).val());
-            });
-
-            // check if the user selected a feature or not
-            if (variable_list.length == 0)
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select at least one variable');
-                return;
-            }
-
-            var start_time = $('#start_date').val();
-            var end_time = $('#end_date').val();
-
-            if ((start_time == 'Start date') && (end_time == 'End date'))
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select a start and an end time');
-                return;
-            }
-            else if (start_time == 'Start date')
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select a start time');
-                return;
-            }
-            else if (end_time == 'End date')
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select an end time');
-                return;
-            }
-
-            // plot_data(variable_list, start_time, end_time);
-            // This is the part that I have to save the data
-            $.ajax({
-                url: SCRIPT_ROOT + '/download_ropod_data',
-                type: 'get',
-                data: { ropod_id: ropod_id,
-                        start_timestamp: date_str_to_timestamp(start_time),
-                        end_timestamp: date_str_to_timestamp(end_time),
-                        features: variable_list.join()
-                 },
-                contentType: 'application/json',
-                cache: false
-            }).done(function(result) {
-                if (typeof(result.message) != 'undefined' && result.message != '')
-                {
-                    $('#error_message_container').show();
-                    $('#error_message_container_content').html(result.message);
-                    return;
-                }
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Data downloaded as "ropod_query_data.json"');
-            }).fail(function(jqXHR, status, error) {
-                console.log(error);
-                $('#error_message_container').show();
-                $('#error_message_container_content').html('An unexpected error has occurred');
-            });
-        });
-
         $(document).on('change', '.plot_variables', function() {
             plot.display_selected_data();
         });
@@ -295,7 +231,7 @@ body {
         $('#start_date').val('Start date');
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
-        $('#btn_download_data').prop('disabled', true);
+        $('#download_btn_form').prop('disabled', true);
 
         $('#operation_indicator').hide();
         plot.reset();
@@ -307,6 +243,66 @@ body {
         var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
         var time_ms = date_obj.getTime() / 1000.;
         return time_ms;
+    }
+
+    function form_download_function()
+    {
+        var variable_list = [];
+        $.each($("input[name='feature']:checked"), function() {
+            variable_list.push($(this).val());
+        });
+
+        // check if the user selected a feature or not
+        if (variable_list.length == 0)
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select at least one variable');
+            return;
+        }
+
+        var start_time = $('#start_date').val();
+        var end_time = $('#end_date').val();
+
+        if ((start_time == 'Start date') && (end_time == 'End date'))
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select a start and an end time');
+            return;
+        }
+        else if (start_time == 'Start date')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select a start time');
+            return;
+        }
+        else if (end_time == 'End date')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select an end time');
+            return;
+        }
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/get_download_query',
+            type: 'get',
+            data: { ropod_id: ropod_id,
+                    start_timestamp: date_str_to_timestamp(start_time),
+                    end_timestamp: date_str_to_timestamp(end_time),
+                    features: variable_list.join()
+             },
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            console.log("Data received and stored successfully");
+            document.getElementById("download_form").submit();  //sending the stored data file to the client
+
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Data downloaded successfully');
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+        });
     }
 </script>
 
@@ -347,7 +343,11 @@ body {
         </div>
 
         <div class="col-lg-2">
-            <div class="form-group"><button id="btn_download_data" class="btn btn-primary" type="button">Download data</button></div>
+            <div class="form-group">
+                <form id="download_form" action="/send_download_file">
+                    <input id="download_btn_form" class="btn btn-primary" type="button" name="download_btn_form" onclick="form_download_function()" value="Download data">
+                </form>
+            </div>
         </div>
 
         <div class="col-lg-1">
