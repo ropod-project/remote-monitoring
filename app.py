@@ -21,10 +21,6 @@ from os.path import expanduser
 from gevent.wsgi import WSGIServer
 
 
-test_table = dict()
-j=0
-
-
 # Initializations
 context = zmq.Context()
 port = "5670"
