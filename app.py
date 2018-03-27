@@ -20,6 +20,11 @@ from io import BytesIO
 from os.path import expanduser
 from gevent.wsgi import WSGIServer
 
+
+test_table = dict()
+j=0
+
+
 # Initializations
 context = zmq.Context()
 port = "5670"
@@ -367,8 +372,10 @@ def get_status_of_all_ropods():
             ropod_overall_status = check_ropod_overall_status(status_reply_json)
 
             # fill and returns a dictionary whose keys are ropod_ids
-            # and values are bool reply from function
-            all_ropods_status[ropod] = ropod_overall_status
+            # and values are bool reply from check_ropod_overall_status function and timestamp
+            status_time = status_reply_json['header']['timestamp']
+            all_ropods_status[ropod] = [ropod_overall_status, status_time]
+
     # except Exception, exc:
     except Exception as exc:
         print('[get_status_of_all_ropods] %s' % str(exc))
