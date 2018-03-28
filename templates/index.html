@@ -121,7 +121,7 @@ body {
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
 
-            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date")) {
+            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date") && ($('#start_date_time').val()!='') && ($('#end_date_time').val()!='')) {
                 $('#btn_display_data').prop('disabled', false);
                 $('#download_btn_form').prop('disabled', false);
 
@@ -189,7 +189,11 @@ body {
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
-            if ((start_time == 'Start date') && (end_time == 'End date'))
+            var start_time_hour = $('#start_date_time').val();
+            var end_time_hour = $('#end_date_time').val();
+
+
+            if ((start_time == 'Start date') && (end_time == 'End date') && (start_time_hour == '') && (end_time_hour == ''))
             {
                 $('#info_message_container').show();
                 $('#info_message_container_content').html('Please select a start and an end time');
@@ -198,17 +202,29 @@ body {
             else if (start_time == 'Start date')
             {
                 $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select a start date');
+                return;
+            }
+            else if (start_time_hour == '')
+            {
+                $('#info_message_container').show();
                 $('#info_message_container_content').html('Please select a start time');
                 return;
             }
             else if (end_time == 'End date')
             {
                 $('#info_message_container').show();
+                $('#info_message_container_content').html('Please select an end date');
+                return;
+            }
+            else if (end_time_hour == '')
+            {
+                $('#info_message_container').show();
                 $('#info_message_container_content').html('Please select an end time');
                 return;
             }
 
-            plot_data(variable_list, start_time, end_time);
+            plot_data(variable_list, start_time, end_time, start_time_hour, end_time_hour);
         });
 
         $(document).on('change', '.plot_variables', function() {
@@ -216,13 +232,13 @@ body {
         });
     });
 
-    function plot_data(variable_list, start_time, end_time)
+    function plot_data(variable_list, start_time, end_time, start_time_hour, end_time_hour)
     {
         var start_time_ms = date_str_to_timestamp(start_time);
         var end_time_ms = date_str_to_timestamp(end_time);
 
         $('#operation_indicator').show();
-        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
+        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms, start_time_hour, end_time_hour);
     }
 
     function reset_data_panel()
@@ -232,6 +248,9 @@ body {
         $('#end_date').val('End date');
         $('#btn_display_data').prop('disabled', true);
         $('#download_btn_form').prop('disabled', true);
+
+        $('#start_date_time').val('');
+        $('#end_date_time').val('');
 
         $('#operation_indicator').hide();
         plot.reset();
@@ -263,7 +282,10 @@ body {
         var start_time = $('#start_date').val();
         var end_time = $('#end_date').val();
 
-        if ((start_time == 'Start date') && (end_time == 'End date'))
+        var start_time_hour = $('#start_date_time').val();
+        var end_time_hour = $('#end_date_time').val();
+
+        if ((start_time == 'Start date') && (end_time == 'End date') && (start_time_hour == '') && (end_time_hour == ''))
         {
             $('#info_message_container').show();
             $('#info_message_container_content').html('Please select a start and an end time');
@@ -272,10 +294,22 @@ body {
         else if (start_time == 'Start date')
         {
             $('#info_message_container').show();
-            $('#info_message_container_content').html('Please select a start time');
+            $('#info_message_container_content').html('Please select a start date');
             return;
         }
         else if (end_time == 'End date')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select an end date');
+            return;
+        }
+        else if (start_time_hour == '')
+        {
+            $('#info_message_container').show();
+            $('#info_message_container_content').html('Please select a start time');
+            return;
+        }
+        else if (end_time_hour == '')
         {
             $('#info_message_container').show();
             $('#info_message_container_content').html('Please select an end time');
@@ -288,7 +322,9 @@ body {
             data: { ropod_id: ropod_id,
                     start_timestamp: date_str_to_timestamp(start_time),
                     end_timestamp: date_str_to_timestamp(end_time),
-                    features: variable_list.join()
+                    features: variable_list.join(),
+                    start_time_hour:start_time_hour, 
+                    end_time_hour:end_time_hour
              },
             contentType: 'application/json',
             cache: false
@@ -333,9 +369,11 @@ body {
         </div>
         <div class="col-lg-2">
             <div class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
+            <div class="form-group">Start time: <input id="start_date_time" class="form-control" type="time" name="Start time" /></div>
         </div>
         <div class="col-lg-2">
             <div class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
+            <div class="form-group">End time: <input id="end_date_time" class="form-control" type="time" name="End time" /></div>
         </div>
 
         <div class="col-lg-2">
