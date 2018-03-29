@@ -9,7 +9,7 @@ function Plot(container_name, variable_selection_container_name, variable_select
     this.current_variable = null;
 }
 
-Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_time, start_time_hour, end_time_hour) {
+Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_time) {
     var parent_obj = this;
 
     $.ajax({
@@ -20,9 +20,7 @@ Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_
             ropod_id: ropod_id,
             features: variable_list.join(),
             start_timestamp: start_time,
-            end_timestamp: end_time,
-            start_time_hour:start_time_hour, 
-            end_time_hour:end_time_hour
+            end_timestamp: end_time
         },
         contentType: 'application/json',
         cache: false,

@@ -180,9 +180,6 @@ def get_ropod_data():
     start_query_time = request.args.get('start_timestamp')
     end_query_time = request.args.get('end_timestamp')
 
-    start_query_time_hour = request.args.get('start_time_hour')
-    end_query_time_hour = request.args.get('end_time_hour')
-
     msg_data['header']['type'] = "DATA_QUERY"
     msg_data['payload']['sender_id'] = session['uid'].hex
     msg_data['payload']['ropod_id'] = ropod_id
@@ -225,9 +222,6 @@ def get_download_query():
 
     start_query_time = request.args.get('start_timestamp')
     end_query_time = request.args.get('end_timestamp')
-
-    start_query_time_hour = request.args.get('start_time_hour')
-    end_query_time_hour = request.args.get('end_time_hour')
 
     msg_data['header']['type'] = "DATA_QUERY"
     msg_data['payload']['sender_id'] = session['uid'].hex

@@ -4,6 +4,10 @@
 <script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='custom/js/plot.js') }}" type="text/javascript"></script>
 
+<link href="css/index.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.17/jquery.datetimepicker.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.17/jquery.datetimepicker.full.js"></script>
+
 <style>
 * {
     box-sizing: border-box;
@@ -37,8 +41,13 @@ body {
     $(document).ready(function() {
         $('#data_container').hide();
 
-        $('#start_date').datepicker();
-        $('#end_date').datepicker();
+        $('#start_date').datetimepicker();
+        $('#start_date').val("Start date");
+        $('#start_date').prop('disabled', true);
+        
+        $('#end_date').datetimepicker();
+        $('#end_date').val("End date");
+        $('#end_date').prop('disabled', true);
 
         $('#btn_display_data').prop('disabled', true);
         $('#download_btn_form').prop('disabled', true);
@@ -121,7 +130,7 @@ body {
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
 
-            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date") && ($('#start_date_time').val()!='') && ($('#end_date_time').val()!='')) {
+            if ( ($('#start_date').val() != "Start date") && ($('#end_date').val() != "End date") ) {
                 $('#btn_display_data').prop('disabled', false);
                 $('#download_btn_form').prop('disabled', false);
 
@@ -133,6 +142,7 @@ body {
         $('#start_date').change(function() {
             var start_date = $(this).val();
             var end_date = $('#end_date').val();
+
             if (start_date == '')
             {
                 $(this).val('Start date');
@@ -154,6 +164,7 @@ body {
         $('#end_date').change(function() {
             var end_date = $(this).val();
             var start_date = $('#start_date').val();
+
             if (end_date == '')
             {
                 $(this).val('End date');
@@ -189,11 +200,7 @@ body {
             var start_time = $('#start_date').val();
             var end_time = $('#end_date').val();
 
-            var start_time_hour = $('#start_date_time').val();
-            var end_time_hour = $('#end_date_time').val();
-
-
-            if ((start_time == 'Start date') && (end_time == 'End date') && (start_time_hour == '') && (end_time_hour == ''))
+            if ((start_time == 'Start date') && (end_time == 'End date') )
             {
                 $('#info_message_container').show();
                 $('#info_message_container_content').html('Please select a start and an end time');
@@ -205,26 +212,14 @@ body {
                 $('#info_message_container_content').html('Please select a start date');
                 return;
             }
-            else if (start_time_hour == '')
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select a start time');
-                return;
-            }
             else if (end_time == 'End date')
             {
                 $('#info_message_container').show();
                 $('#info_message_container_content').html('Please select an end date');
                 return;
             }
-            else if (end_time_hour == '')
-            {
-                $('#info_message_container').show();
-                $('#info_message_container_content').html('Please select an end time');
-                return;
-            }
 
-            plot_data(variable_list, start_time, end_time, start_time_hour, end_time_hour);
+            plot_data(variable_list, 'start_date', 'end_date');
         });
 
         $(document).on('change', '.plot_variables', function() {
@@ -232,13 +227,13 @@ body {
         });
     });
 
-    function plot_data(variable_list, start_time, end_time, start_time_hour, end_time_hour)
+    function plot_data(variable_list, start_date, end_date)
     {
-        var start_time_ms = date_str_to_timestamp(start_time);
-        var end_time_ms = date_str_to_timestamp(end_time);
+        var start_time_ms = date_str_to_timestamp(start_date);
+        var end_time_ms = date_str_to_timestamp(end_date);
 
         $('#operation_indicator').show();
-        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms, start_time_hour, end_time_hour);
+        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
     }
 
     function reset_data_panel()
@@ -249,16 +244,30 @@ body {
         $('#btn_display_data').prop('disabled', true);
         $('#download_btn_form').prop('disabled', true);
 
-        $('#start_date_time').val('');
-        $('#end_date_time').val('');
-
         $('#operation_indicator').hide();
         plot.reset();
     }
 
     function date_str_to_timestamp(date_str)
     {
+        var time = undefined;
+        if (date_str == 'start_date') 
+        {
+            time = $('#start_date').datetimepicker('getValue');
+        }
+        else
+        {
+            time = $('#end_date').datetimepicker('getValue');
+        }
+
+        var time_ms = time.getTime() / 1000.;
+        return time_ms;
+
+    }
+    function date_str_to_timestamp_old(date_str)
+    {
         var date_components = date_str.split('/');
+        var day = date_components[2].split(' ');
         var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
         var time_ms = date_obj.getTime() / 1000.;
         return time_ms;
@@ -282,10 +291,7 @@ body {
         var start_time = $('#start_date').val();
         var end_time = $('#end_date').val();
 
-        var start_time_hour = $('#start_date_time').val();
-        var end_time_hour = $('#end_date_time').val();
-
-        if ((start_time == 'Start date') && (end_time == 'End date') && (start_time_hour == '') && (end_time_hour == ''))
+        if ((start_time == 'Start date') && (end_time == 'End date') )
         {
             $('#info_message_container').show();
             $('#info_message_container_content').html('Please select a start and an end time');
@@ -303,28 +309,14 @@ body {
             $('#info_message_container_content').html('Please select an end date');
             return;
         }
-        else if (start_time_hour == '')
-        {
-            $('#info_message_container').show();
-            $('#info_message_container_content').html('Please select a start time');
-            return;
-        }
-        else if (end_time_hour == '')
-        {
-            $('#info_message_container').show();
-            $('#info_message_container_content').html('Please select an end time');
-            return;
-        }
 
         $.ajax({
             url: SCRIPT_ROOT + '/get_download_query',
             type: 'get',
             data: { ropod_id: ropod_id,
-                    start_timestamp: date_str_to_timestamp(start_time),
-                    end_timestamp: date_str_to_timestamp(end_time),
-                    features: variable_list.join(),
-                    start_time_hour:start_time_hour, 
-                    end_time_hour:end_time_hour
+                    start_timestamp: date_str_to_timestamp('start_date'),
+                    end_timestamp: date_str_to_timestamp('end_date'),
+                    features: variable_list.join()
              },
             contentType: 'application/json',
             cache: false
@@ -368,12 +360,10 @@ body {
             </div>
         </div>
         <div class="col-lg-2">
-            <div class="form-group"><input id="start_date" class="form-control" type="text" value="Start date" /></div>
-            <div class="form-group">Start time: <input id="start_date_time" class="form-control" type="time" name="Start time" /></div>
+            <div class="form-group"><input id="start_date" type="text" class="form-control" value="End date"></div>
         </div>
         <div class="col-lg-2">
-            <div class="form-group"><input id="end_date" class="form-control" type="text" value="End date" /></div>
-            <div class="form-group">End time: <input id="end_date_time" class="form-control" type="time" name="End time" /></div>
+            <div class="form-group"><input id="end_date" type="text" class="form-control" value="End date"></div>
         </div>
 
         <div class="col-lg-2">
