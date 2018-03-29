@@ -106,7 +106,7 @@ ropod_id_list = list()      # for storing the list of ropods (Ropod info page)
 ropod_status_list = dict()  # for storing the status reply for each ropod
 
 # the path and file name for storing the query result for downloading data
-query_result_file_path = './tmp_downloaded_data/ropod_query_data.json'
+query_result_file_path = '/tmp/ropod_query_data.json'
 
 
 app = Flask(__name__)
