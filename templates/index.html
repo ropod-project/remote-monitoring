@@ -43,11 +43,9 @@ body {
 
         $('#start_date').datetimepicker();
         $('#start_date').val("Start date");
-        $('#start_date').prop('disabled', true);
         
         $('#end_date').datetimepicker();
         $('#end_date').val("End date");
-        $('#end_date').prop('disabled', true);
 
         $('#btn_display_data').prop('disabled', true);
         $('#download_btn_form').prop('disabled', true);
@@ -260,7 +258,9 @@ body {
             time = $('#end_date').datetimepicker('getValue');
         }
 
-        var time_ms = time.getTime() / 1000.;
+        var local_time = new Date(time.setTime(time.getTime() - (time.getTimezoneOffset() * 60000)));
+
+        var time_ms = local_time.getTime() / 1000.;
         return time_ms;
 
     }
