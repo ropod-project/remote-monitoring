@@ -45,7 +45,7 @@ body {
             validateOnBlur:false
         });
         $('#start_date').val("Start date");
-        
+
         $('#end_date').datetimepicker({
             validateOnBlur:false
         });
@@ -221,6 +221,7 @@ body {
                 return;
             }
 
+            plot.reset();
             plot_data(variable_list, 'start_date', 'end_date');
         });
 
@@ -253,7 +254,7 @@ body {
     function date_str_to_timestamp(date_str)
     {
         var time = undefined;
-        if (date_str == 'start_date') 
+        if (date_str == 'start_date')
         {
             time = $('#start_date').datetimepicker('getValue');
         }
