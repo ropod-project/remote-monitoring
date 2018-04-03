@@ -253,15 +253,12 @@ body {
 
     function date_str_to_timestamp(date_str)
     {
-        // var time = undefined;
         if (date_str == 'start_date')
         {
-            // time = $('#start_date').datetimepicker('getValue');
             var time = new Date($('#start_date').val());
         }
         else
         {
-            // time = $('#end_date').datetimepicker('getValue');
             var time = new Date($('#end_date').val());
         }
 
@@ -270,14 +267,6 @@ body {
         var time_ms = local_time.getTime() / 1000.;
         return time_ms;
 
-    }
-    function date_str_to_timestamp_old(date_str)
-    {
-        var date_components = date_str.split('/');
-        var day = date_components[2].split(' ');
-        var date_obj = new Date(parseInt(date_components[2]), parseInt(date_components[0])-1, parseInt(date_components[1]));
-        var time_ms = date_obj.getTime() / 1000.;
-        return time_ms;
     }
 
     function form_download_function()

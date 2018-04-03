@@ -112,6 +112,7 @@ query_result_file_path = '/tmp/ropod_query_data.json'
 app = Flask(__name__)
 local_db_connection = DbConnection('127.0.0.1', LocalDbConstants.DATABASE, LocalDbConstants.COLLECTION)
 
+
 ################ Black box data interface ################
 @app.route('/')
 def index():
