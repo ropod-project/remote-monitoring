@@ -253,14 +253,16 @@ body {
 
     function date_str_to_timestamp(date_str)
     {
-        var time = undefined;
+        // var time = undefined;
         if (date_str == 'start_date')
         {
-            time = $('#start_date').datetimepicker('getValue');
+            // time = $('#start_date').datetimepicker('getValue');
+            var time = new Date($('#start_date').val());
         }
         else
         {
-            time = $('#end_date').datetimepicker('getValue');
+            // time = $('#end_date').datetimepicker('getValue');
+            var time = new Date($('#end_date').val());
         }
 
         var local_time = new Date(time.setTime(time.getTime() - (time.getTimezoneOffset() * 60000)));
