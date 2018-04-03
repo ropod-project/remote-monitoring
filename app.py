@@ -261,14 +261,6 @@ def send_download_file():
 
 ##########################################################
 
-################ Debug test interface ################
-@app.route('/debug_test')
-def debug_test():
-    # session['uid'] = uuid.uuid4()
-    return render_template('debug_test.html')
-
-##########################################################
-
 ################ Experiment request interface ################
 @app.route('/run_experiment')
 def run_experiment():
