@@ -41,10 +41,14 @@ body {
     $(document).ready(function() {
         $('#data_container').hide();
 
-        $('#start_date').datetimepicker();
+        $('#start_date').datetimepicker({
+            validateOnBlur:false
+        });
         $('#start_date').val("Start date");
         
-        $('#end_date').datetimepicker();
+        $('#end_date').datetimepicker({
+            validateOnBlur:false
+        });
         $('#end_date').val("End date");
 
         $('#btn_display_data').prop('disabled', true);
