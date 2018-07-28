@@ -34,6 +34,8 @@ class ZyreListener
         std::string getStatus(std::string msg, double timeout=-1);
         ///////////////////////////////////////////////////////////////////////
 
+        void forwardMessage(std::string msg);
+
     private:
         static void receiveData(zsock_t *pipe, void *args);
         Json::Value parseMessageJson(std::string msg);

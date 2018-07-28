@@ -2,7 +2,7 @@
 
 ZyreListener::ZyreListener(int timeout)
 {
-    listener_node_ = new zyre::node_t("z_listener_node");
+    listener_node_ = new zyre::node_t("ropod_web_listener_node");
     listener_node_->start();
     listener_node_->join("ROPOD");
     timeout_ = timeout;
@@ -187,6 +187,14 @@ std::string ZyreListener::getStatus(std::string msg, double timeout)
         received_msg_.erase(sender_id);
     }
     return received_msg;
+}
+
+void ZyreListener::forwardMessage(std::string msg)
+{
+    Json::Value jmsg =  parseMessageJson(msg);
+    std::string request_type = jmsg["header"]["type"].asString();
+    std::cout << "Received a '" <<  request_type << "' request" << std::endl;
+    ZyreListener::shoutMessage(jmsg);
 }
 
 void ZyreListener::receiveData(zsock_t *pipe, void *args)

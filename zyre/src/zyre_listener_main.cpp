@@ -42,7 +42,6 @@ int main()
 
         try
         {
-            // this must changed into get_interface_list
             if (!received_zmq_msgs[0].compare("GET_QUERY_INTERFACE_LIST"))
             {
                 std::vector<std::string> query_interface_names = zyre_listener->getQueryInterfaceList(received_zmq_msgs[2], name_query_timeout);
@@ -57,37 +56,33 @@ int main()
                 query_interfaces += "]";
 
                 data_size = query_interfaces.size();
-                zmq::message_t reply (data_size);
-                memcpy(reply.data (), query_interfaces.c_str(), query_interfaces.size());
-                server.send (reply);
+                zmq::message_t reply(data_size);
+                memcpy(reply.data(), query_interfaces.c_str(), query_interfaces.size());
+                server.send(reply);
             }
             else if (!received_zmq_msgs[0].compare("VARIABLE_QUERY"))
             {
                 query_reply_str = zyre_listener->getFeatures(received_zmq_msgs[2], name_query_timeout);
 
-                // sending the reply to the interface
                 data_size = query_reply_str.length();
-                zmq::message_t reply (data_size);
-                memcpy(reply.data (), query_reply_str.c_str(), query_reply_str.length());
+                zmq::message_t reply(data_size);
+                memcpy(reply.data(), query_reply_str.c_str(), query_reply_str.length());
                 server.send (reply);
             }
             else if (!received_zmq_msgs[0].compare("DATA_QUERY"))
             {
                 query_reply_str = zyre_listener->getData(received_zmq_msgs[2], data_query_timeout);
 
-                // sending the reply to the interface
                 data_size = query_reply_str.length();
-                zmq::message_t reply (data_size);
-                memcpy(reply.data (), query_reply_str.c_str(), query_reply_str.length());
-                server.send (reply);
+                zmq::message_t reply(data_size);
+                memcpy(reply.data(), query_reply_str.c_str(), query_reply_str.length());
+                server.send(reply);
             }
             // Here I have to add another part for getting the ropod lists
             // and getting the status
             else if (!received_zmq_msgs[0].compare("GET_ROPOD_IDs"))
             {
-                // This part must be editted
                 std::vector<std::string> ropod_ids = zyre_listener->getRopodIDs(received_zmq_msgs[2], name_query_timeout);
-
                 std::string ropods = "[";
                 for (size_t i=0; i<ropod_ids.size(); i++)
                 {
@@ -98,19 +93,25 @@ int main()
                 ropods += "]";
 
                 data_size = ropods.size();
-                zmq::message_t reply (data_size);
-                memcpy(reply.data (), ropods.c_str(), ropods.size());
+                zmq::message_t reply(data_size);
+                memcpy(reply.data(), ropods.c_str(), ropods.size());
                 server.send (reply);
             }
             else if (!received_zmq_msgs[0].compare("STATUS_QUERY"))
             {
                 query_reply_str = zyre_listener->getStatus(received_zmq_msgs[2], name_query_timeout);
 
-                // sending the reply to the interface
                 data_size = query_reply_str.length();
-                zmq::message_t reply (data_size);
-                memcpy(reply.data (), query_reply_str.c_str(), query_reply_str.length());
-                server.send (reply);
+                zmq::message_t reply(data_size);
+                memcpy(reply.data(), query_reply_str.c_str(), query_reply_str.length());
+                server.send(reply);
+            }
+            else //we react to every other request by forwarding it
+            {
+                zyre_listener->forwardMessage(received_zmq_msgs[2]);
+                zmq::message_t reply(0);
+                memcpy(reply.data(), "", 0);
+                server.send(reply);
             }
         }
         catch(zmq::error_t exception)
