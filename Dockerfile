@@ -7,15 +7,10 @@ ENV PYTHONPATH=/remote-monitoring
 
 RUN apt update && apt install -y \
     vim \
+    tmux \
     git \
     cmake \
     build-essential \
-    libtool \
-    libtool-bin \
-    pkg-config \
-    wget \
-    curl \
-    unzip \
     libjsoncpp-dev \
     libboost-all-dev \
     apache2-dev \
