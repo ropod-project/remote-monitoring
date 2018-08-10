@@ -1,0 +1,5 @@
+setuptools==20.7.0
+Flask
+mod_wsgi
+gevent
+pyzmq
