@@ -3,7 +3,7 @@
 from __future__ import print_function
 from flask import Flask
 
-from gevent.wsgi import WSGIServer
+from gevent.pywsgi import WSGIServer
 
 from remote_monitoring.blueprints.black_box.black_box import black_box
 from remote_monitoring.blueprints.experiments.experiments import experiments
