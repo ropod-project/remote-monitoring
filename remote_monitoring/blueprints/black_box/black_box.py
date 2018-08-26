@@ -17,10 +17,11 @@ def index():
 
 @black_box.route('/get_blackbox_ids', methods=['GET', 'POST'])
 def get_blackbox_ids():
-    msg_data['header']['type'] = "NAME_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
+    msg = dict(msg_data)
+    msg['header']['type'] = "NAME_QUERY"
+    msg['payload']['senderId'] = session['uid'].hex
     communication_command = "GET_QUERY_INTERFACE_LIST"
-    msg_data_string = json.dumps(msg_data)
+    msg_data_string = json.dumps(msg)
     data = communication_command + "++" + msg_data_string
 
     ropod_ids = dict()
@@ -40,21 +41,21 @@ def get_blackbox_ids():
         message = 'Black box list could not be retrieved'
     return jsonify(ids=ropod_ids, message=message)
 
-@black_box.route('/get_ropod_features', methods=['GET','POST'])
-def get_ropod_features():
+@black_box.route('/get_ropod_variables', methods=['GET','POST'])
+def get_ropod_variables():
     ropod_id = request.args.get('ropod_id', '', type=str)
 
-    msg_data['header']['type'] = "VARIABLE_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
-    msg_data['payload']['ropod_id'] = ropod_id
-    msg_data['payload']['commandList'][0] = {"command": "GET_ROPOD_FEATURES"}
+    msg = dict(msg_data)
+    msg['header']['type'] = "VARIABLE_QUERY"
+    msg['payload']['senderId'] = session['uid'].hex
+    msg['payload']['ropodId'] = ropod_id
 
     # communicate_zmq
-    msg_data_string = json.dumps(msg_data)
+    msg_data_string = json.dumps(msg)
     communication_command = "VARIABLE_QUERY"
     data = communication_command + '++' + msg_data_string
 
-    features = list()
+    variables = list()
     message = ''
     try:
         reply = communicate_zmq(data)
@@ -63,30 +64,31 @@ def get_ropod_features():
             values = list(interface.values())
             if values is not None and values[0] is not None:
                 for element in values[0]:
-                    features.append(element)
+                    variables.append(element)
     # except Exception, exc:
     except Exception as exc:
-        print('[get_ropod_features] %s' % str(exc))
-        message = 'Feature list could not be retrieved'
-    return jsonify(ropod_features=features, message=message)
+        print('[get_ropod_variables] %s' % str(exc))
+        message = 'Variable list could not be retrieved'
+    return jsonify(ropod_variables=variables, message=message)
 
 @black_box.route('/get_ropod_data', methods=['GET','POST'] )
 def get_ropod_data():
     ropod_id = request.args.get('ropod_id', '', type=str)
-    feature_list = request.args.get('features').split(',')
+    variable_list = request.args.get('variables').split(',')
 
     start_query_time = request.args.get('start_timestamp')
     end_query_time = request.args.get('end_timestamp')
 
-    msg_data['header']['type'] = "DATA_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
-    msg_data['payload']['ropod_id'] = ropod_id
-    msg_data['payload']['commandList'][0] = {"features": feature_list,
-                                             "start_time": start_query_time,
-                                             "end_time": end_query_time}
+    msg = dict(msg_data)
+    msg['header']['type'] = "DATA_QUERY"
+    msg['payload']['senderId'] = session['uid'].hex
+    msg['payload']['ropodId'] = ropod_id
+    msg['payload']['variables'] = variable_list
+    msg['payload']['startTime'] = start_query_time
+    msg['payload']['endTime'] = end_query_time
 
     communication_command = "DATA_QUERY"
-    msg_data_string = json.dumps(msg_data)
+    msg_data_string = json.dumps(msg)
     data_query = communication_command + "++" + msg_data_string
 
     variables = list()
@@ -116,20 +118,21 @@ def get_download_query():
     black box and then saving the data to a temporary file for download.
     """
     ropod_id = request.args.get('ropod_id', '', type=str)
-    feature_list = request.args.get('features').split(',')
+    variable_list = request.args.get('variables').split(',')
 
     start_query_time = request.args.get('start_timestamp')
     end_query_time = request.args.get('end_timestamp')
 
-    msg_data['header']['type'] = "DATA_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
-    msg_data['payload']['ropod_id'] = ropod_id
-    msg_data['payload']['commandList'][0] = {"features": feature_list,
-                                             "start_time": start_query_time,
-                                             "end_time": end_query_time}
+    msg = dict(msg_data)
+    msg['header']['type'] = "DATA_QUERY"
+    msg['payload']['senderId'] = session['uid'].hex
+    msg['payload']['ropodId'] = ropod_id
+    msg['payload']['variables'] = variable_list
+    msg['payload']['startTime'] = start_query_time
+    msg['payload']['endTime'] = end_query_time
 
     communication_command = "DATA_QUERY"
-    msg_data_string = json.dumps(msg_data)
+    msg_data_string = json.dumps(msg)
     data = communication_command + "++" + msg_data_string
 
     message = ''

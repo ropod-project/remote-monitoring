@@ -33,7 +33,7 @@ body {
 </style>
 
 <script>
-    var ropod_features = [];
+    var ropod_variables = [];
     var ropod_id = undefined;
 
     var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_ropod_data');
@@ -91,7 +91,7 @@ body {
                 $('#btn_display_data').prop('disabled', true);
                 $('#download_btn_form').prop('disabled', true);
 
-                $('#feature_container').html('');
+                $('#variable_container').html('');
                 $('#data_container').hide();
                 plot.reset();
                 return;
@@ -99,7 +99,7 @@ body {
 
             ropod_id = $(this).val();
             $.ajax({
-                url: SCRIPT_ROOT + '/get_ropod_features',
+                url: SCRIPT_ROOT + '/get_ropod_variables',
                 type: 'get',
                 data: { ropod_id: ropod_id },
                 contentType: 'application/json',
@@ -112,20 +112,20 @@ body {
                     return;
                 }
 
-                ropod_features = result.ropod_features;
+                ropod_variables = result.ropod_variables;
                 var html_string = '';
-                for (var i=0; i<result.ropod_features.length; i++) {
+                for (var i=0; i<result.ropod_variables.length; i++) {
                     if ( (i % 10) == 0 ) {
-                        html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                        html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_variables[i] + '" name="variable" >' + ropod_variables[i] + '</label></div>\n';
                     }
                     else {
-                        html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_features[i] + '" name= "feature" >' + ropod_features[i] + '</label></div>\n';
+                        html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_variables[i] + '" name="variable" >' + ropod_variables[i] + '</label></div>\n';
                     }
                 }
 
-                $('#feature_container').html('');
-                $('#feature_container').html(html_string);
-                $('#feature_container').prop('disabled', false);
+                $('#variable_container').html('');
+                $('#variable_container').html(html_string);
+                $('#variable_container').prop('disabled', false);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
                 $('#error_message_container').show();
@@ -187,11 +187,11 @@ body {
 
         $('#btn_display_data').click(function() {
             var variable_list = [];
-            $.each($("input[name='feature']:checked"), function(){
+            $.each($("input[name='variable']:checked"), function(){
                 variable_list.push($(this).val());
             });
 
-            // check if the user selected a feature or not
+            // check if the user selected a variable or not
             if (variable_list.length == 0)
             {
                 $('#info_message_container').show();
@@ -272,11 +272,11 @@ body {
     function form_download_function()
     {
         var variable_list = [];
-        $.each($("input[name='feature']:checked"), function() {
+        $.each($("input[name='variable']:checked"), function() {
             variable_list.push($(this).val());
         });
 
-        // check if the user selected a feature or not
+        // check if the user selected a variable or not
         if (variable_list.length == 0)
         {
             $('#info_message_container').show();
@@ -312,7 +312,7 @@ body {
             data: { ropod_id: ropod_id,
                     start_timestamp: date_str_to_timestamp('start_date'),
                     end_timestamp: date_str_to_timestamp('end_date'),
-                    features: variable_list.join()
+                    variables: variable_list.join()
              },
             contentType: 'application/json',
             cache: false
@@ -380,7 +380,7 @@ body {
     </div>
 </div>
 
-<div id="feature_container" disabled="disabled">
+<div id="variable_container" disabled="disabled">
     <div class="panel panel-default">
 
     </div>

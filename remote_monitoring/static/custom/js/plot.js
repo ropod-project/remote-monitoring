@@ -18,7 +18,7 @@ Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_
         data:
         {
             ropod_id: ropod_id,
-            features: variable_list.join(),
+            variables: variable_list.join(),
             start_timestamp: start_time,
             end_timestamp: end_time
         },
