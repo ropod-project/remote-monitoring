@@ -112,20 +112,12 @@ body {
                     return;
                 }
 
-                ropod_variables = result.ropod_variables;
-                var html_string = '';
-                for (var i=0; i<result.ropod_variables.length; i++) {
-                    if ( (i % 10) == 0 ) {
-                        html_string += '</div>\n<div class="column"><div class="checkbox"><label><input type="checkbox" value="' + ropod_variables[i] + '" name="variable" >' + ropod_variables[i] + '</label></div>\n';
-                    }
-                    else {
-                        html_string += '<div class="checkbox"><label><input type="checkbox" value="' + ropod_variables[i] + '" name="variable" >' + ropod_variables[i] + '</label></div>\n';
-                    }
-                }
-
                 $('#variable_container').html('');
-                $('#variable_container').html(html_string);
                 $('#variable_container').prop('disabled', false);
+
+                ropod_variables = result.ropod_variables;
+                var html_string = visualise_variable_names(ropod_variables);
+                $('#variable_container').html(html_string);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
                 $('#error_message_container').show();
@@ -188,7 +180,10 @@ body {
         $('#btn_display_data').click(function() {
             var variable_list = [];
             $.each($("input[name='variable']:checked"), function(){
-                variable_list.push($(this).val());
+                if ($(this).closest('div').find('div').length == 0)
+                {
+                    variable_list.push($(this).val());
+                }
             });
 
             // check if the user selected a variable or not
@@ -228,7 +223,53 @@ body {
         $(document).on('change', '.plot_variables', function() {
             plot.display_selected_data();
         });
+
+        $(document).on('click', '.variable_checkbox', function() {
+            if ($(this).is(':checked'))
+            {
+                $(this).closest('div').find(':checkbox').each(function() {
+                    $(this).prop('checked', true);
+                });
+            }
+            else
+            {
+                $(this).closest('div').find(':checkbox').each(function() {
+                    $(this).prop('checked', false);
+                });
+            }
+        });
     });
+
+    function visualise_variable_names(variables, html_string='', level=0, parent_variable_name='')
+    {
+        if (Object.keys(variables).length == 0)
+        {
+            html_string += '</div>';
+            return html_string;
+        }
+
+        for (var variable in variables)
+        {
+            var full_variable_name = '';
+            if (parent_variable_name == '')
+            {
+                full_variable_name = variable;
+            }
+            else
+            {
+                full_variable_name = parent_variable_name + '/' + variable;
+            }
+            html_string += '<div id="' + full_variable_name + '" class="checkbox"><label><input class="variable_checkbox" type="checkbox" value="' + full_variable_name + '" name="variable" />';
+            for (var i=0; i<level; i++)
+            {
+                html_string += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            }
+            html_string += variable + '</label>';
+            html_string = visualise_variable_names(variables[variable], html_string, level+1, full_variable_name);
+        }
+        html_string += '</div>';
+        return html_string;
+    }
 
     function plot_data(variable_list, start_date, end_date)
     {
@@ -266,14 +307,16 @@ body {
 
         var time_ms = local_time.getTime() / 1000.;
         return time_ms;
-
     }
 
     function form_download_function()
     {
         var variable_list = [];
-        $.each($("input[name='variable']:checked"), function() {
-            variable_list.push($(this).val());
+        $.each($("input[name='variable']:checked"), function(){
+            if ($(this).closest('div').find('div').length == 0)
+            {
+                variable_list.push($(this).val());
+            }
         });
 
         // check if the user selected a variable or not
