@@ -238,6 +238,12 @@ body {
                 });
             }
         });
+
+        $(document).on('click', '.glyphicon-plus', function() {
+            $.each($(this).closest('div').children('div'), function() {
+                $(this).collapse('toggle');
+            });
+        });
     });
 
     function visualise_variable_names(variables, html_string='', level=0, parent_variable_name='')
@@ -259,12 +265,49 @@ body {
             {
                 full_variable_name = parent_variable_name + '/' + variable;
             }
-            html_string += '<div id="' + full_variable_name + '" class="checkbox"><label><input class="variable_checkbox" type="checkbox" value="' + full_variable_name + '" name="variable" />';
+
+            // if this is the last level of variables, we add a collapsible panel
+            if (Object.keys(variables[variable]).length == 0)
+            {
+                html_string += '<div id="' + full_variable_name + '" class="checkbox panel-collapse collapse">';
+            }
+            // if there are additional variable levels, we only add a checkbox panel
+            // for the first level and additionally make the panel collapsible for the levels below
+            else
+            {
+                if (level == 0)
+                {
+                    html_string += '<div id="' + full_variable_name + '" class="checkbox">';
+                }
+                else
+                {
+                    html_string += '<div id="' + full_variable_name + '" class="checkbox panel-collapse collapse">';
+                }
+            }
+
+            // we add some spacing for better nested variable display
             for (var i=0; i<level; i++)
             {
                 html_string += '&nbsp;&nbsp;&nbsp;&nbsp;';
             }
-            html_string += variable + '</label>';
+
+            // if there are additional variable levels, we add a button
+            // for collapsing/uncollapsing the variable level below
+            if (Object.keys(variables[variable]).length != 0)
+            {
+                html_string += '<a href="#"><span class="glyphicon glyphicon-plus"></span></a>&nbsp;&nbsp;';
+            }
+            // if there's no variable level below, we simply add some additional
+            // space for better display of the variables on the last level
+            else
+            {
+                html_string += '&nbsp;&nbsp;&nbsp;&nbsp;';
+            }
+
+            // we finally add a checkbox for the variable
+            html_string += '<label><input class="variable_checkbox" type="checkbox" value="' + full_variable_name + '" name="variable" />' + variable + '</label>';
+
+            // the function is called recursively for displaying the next level of variables
             html_string = visualise_variable_names(variables[variable], html_string, level+1, full_variable_name);
         }
         html_string += '</div>';
