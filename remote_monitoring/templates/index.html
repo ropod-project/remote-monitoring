@@ -17,10 +17,10 @@ body {
     margin: 0;
 }
 
-/* Create two equal columns that floats next to each other */
+/* Create two equal columns that float next to each other */
 .column {
     float: left;
-    width: 30%;
+    width: 25%;
     padding: 10px;
 }
 
@@ -246,7 +246,7 @@ body {
         });
     });
 
-    function visualise_variable_names(variables, html_string='', level=0, parent_variable_name='')
+    function visualise_variable_names(variables, html_string='', level=0, parent_variable_name='', variable_count=0)
     {
         if (Object.keys(variables).length == 0)
         {
@@ -256,6 +256,21 @@ body {
 
         for (var variable in variables)
         {
+            // we only allow 10 top-level variables per column
+            if ( (variable_count % 10) == 0)
+            {
+                if (variable_count != 0)
+                {
+                    html_string += '</div>';
+                }
+                html_string += '<div class="column">';
+            }
+
+            if (level == 0)
+            {
+                variable_count += 1;
+            }
+
             var full_variable_name = '';
             if (parent_variable_name == '')
             {
@@ -308,7 +323,7 @@ body {
             html_string += '<label><input class="variable_checkbox" type="checkbox" value="' + full_variable_name + '" name="variable" />' + variable + '</label>';
 
             // the function is called recursively for displaying the next level of variables
-            html_string = visualise_variable_names(variables[variable], html_string, level+1, full_variable_name);
+            html_string = visualise_variable_names(variables[variable], html_string, level+1, full_variable_name, variable_count);
         }
         html_string += '</div>';
         return html_string;
