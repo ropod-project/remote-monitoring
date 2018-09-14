@@ -18,8 +18,8 @@ def ropod_info():
 
 @ropod_status.route('/get_ropod_status_ids', methods=['GET'])
 def get_ropod_status_ids():
-    msg_data['header']['type'] = "STATUS_NAME_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
+    msg_data['header']['type'] = "HEALTH-STATUS-NAME-QUERY"
+    msg_data['payload']['senderId'] = session['uid'].hex
     communication_command = "GET_ROPOD_IDs"
     msg_data_string = json.dumps(msg_data)
     data = communication_command + "++" + msg_data_string
@@ -87,8 +87,10 @@ def check_ropod_overall_status(ropod_status):
     """Returns True if, on a given ropod, everything is working and all
     numerical values are above a predefined threshold; returns False otherwise.
     """
+    return True
     ropod_overall_status = True
-    status = ropod_status['payload']['status']
+    ropod_id = ropod_status['payload']['ropodId']
+    monitors = ropod_status['payload']['monitors']
 
     wifi_threshold = -70
     battery_threshold = 21

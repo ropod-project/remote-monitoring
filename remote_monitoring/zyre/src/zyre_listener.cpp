@@ -5,6 +5,7 @@ ZyreListener::ZyreListener(int timeout)
     listener_node_ = new zyre::node_t("ropod_web_listener_node");
     listener_node_->start();
     listener_node_->join("ROPOD");
+    listener_node_->join("MONITOR");
     timeout_ = timeout;
     actor_ = zactor_new(ZyreListener::receiveData, this);
 }
@@ -12,6 +13,7 @@ ZyreListener::ZyreListener(int timeout)
 ZyreListener::~ZyreListener()
 {
     listener_node_->leave("ROPOD");
+    listener_node_->join("MONITOR");
     listener_node_->stop();
     delete listener_node_;
 }
@@ -143,7 +145,7 @@ std::vector<std::string> ZyreListener::getRopodIDs(std::string message, double t
     Json::Value jmsg =  parseMessageJson(message);
     std::string query_type = jmsg["header"]["type"].asString();
     std::cout << "Received a '" << query_type << "' request\n";
-    std::cout << "Returning ropod IDs\n\n";
+    std::cout << "Returning ropod IDs (" << status_node_names_.size() << ")" << std::endl;
     return std::vector<std::string>(status_node_names_.begin(), status_node_names_.end());
 }
 
@@ -185,6 +187,10 @@ std::string ZyreListener::getStatus(std::string msg, double timeout)
     {
         received_msg = received_msg_[sender_id];
         received_msg_.erase(sender_id);
+    }
+    else
+    {
+        std::cout << "no messages for requested robot" << std::endl;
     }
     return received_msg;
 }
@@ -275,7 +281,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             if (streq(event, "JOIN"))
             {
                 std::string name_str = std::string(name);
-                if (name_str.find("local_status_monitor") != std::string::npos)
+                if (std::string(group) == "MONITOR" && name_str.find("component_monitor") != std::string::npos)
                 {
                     listener->status_node_names_.insert(name_str);
                 }
@@ -283,7 +289,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             else if (streq(event, "LEAVE") || streq(event, "EXIT"))
             {
                 std::string name_str = std::string(name);
-                if (name_str.find("local_status_monitor") != std::string::npos)
+                if (std::string(group) == "MONITOR" && name_str.find("component_monitor") != std::string::npos)
                 {
                     listener->status_node_names_.erase(name_str);
                 }
@@ -294,7 +300,8 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             {
                 std::string name_str = std::string(name);
                 if ((name_str.find("query_interface") != std::string::npos) ||
-                    (name_str.find("ropod") != std::string::npos))
+                    (name_str.find("ropod") != std::string::npos) ||
+                    (name_str.find("component_monitor") != std::string::npos))
                 {
                     rec_msg = listener->parseMessageJson(message);
                     sender_id = rec_msg["payload"]["sender_id"].asString();
@@ -320,7 +327,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
                         listener->received_msg_[sender_id] = std::string(message);
                         listener->reply_received_[sender_id] = true;
                     }
-                    else if (!rec_msg["header"]["type"].compare("STATUS"))
+                    else if (!rec_msg["header"]["type"].compare("HEALTH-STATUS"))
                     {
                         std::string ropod_id = std::string(name);
                         for (auto info : listener->query_info_)
