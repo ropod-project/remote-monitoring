@@ -24,6 +24,7 @@
 <script>
     var ropod_id = '';
     var ropod_status_timeout = null;
+    var monitor_statuses_expanded = {};
 
     $(document).ready(function() {
         $('#error_message_container').hide();
@@ -145,6 +146,8 @@
                 $('#status_container').html(html_string);
                 $('#status_container').prop('disabled', false);
                 $('[data-toggle="toggle"]').change(function(){
+                    var component_monitor_name = this.id;
+                    monitor_statuses_expanded[component_monitor_name] = !monitor_statuses_expanded[component_monitor_name];
                     $(this).parents().next('.monitor_modes').toggle();
                 });
             }).fail(function(jqXHR, status, error) {
@@ -166,6 +169,7 @@
 
         $('.ropod_table').on('click', 'button', function() {
             ropod_id = $(this).val();
+            monitor_statuses_expanded = {};
             getRopodStatus();
         });
 
@@ -178,13 +182,19 @@
 
         $(document).on('click', 'button#expand_all', function() {
             $('.monitor_modes').show();
+            for (var component_monitor_name in monitor_statuses_expanded)
+            {
+                monitor_statuses_expanded[component_monitor_name] = true;
+            }
         });
 
         $(document).on('click', 'button#collapse_all', function() {
             $('.monitor_modes').hide();
+            for (var component_monitor_name in monitor_statuses_expanded)
+            {
+                monitor_statuses_expanded[component_monitor_name] = false;
+            }
         });
-
-
     });
 
 
@@ -196,6 +206,11 @@
         for (var monitor in monitors)
         {
             var component_monitor_name = monitors[monitor].component;
+            if (!monitor_statuses_expanded.hasOwnProperty(component_monitor_name))
+            {
+                monitor_statuses_expanded[component_monitor_name] = false;
+            }
+
             var modes = monitors[monitor].modes;
             mode_string = '';
             var comp_stat = true;
@@ -218,6 +233,7 @@
             }
             html_string += '<tbody class="component_monitor">';
             html_string += '<tr style="background-color:rgba(0,0,0,.075)"><td colspan="3"><label for="' + component_monitor_name + '" style="display:block">' + component_monitor_name + '</label>';
+
             html_string += '<input type="checkbox" name="' + component_monitor_name + '" id="' + component_monitor_name + '" data-toggle="toggle" style="display:none"/></td>';
             if (comp_stat == false)
             {
@@ -227,11 +243,19 @@
             {
                 html_string += '<td>' + green_circle + '</td>';
             }
-            html_string += '</tr></tbody><tbody class="monitor_modes" style="display:none">';
+            html_string += '</tr></tbody>';
+
+            if (!monitor_statuses_expanded[component_monitor_name])
+            {
+                html_string += '<tbody class="monitor_modes" style="display:none">';
+            }
+            else
+            {
+                html_string += '<tbody class="monitor_modes">';
+            }
             html_string += mode_string;
             html_string += '</tbody>';
         }
-
         return html_string;
     }
 </script>
