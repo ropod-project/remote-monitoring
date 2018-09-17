@@ -1,0 +1,17 @@
+version: "2"
+services:
+  monitoring:
+    build: .
+    image: ropod-monitoring
+    # restart: on-failure
+    container_name: remote_monitoring
+    network_mode: "host"
+    working_dir: /remote-monitoring/remote_monitoring
+    command: ["python3", "app.py"]
+  listener:
+    image: ropod-monitoring
+    # restart: on-failure
+    container_name: monitoring_listener
+    network_mode: "host"
+    working_dir: /remote-monitoring/remote_monitoring/zyre/build
+    command: ["./zyre_listener"]
