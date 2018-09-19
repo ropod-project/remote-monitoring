@@ -289,7 +289,7 @@ void ZyreListener::receiveData(zsock_t *pipe, void *args)
             else if (streq(event, "LEAVE") || streq(event, "EXIT"))
             {
                 std::string name_str = std::string(name);
-                if (std::string(group) == "MONITOR" && name_str.find("component_monitor") != std::string::npos)
+                if (name_str.find("component_monitor") != std::string::npos)
                 {
                     listener->status_node_names_.erase(name_str);
                 }
