@@ -217,9 +217,9 @@
             for (var mode in modes)
             {
                 var healthStatus = modes[mode].healthStatus;
-                var modeName = modes[mode].monitorName;
+                var modeDescription = modes[mode].monitorDescription;
                 var stat = healthStatus['status'];
-                mode_string += '<tr style="background-color:#fdfdfe"><td>' + modeName + '</td><td></td><td></td><td>';
+                mode_string += '<tr style="background-color:#fdfdfe"><td>' + modeDescription + '</td><td></td><td></td><td>';
                 if (stat == false)
                 {
                     mode_string += '<span class="red_dot" title=' + JSON.stringify(healthStatus) + '></span>';
