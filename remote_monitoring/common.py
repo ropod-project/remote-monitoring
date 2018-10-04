@@ -1,4 +1,7 @@
 import zmq
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
 
 zmq_context = zmq.Context()
 port = "5670"

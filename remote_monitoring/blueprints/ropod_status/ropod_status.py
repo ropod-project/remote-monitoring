@@ -1,15 +1,27 @@
 from __future__ import print_function
 from flask import Blueprint, jsonify, render_template, request, session
+from flask_socketio import emit
+from pymongo import MongoClient
 
 import ast
 import json
 import uuid
 
-from remote_monitoring.common import msg_data, communicate_zmq
+from remote_monitoring.common import msg_data, communicate_zmq, socketio
+
+from pyre_communicator.base_class import PyreBaseCommunicator
+from threading import Lock
+
 
 ropod_status = Blueprint('ropod_status', __name__)
 ropod_id_list = list()      # for storing the list of ropods (Ropod info page)
 ropod_status_list = dict()  # for storing the status reply for each ropod
+
+thread = None
+thread_lock = Lock()
+
+client = MongoClient()
+
 
 @ropod_status.route('/ropod_info')
 def ropod_info():
@@ -146,3 +158,41 @@ def read_ropod_status():
         print('[read_ropod_status] %s' % str(exc))
         message = 'Status could not be retrieved'
         return jsonify(ropod_status=None, message=message)
+
+def get_deployed_ropods():
+    cursor = client.deployed_ropods.ropods.find()
+    ropods = []
+    for r in cursor:
+        ropods.append(r['ropod_name'])
+    return ropods
+
+def get_deployed_black_boxes():
+    cursor = client.deployed_ropods.black_boxes.find()
+    black_boxes = []
+    for b in cursor:
+        black_boxes.append(b)
+    return black_boxes
+
+
+def background_thread():
+    pyre = PyreBaseCommunicator("ropod_status_listener", ['ROPOD'], [], verbose=False)
+    socketio.sleep(1)
+    while True:
+        peers = pyre.peers()
+        peers_list = []
+        for p in peers:
+            peers_list.append(pyre.peer_directory[p])
+        socketio.emit('zyre_peers', {'data':json.dumps(peers_list)}, namespace='/ropod_status')
+        socketio.sleep(1)
+
+
+@socketio.on('connect', namespace='/ropod_status')
+def on_connect():
+    ropods = get_deployed_ropods()
+    emit('deployed_ropods', {'data':json.dumps(ropods)})
+
+    global thread
+    with thread_lock:
+        if thread is None:
+            thread = socketio.start_background_task(target=background_thread)
+

@@ -16,248 +16,66 @@
     border-radius: 50%;
     display: inline-block;
 }
+.grey_dot {
+    height: 10px;
+    width: 10px;
+    background-color: rgb(128, 128, 128);
+    border-radius: 50%;
+    display: inline-block;
+}
 </style>
 
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
 
 <script>
-    var ropod_id = '';
-    var ropod_status_timeout = null;
-    var monitor_statuses_expanded = {};
-
     $(document).ready(function() {
         $('#error_message_container').hide();
-        $('#operation_indicator').show();
-        $.ajax({
-            url: SCRIPT_ROOT + '/get_ropod_status_ids',
-            type: 'get',
-            contentType: 'application/json',
-            cache: false
-        }).done(function(result) {
-            $('#operation_indicator').hide();
-            if (result.message != '')
-            {
-                $('#error_message_container').show();
-                $('#error_message_container_content').html(result.message);
-            }
-        }).fail(function(jqXHR, status, error) {
-            console.log(error);
-            $('#error_message_container').show();
-            $('#error_message_container_content').html('An unexpected error has occurred');
-            $('#operation_indicator').hide();
-        });
-
-        setTimeout(execute_query, 5000);
-
-        // ==================== get ropod ids =====================
-        function execute_query()
-        {
-            var html_string = '';
-            html_string += '<table id="ropods" width="100%" class="table table-striped table-bordered table-hover"><thead><th width="75%">Ropod</th><th width="5%">Status</th><th width="10%">Status time</th><th width="10%">Detailed status</th></thead><tbody>';
-            var green_circle = '<span class="green_dot"></span>';
-            var red_circle = '<span class="red_dot"></span>';
-
-            $.ajax({
-                url: SCRIPT_ROOT + '/get_status_of_all_ropods',
-                type: 'get',
-                contentType: 'application/json',
-                cache: false
-            }).done(function(result) {
-                if (result.message != '')
-                {
-                    $('#error_message_container').show();
-                    $('#error_message_container_content').html(result.message);
-                    return;
-                }
-
-                $.each(result.status_list, function(ropod, ropod_status){
-                    html_string += '<tr><td>' + ropod + '</td>';
-                    if (ropod_status[0] == true)
-                    {
-                        html_string += '<td style="text-align:center;vertical-align:middle">' + green_circle +'</td>';
-                    }
-                    else if (ropod_status[0] == false)
-                    {
-                        html_string += '<td style="text-align:center;vertical-align:middle">' + red_circle +'</td>';
-                    }
-                    // adding the timestamp
-                    html_string += '<td>' + ropod_status[1] +'</td>';
-                    // adding the button
-                    html_string += '<td><button id="' + ropod + '" value="' + ropod + '" class="btn btn-primary" type="button">Get detailed status</button></td></tr>';
-                });
-
-                html_string += '</tbody></table>';
-                $('#overall_ropod_status_container').html('');
-                $('#overall_ropod_status_container').html(html_string);
-                $('#overall_ropod_status_container').prop('disabled', false);
-            }).fail(function(jqXHR, status, error) {
-                console.log(error);
-                $('#error_message_container').show();
-                $('#error_message_container_content').html('An unexpected error has occurred');
-                $('#operation_indicator').hide();
-            });
-
-            setTimeout(execute_query, 5000);
-        }
-
-        function getRopodStatus()
-        {
-            if (ropod_id == '')
-            {
-                return;
-            }
-
-            var html_string = '';
-            html_string += '<table id="ropods" width="100%" class="table table-bordered">';
-            html_string += '<thead><th width="70%">Status of <b>' + ropod_id + '</b></th>';
-            html_string += '<th width="10%"><button id="expand_all" class="btn btn-primary" type="button">Expand all</button></th>';
-            html_string += '<th width="10%"><button id="collapse_all" class="btn btn-primary" type="button">Collapse all</button></th>';
-            html_string += '<th width="10%"><button id="hide_detailed_status" class="btn btn-primary" type="button">Hide detailed status</button></th>';
-            html_string += '</thead><tbody>';
-            var green_circle = '<span class="green_dot"></span>';
-            var red_circle = '<span class="red_dot"></span>';
-
-            $.ajax({
-                url: SCRIPT_ROOT + '/read_ropod_status',
-                type: 'get',
-                data: { ropod_id: ropod_id },
-                contentType: 'application/json',
-                cache: false
-            }).done(function(result) {
-                if (ropod_id == '')
-                {
-                    return;
-                }
-
-                if (result.message != '')
-                {
-                    $('#error_message_container').show();
-                    $('#error_message_container_content').html(result.message);
-                    return;
-                }
-
-                var monitors = result.ropod_status.payload.monitors;
-                var monitors_html_string = generate_monitors_table(monitors);
-                html_string += monitors_html_string;
-                html_string += '</tbody></table></div>';
-
-                $('#status_container').html('');
-                $('#status_container').html(html_string);
-                $('#status_container').prop('disabled', false);
-                $('[data-toggle="toggle"]').change(function(){
-                    var component_monitor_name = this.id;
-                    monitor_statuses_expanded[component_monitor_name] = !monitor_statuses_expanded[component_monitor_name];
-                    $(this).parents().next('.monitor_modes').toggle();
-                });
-            }).fail(function(jqXHR, status, error) {
-                console.log(error);
-                $('#error_message_container').show();
-                $('#error_message_container_content').html('An unexpected error has occurred');
-            });
-
-            if (ropod_id != '')
-            {
-                if (ropod_status_timeout)
-                {
-                    clearTimeout(ropod_status_timeout);
-                    ropod_status_timeout = null;
-                }
-                ropod_status_timeout = setTimeout(getRopodStatus, 5000);
-            }
-        }
-
-        $('.ropod_table').on('click', 'button', function() {
-            ropod_id = $(this).val();
-            monitor_statuses_expanded = {};
-            getRopodStatus();
-        });
-
-        $(document).on('click', 'button#hide_detailed_status', function() {
-            ropod_id = '';
-            clearTimeout(ropod_status_timeout);
-            ropod_status_timeout = null;
-            $('#status_container').html('');
-        });
-
-        $(document).on('click', 'button#expand_all', function() {
-            $('.monitor_modes').show();
-            for (var component_monitor_name in monitor_statuses_expanded)
-            {
-                monitor_statuses_expanded[component_monitor_name] = true;
-            }
-        });
-
-        $(document).on('click', 'button#collapse_all', function() {
-            $('.monitor_modes').hide();
-            for (var component_monitor_name in monitor_statuses_expanded)
-            {
-                monitor_statuses_expanded[component_monitor_name] = false;
-            }
-        });
+        $('#operation_indicator').hide();
     });
 
-
-    function generate_monitors_table(monitors)
-    {
-        html_string = '';
-        var green_circle = '<span class="green_dot"></span>';
-        var red_circle = '<span class="red_dot"></span>';
-        for (var monitor in monitors)
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/ropod_status');
+    socket.on('deployed_ropods', function(msg) {
+        $("#ropod_list tr:not(:first)").remove()
+        var t = document.getElementById('ropod_list');
+        data = JSON.parse(msg.data)
+        for (var i = 0; i < data.length; i++)
         {
-            var component_monitor_name = monitors[monitor].component;
-            if (!monitor_statuses_expanded.hasOwnProperty(component_monitor_name))
-            {
-                monitor_statuses_expanded[component_monitor_name] = false;
-            }
-
-            var modes = monitors[monitor].modes;
-            mode_string = '';
-            var comp_stat = true;
-            for (var mode in modes)
-            {
-                var healthStatus = modes[mode].healthStatus;
-                var modeDescription = modes[mode].monitorDescription;
-                var stat = healthStatus['status'];
-                mode_string += '<tr style="background-color:#fdfdfe"><td>' + modeDescription + '</td><td></td><td></td><td>';
-                if (stat == false)
-                {
-                    mode_string += '<span class="red_dot" title=' + JSON.stringify(healthStatus) + '></span>';
-                    comp_stat = false;
-                }
-                else
-                {
-                    mode_string += '<span class="green_dot" title=' + JSON.stringify(healthStatus) + '></span>';
-                }
-                mode_string += '</td><td></td></tr>';
-            }
-            html_string += '<tbody class="component_monitor">';
-            html_string += '<tr style="background-color:rgba(0,0,0,.075)"><td colspan="3"><label for="' + component_monitor_name + '" style="display:block">' + component_monitor_name + '</label>';
-
-            html_string += '<input type="checkbox" name="' + component_monitor_name + '" id="' + component_monitor_name + '" data-toggle="toggle" style="display:none"/></td>';
-            if (comp_stat == false)
-            {
-                html_string += '<td>' + red_circle + '</td>';
-            }
-            else
-            {
-                html_string += '<td>' + green_circle + '</td>';
-            }
-            html_string += '</tr></tbody>';
-
-            if (!monitor_statuses_expanded[component_monitor_name])
-            {
-                html_string += '<tbody class="monitor_modes" style="display:none">';
-            }
-            else
-            {
-                html_string += '<tbody class="monitor_modes">';
-            }
-            html_string += mode_string;
-            html_string += '</tbody>';
+            var r = t.insertRow(-1);
+            var c = r.insertCell(-1);
+            r.insertCell(-1);
+            r.insertCell(-1);
+            r.insertCell(-1);
+            r.insertCell(-1);
+            c.innerHTML = data[i]
         }
-        return html_string;
-    }
+    });
+    socket.on('zyre_peers', function(msg) {
+        var t = document.getElementById('ropod_list');
+        data = JSON.parse(msg.data);
+        for (var i = 1, row; row = t.rows[i]; i++)
+        {
+            // if current row exists in zyre_peers
+            if (data.indexOf(row.cells[0].innerHTML) > -1)
+            {
+                row.cells[1].innerHTML = '<span class="green_dot"></span>'
+                row.cells[1].style.textAlign = 'center';
+                row.cells[1].style.verticalAlign = 'middle';
+            }
+            else
+            {
+                row.cells[1].innerHTML = '<span class="red_dot"></span>'
+                row.cells[1].style.textAlign = 'center';
+                row.cells[1].style.verticalAlign = 'middle';
+
+                row.cells[2].innerHTML = '<span class="grey_dot"></span>'
+                row.cells[2].style.textAlign = 'center';
+                row.cells[2].style.verticalAlign = 'middle';
+            }
+        }
+    });
+
 </script>
 
 <div class="row">
@@ -278,6 +96,17 @@
 </div>
 
 <div id="overall_ropod_status_container" class="ropod_table" disabled="disabled">
+    <table id="ropod_list" width="100%" class="table table-striped table-bordered table-hover">
+        <thead>
+            <th width="70%">Ropod</th>
+            <th width="5%">Online</th>
+            <th width="5%">Status</th>
+            <th width="10%">Status time</th>
+            <th width="10%">Detailed status</th>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     <div class="panel panel-default">
     </div>
 </div>
