@@ -11,6 +11,7 @@ from remote_monitoring.common import msg_data, communicate_zmq, socketio
 
 from pyre_communicator.base_class import PyreBaseCommunicator
 from threading import Lock
+from Queue import LifoQueue
 
 
 ropod_status = Blueprint('ropod_status', __name__)
@@ -21,6 +22,28 @@ thread = None
 thread_lock = Lock()
 
 client = MongoClient()
+
+status_msg_queues = {}
+
+class PyreTalker(PyreBaseCommunicator):
+    def __init__(self, node_name, groups, message_types, verbose=False,
+                 interface=None, acknowledge=False):
+        super(PyreTalker, self).__init__(node_name, groups, message_types,
+                                        verbose=verbose, interface=interface, acknowledge=acknowledge)
+
+    def receive_event_cb(self, zyre_msg):
+        if (zyre_msg.msg_type == "SHOUT"):
+            peer_name = zyre_msg.peer_name
+            if not peer_name in status_msg_queues.keys():
+                return
+            msg = zyre_msg.msg_content
+            try:
+                json_msg = json.loads(msg)
+            except:
+                return
+            if "header" in json_msg and "type" in json_msg["header"]:
+                if json_msg["header"]["type"] == "HEALTH-STATUS":
+                    status_msg_queues[peer_name].put(msg)
 
 
 @ropod_status.route('/ropod_info')
@@ -175,13 +198,30 @@ def get_deployed_black_boxes():
 
 
 def background_thread():
-    pyre = PyreBaseCommunicator("ropod_status_listener", ['ROPOD'], [], verbose=False)
+    pyre = PyreTalker("ropod_status_listener", ['MONITOR'], [], verbose=False)
     socketio.sleep(1)
     while True:
         peers = pyre.peers()
         peers_list = []
+        # find all component monitor peers and create
+        # queues for their status messages
         for p in peers:
-            peers_list.append(pyre.peer_directory[p])
+            if p in pyre.peer_directory.keys():
+                peer_name = pyre.peer_directory[p]
+                # TODO: only look for component monitor peers
+                if peer_name not in status_msg_queues.keys():
+                    status_msg_queues[peer_name] = LifoQueue()
+                peers_list.append(peer_name)
+        # emit the health-status message for all ropods
+        for key in status_msg_queues.keys():
+            try:
+                msg = status_msg_queues[key].get(block=False)
+                socketio.emit('status_msg', {'data': msg}, namespace='/ropod_status')
+            except:
+                pass
+            # TODO: clear the queues once in a while
+
+        # emit names of all ropods with component monitors
         socketio.emit('zyre_peers', {'data':json.dumps(peers_list)}, namespace='/ropod_status')
         socketio.sleep(1)
 
