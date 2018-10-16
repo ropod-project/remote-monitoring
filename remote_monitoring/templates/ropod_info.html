@@ -3,25 +3,28 @@
 
 <style>
 .green_dot {
-    height: 10px;
-    width: 10px;
+    height: 15px;
+    width: 15px;
     background-color: rgb(0, 255, 0);
     border-radius: 50%;
     display: inline-block;
 }
 .red_dot {
-    height: 10px;
-    width: 10px;
+    height: 15px;
+    width: 15px;
     background-color: rgb(255, 0, 0);
     border-radius: 50%;
     display: inline-block;
 }
 .grey_dot {
-    height: 10px;
-    width: 10px;
+    height: 15px;
+    width: 15px;
     background-color: rgb(128, 128, 128);
     border-radius: 50%;
     display: inline-block;
+}
+.toggle {
+    display: none;
 }
 </style>
 
@@ -30,48 +33,47 @@
 <script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
 
 <script>
+    // currently selected ropod. Full status of this ropod
+    // is to be shown
     var current_ropod_id = '';
 
     $(document).ready(function() {
         $('#error_message_container').hide();
         $('#operation_indicator').hide();
+        $('#status_container').hide();
 
-        $('[data-toggle="toggle"]').change(function(){
-            var component_monitor_name = this.id;
-            console($(this).parents());
-            $(this).parents().next('.monitor_modes').toggle();
-        });
-
+        // click on 'Detailed status' button
         $('.ropod_table').on('click', 'button', function() {
             current_ropod_id = $(this).val();
+            // clear the current table
             $("#detailed_component_monitors tbody").html('');
             var table = document.getElementById('detailed_component_monitors');
             var title = table.getElementsByTagName('th')[0];
             title.innerHTML = '';
-            console.log('clicked ' + current_ropod_id);
         });
-
+        // click on 'Hide detailed status' button
         $(document).on('click', 'button#hide_detailed_status', function() {
             current_ropod_id = '';
             $('#detailed_component_monitors tbody').html('');
             var table = document.getElementById('detailed_component_monitors');
             var title = table.getElementsByTagName('th')[0];
             title.innerHTML = '';
+            $('#status_container').hide();
         });
 
-
+        // expand all component monitor modes
         $(document).on('click', 'button#expand_all', function() {
             $('.monitor_modes').show();
         });
-
+        // collapse all component monitor modes
         $(document).on('click', 'button#collapse_all', function() {
             $('.monitor_modes').hide();
         });
 
     });
 
-
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/ropod_status');
+    // receive list of deployed ropod ids
     socket.on('deployed_ropods', function(msg) {
         $("#ropod_list tr:not(:first)").remove()
         var t = document.getElementById('ropod_list');
@@ -88,18 +90,28 @@
             button.innerHTML = '<td><button id="' + data[i] + '" value="' + data[i] + '" class="btn btn-primary" type="button">Get detailed status</button></td>';
         }
     });
+    // receive list of ropods that are currently online
     socket.on('zyre_peers', function(msg) {
         var t = document.getElementById('ropod_list');
         data = JSON.parse(msg.data);
         for (var i = 1, row; row = t.rows[i]; i++)
         {
             // if current row exists in zyre_peers
+            // set online true, status unknown (if no status received)
             if (data.indexOf(row.cells[0].innerHTML) > -1)
             {
                 row.cells[1].innerHTML = '<span class="green_dot"></span>'
                 row.cells[1].style.textAlign = 'center';
                 row.cells[1].style.verticalAlign = 'middle';
+
+                if (row.cells[2].innerHTML == '')
+                {
+                    row.cells[2].innerHTML = '<span class="grey_dot"></span>'
+                    row.cells[2].style.textAlign = 'center';
+                    row.cells[2].style.verticalAlign = 'middle';
+                }
             }
+            // set online false, and status unknown
             else
             {
                 row.cells[1].innerHTML = '<span class="red_dot"></span>'
@@ -109,18 +121,31 @@
                 row.cells[2].innerHTML = '<span class="grey_dot"></span>'
                 row.cells[2].style.textAlign = 'center';
                 row.cells[2].style.verticalAlign = 'middle';
+
+                if (data.indexOf(current_ropod_id) < 0)
+                {
+                    $('#detailed_component_monitors tbody').html('');
+                    $('#status_container').hide();
+                }
             }
         }
     });
+
+    function toggle_monitor(component_monitor_name_label){
+        monitor_name = component_monitor_name_label;
+        console.log($('#'+monitor_name).parents().next('.monitor_modes'));
+        $('#'+monitor_name).parents().next('.monitor_modes').toggle();
+    }
+    // receive status message (for a single ropod)
     socket.on('status_msg', function(msg) {
-        console.log('msg received');
         var jmsg = JSON.parse(msg.data);
         var ropod_id = jmsg.payload.ropodId;
-        console.log(Object.keys(msg.data).some(item => !msg.data[item]));
         // only update the full table if it's the current ropod_id
         if (ropod_id == current_ropod_id)
         {
             var tbody = $("#detailed_component_monitors tbody");
+            // table has not been constructed yet; so construct it with correct
+            // component monitor and mode names
             if (tbody.children().length == 0)
             {
                 var table = document.getElementById('detailed_component_monitors');
@@ -135,9 +160,9 @@
                     header_row = comp_tbody.insertRow(-1);
                     header_row.style.backgroundColor = "rgba(0,0,0,.075)";
                     cell = header_row.insertCell(-1);
-//                    cell.colSpan = 3;
-                    cell_html = '<label for="' + component_monitor_name + '_label" style="display:block">' + component_monitor_name + '</label>';
-                    cell_html += '<input type="checkbox" name="' + component_monitor_name + '_label" id="' + component_monitor_name + '_label" data-toggle="toggle" style="display:none"/>';
+                    cell_id = component_monitor_name.split(' ').join('_') + '_label'
+                    cell_html = '<label for="' + cell_id + '" style="display:block">' + component_monitor_name + '</label>';
+                    cell_html += '<input type="checkbox" name="' + component_monitor_name + '" id="' + cell_id + '" class="toggle" onclick="toggle_monitor(this.id)" />';
                     cell.innerHTML = cell_html;
 
                     overall_status_cell = header_row.insertCell(-1);
@@ -151,6 +176,7 @@
 
                     modes_tbody = document.createElement('tbody');
                     modes_tbody.className = 'monitor_modes';
+                    modes_tbody.style.display = "none";
                     var modes = monitors[monitor].modes;
                     for (var mode in modes)
                     {
@@ -159,17 +185,18 @@
                         mode_row.style.backgroundColor = "#fdfdfe";
                         mode_row_c1 = mode_row.insertCell(-1);
                         mode_row_c1.innerText = modeDescription;
-                        mode_row.insertCell(-1);
                         status_cell = mode_row.insertCell(-1);
                         status_cell.id = component_monitor_name + modeDescription;
                         status_cell.style.textAlign = 'center';
                         status_cell.style.verticalAlign = 'middle';
                         mode_row.insertCell(-1);
+                        mode_row.insertCell(-1);
                     }
                     table.appendChild(modes_tbody);
                 }
-                // construct the table
+                $('#status_container').show();
             }
+            // display the status of each monitor and mode
             var monitors = jmsg.payload.monitors;
             for (var monitor in monitors)
             {
@@ -208,6 +235,7 @@
         }
         // function as seen on stackoverflow.com by Ponmudi VN
         // (https://stackoverflow.com/questions/6384421/check-whether-a-value-exists-in-json-object)
+        // check if value is contained in any key of the json object
         function _isContains(json, value) {
             let contains = false;
             Object.keys(json).some(key => {
@@ -216,7 +244,8 @@
             });
             return contains;
         }
-        var overall_ropod_status = _isContains(jmsg.payload.monitors, 'false');
+        // check if any status is false
+        var overall_ropod_status = !(_isContains(jmsg.payload.monitors, false));
         var t = document.getElementById('ropod_list');
         for (var i = 1, row; row = t.rows[i]; i++)
         {

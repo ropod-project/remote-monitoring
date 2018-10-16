@@ -28,6 +28,6 @@ if __name__ == '__main__':
     try:
         app.secret_key = 'area5142'
         app.config['SESSION_TYPE'] = 'filesystem'
-        socketio.run(app)
+        socketio.run(app, host='0.0.0.0')
     finally:
         zmq_context.term()

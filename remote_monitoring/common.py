@@ -3,6 +3,9 @@ from flask_socketio import SocketIO
 
 socketio = SocketIO()
 
+from pymongo import MongoClient
+client = MongoClient()
+
 zmq_context = zmq.Context()
 port = "5670"
 
@@ -72,3 +75,18 @@ def communicate_zmq(data):
     socket.send(data.encode('ascii'))
     reply = socket.recv()
     return reply
+
+def get_deployed_ropods():
+    cursor = client.deployed_ropods.ropods.find()
+    ropods = []
+    for r in cursor:
+        ropods.append(r['ropod_name'])
+    return ropods
+
+def get_deployed_black_boxes():
+    cursor = client.deployed_ropods.black_boxes.find()
+    black_boxes = []
+    for b in cursor:
+        black_boxes.append(b)
+    return black_boxes
+
