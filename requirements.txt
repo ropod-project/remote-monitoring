@@ -3,3 +3,4 @@ Flask
 mod_wsgi
 gevent
 pyzmq
+pymongo
