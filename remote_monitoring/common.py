@@ -1,4 +1,8 @@
 import zmq
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
+
 import pymongo as pm
 
 class Config(object):
