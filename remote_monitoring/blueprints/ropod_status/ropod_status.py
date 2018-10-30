@@ -7,7 +7,7 @@ import json
 import uuid
 
 from remote_monitoring.common import socketio
-from remote_monitoring.common import get_deployed_ropods, get_deployed_black_boxes
+from remote_monitoring.common import Config
 
 from pyre_communicator.base_class import PyreBaseCommunicator
 from threading import Lock
@@ -20,6 +20,8 @@ thread = None
 thread_lock = Lock()
 
 status_msg_queues = {}
+
+config = Config()
 
 class PyreTalker(PyreBaseCommunicator):
     def __init__(self, node_name, groups, message_types, verbose=False,
@@ -82,7 +84,7 @@ def background_thread():
 
 @socketio.on('connect', namespace='/ropod_status')
 def on_connect():
-    ropods = get_deployed_ropods()
+    ropods = config.get_robots()
     emit('deployed_ropods', {'data':json.dumps(ropods)})
 
     global thread
