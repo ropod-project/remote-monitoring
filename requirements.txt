@@ -4,3 +4,4 @@ mod_wsgi
 gevent
 pyzmq
 flask-socketio
+pymongo
