@@ -1,7 +1,23 @@
 import zmq
+import pymongo as pm
+
+class Config(object):
+    def __init__(self):
+        self.db_name = 'remote_monitoring_config'
+
+    def get_robots(self):
+        collection_name = 'robots'
+        client = pm.MongoClient()
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({})
+        robots = list()
+        for doc in docs:
+            robots.append(doc['name'])
+        return robots
 
 zmq_context = zmq.Context()
-port = "5670"
+zmq_port = "5670"
 
 msg_data = {
     "header":
@@ -65,7 +81,7 @@ ropod_status_msg = {
 
 def communicate_zmq(data):
     socket = zmq_context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:%s" % port)
+    socket.connect("tcp://localhost:%s" % zmq_port)
     socket.send(data.encode('ascii'))
     reply = socket.recv()
     return reply
