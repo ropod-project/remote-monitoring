@@ -1,8 +1,13 @@
 from __future__ import print_function
 import uuid
+import threading
+import json
 
 from flask import Blueprint, jsonify, render_template, request, session
-from remote_monitoring.common import msg_data, Config
+from remote_monitoring.common import socketio, msg_data, Config
+
+feedback_thread = None
+feedback_thread_lock = threading.Lock()
 
 def create_blueprint(communicator):
     experiments = Blueprint('experiments', __name__)
@@ -38,21 +43,51 @@ def create_blueprint(communicator):
 
     @experiments.route('/send_experiment_request', methods=['GET', 'POST'])
     def send_experiment_request():
-        ropod_id = request.args.get('ropod_id', '', type=str)
+        '''Sends a "ROBOT-EXPERIMENT-REQUEST" message to a robot with ID "robot_id"
+        for performing the experiment with ID "experiment" (both the robot ID and
+        the experiment ID are expected to be passed in the request).
+        '''
+        robot_id = request.args.get('robot_id', '', type=str)
         experiment = request.args.get('experiment', '', type=str)
 
         msg = dict(msg_data)
         msg['header']['type'] = 'ROBOT-EXPERIMENT-REQUEST'
         msg['payload']['userId'] = session['uid'].hex
-        msg['payload']['robotId'] = ropod_id
+        msg['payload']['robotId'] = robot_id
         msg['payload']['experimentType'] = experiment
 
         client_feedback_msg = ''
         try:
             zyre_communicator.shout(msg)
+
+            global feedback_thread
+            with feedback_thread_lock:
+                if not feedback_thread:
+                    feedback_thread = socketio.start_background_task(target=get_experiment_feedback,
+                                                                     session_id=session['uid'],
+                                                                     robot_id=robot_id)
         except Exception as exc:
             print('[send_experiment_request] %s' % str(exc))
             client_feedback_msg = 'Command could not be sent'
         return jsonify(success=True, message=client_feedback_msg)
+
+    def get_experiment_feedback(session_id, robot_id):
+        experiment_ongoing = True
+        while experiment_ongoing:
+            feedback_msg = zyre_communicator.get_experiment_feedback(session_id)
+            if feedback_msg and feedback_msg['robot_id'] == robot_id:
+                if feedback_msg['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK':
+                    socketio.emit('experiment_feedback',
+                                  json.dumps(feedback_msg),
+                                  namespace='/experiments')
+                elif feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
+                    socketio.emit('experiment_feedback',
+                                  json.dumps(feedback_msg),
+                                  namespace='/experiments')
+                    experiment_ongoing = False
+                socketio.sleep(0.05)
+
+        global feedback_thread
+        feedback_thread = None
 
     return experiments

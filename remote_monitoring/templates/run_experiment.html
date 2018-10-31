@@ -3,10 +3,12 @@
 
 <script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
 
 <script>
     var robot_id = undefined;
     var experiment = undefined;
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/experiments');
 
     $(document).ready(function() {
         $('#error_message_container').hide();
@@ -108,6 +110,7 @@
                 $('#info_message_container_content').html('Experiment request sent');
                 $('#experiment_robot_id').html(robot_id);
                 $('#ongoing_experiment_id').html(experiment);
+                $('#experiment_feedback').val('')
                 $('#experiment_progress').show();
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
@@ -115,6 +118,23 @@
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
         });
+    });
+
+    socket.on('experiment_feedback', function(msg) {
+        var feedback_data = JSON.parse(msg);
+        var feedback_str = $('#experiment_feedback').val();
+        if (feedback_data['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK') {
+            feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
+            feedback_str += 'State: ' + feedback_data['command'] + ' --- ';
+            feedback_str += 'Status: ' + feedback_data['state'] + '\n';
+        }
+        else if (feedback_data['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK') {
+            feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
+            feedback_str += 'Experiment result: ' + feedback_data['result'];
+        }
+        $('#experiment_feedback').val(feedback_str);
+        var bottom_height = $('#experiment_feedback').prop('scrollHeight') - $('#experiment_feedback').height();
+        $('#experiment_feedback').scrollTop(bottom_height);
     });
 </script>
 
