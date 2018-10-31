@@ -1,17 +1,20 @@
 import zmq
+import pymongo as pm
 from flask_socketio import SocketIO
 
 socketio = SocketIO()
 
-import pymongo as pm
-
 class Config(object):
+    ROBOT_COLLECTION = 'robots'
+    EXPERIMENT_COLLECTION = 'experiments'
+
     def __init__(self):
         self.db_name = 'remote_monitoring_config'
+        self.db_port = 27017
 
     def get_robots(self):
-        collection_name = 'robots'
-        client = pm.MongoClient()
+        collection_name = Config.ROBOT_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
         db = client[self.db_name]
         collection = db[collection_name]
         docs = collection.find({})
@@ -19,6 +22,20 @@ class Config(object):
         for doc in docs:
             robots.append(doc['name'])
         return robots
+
+    def get_experiments(self):
+        collection_name = Config.EXPERIMENT_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({})
+        experiments = list()
+        for doc in docs:
+            experiment = dict()
+            experiment['id'] = doc['id']
+            experiment['name'] = doc['name']
+            experiments.append(experiment)
+        return experiments
 
 zmq_context = zmq.Context()
 zmq_port = "5670"

@@ -25,6 +25,17 @@ def create_blueprint(communicator):
             feedback_msg = 'An error occurred while retrieving the robot IDs'
         return jsonify(robot_ids=robots, message=feedback_msg)
 
+    @experiments.route('/get_experiment_list', methods=['GET'])
+    def get_experiment_list():
+        experiments = dict()
+        feedback_msg = ''
+        try:
+            experiments = config.get_experiments()
+        except Exception as exc:
+            print('[get_experiment_list] %s' % str(exc))
+            feedback_msg = 'An error occurred while retrieving the experiment list'
+        return jsonify(experiments=experiments, message=feedback_msg)
+
     @experiments.route('/send_experiment_request', methods=['GET', 'POST'])
     def send_experiment_request():
         ropod_id = request.args.get('ropod_id', '', type=str)
