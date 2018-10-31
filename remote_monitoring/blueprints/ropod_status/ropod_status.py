@@ -11,7 +11,7 @@ from remote_monitoring.common import Config
 
 from pyre_communicator.base_class import PyreBaseCommunicator
 from threading import Lock
-from Queue import LifoQueue
+from queue import LifoQueue
 
 
 ropod_status = Blueprint('ropod_status', __name__)
@@ -91,4 +91,3 @@ def on_connect():
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(target=background_thread)
-
