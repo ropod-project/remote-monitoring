@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
 
 <script>
@@ -12,7 +12,7 @@
         $('#operation_indicator').show();
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_locations',
+            url: SCRIPT_ROOT + '/task/get_locations',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -44,7 +44,7 @@
         });
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_device_types',
+            url: SCRIPT_ROOT + '/task/get_device_types',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -78,7 +78,7 @@
             var device_type = $('#device_types').val();
 
             $.ajax({
-                url: SCRIPT_ROOT + '/send_task_request',
+                url: SCRIPT_ROOT + '/task/send_task_request',
                 type: 'post',
                 data: JSON.stringify({
                           user_id: user_id,
