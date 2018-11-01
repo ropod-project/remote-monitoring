@@ -5,19 +5,19 @@ from flask import Flask
 
 import remote_monitoring.blueprints.black_box.black_box as black_box
 import remote_monitoring.blueprints.experiments.experiments as experiments
-from remote_monitoring.blueprints.ropod_status.ropod_status import ropod_status
+import remote_monitoring.blueprints.ropod_status.robot_status as robot_status
 import remote_monitoring.blueprints.task_scheduling.task_scheduling as task_scheduling
 
 from remote_monitoring.common import socketio
 from remote_monitoring.zyre_communicator import ZyreWebCommunicator
 
-zyre_communicator = ZyreWebCommunicator('remote_monitoring',
-                                        ['ROPOD', 'MONITORING'], 10.)
+zyre_communicator = ZyreWebCommunicator('remote_monitoring', ['ROPOD', 'MONITOR'],
+                                        data_timeout=10., status_timeout=5.)
 
 app = Flask(__name__)
 app.register_blueprint(black_box.create_blueprint(zyre_communicator))
 app.register_blueprint(experiments.create_blueprint(zyre_communicator))
-app.register_blueprint(ropod_status)
+app.register_blueprint(robot_status.create_blueprint(zyre_communicator))
 app.register_blueprint(task_scheduling.create_blueprint(zyre_communicator))
 
 socketio.init_app(app)

@@ -2,9 +2,10 @@ import time
 from pyre_communicator.base_class import PyreBaseCommunicator
 
 class ZyreWebCommunicator(PyreBaseCommunicator):
-    def __init__(self, node_name, groups, data_timeout=10.):
+    def __init__(self, node_name, groups, data_timeout=10., status_timeout=5.):
         super(ZyreWebCommunicator, self).__init__(node_name, groups, [])
         self.data_timeout = data_timeout
+        self.status_timeout = status_timeout
 
         # a dictionary in which the keys are session IDs
         # and the values are types of requests for the particular users
@@ -18,6 +19,10 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
         # and the values are messages for the particular users
         self.request_data = dict()
 
+        # a dictionary in which the keys are robot IDs
+        # and the values are robot status messages
+        self.status_msgs = dict()
+
     def receive_msg_cb(self, msg_content):
         dict_msg = self.convert_zyre_msg_to_dict(msg_content)
         if dict_msg is None:
@@ -29,6 +34,10 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             for session_id in self.request_data:
                 if dict_msg['payload']['receiverId'] == session_id:
                     self.request_data[session_id] = dict_msg
+        elif message_type == 'HEALTH-STATUS':
+            robot_id = dict_msg['payload']['robotId']
+            if robot_id in self.status_msgs:
+                self.status_msgs[robot_id] = dict_msg
         elif message_type == 'ROBOT-COMMAND-FEEDBACK':
             for session_id in self.request_data:
                 if self.request_type[session_id] == 'ROBOT-EXPERIMENT-FEEDBACK' and \
@@ -80,6 +89,16 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
         self.shout(query_msg)
         data = self.wait_for_data(session_id)
         return data
+
+    #####################
+    # Component monitors
+    #####################
+    def get_status(self, robot_id):
+        if self.status_msgs[robot_id] and self.status_msgs[robot_id]['header']['timestamp']:
+            time_since_last_msg = time.time() - self.status_msgs[robot_id]['header']['timestamp']
+            if time_since_last_msg > self.status_timeout:
+                self.status_msgs[robot_id]['payload']['monitors'] = None
+        return self.status_msgs[robot_id]
 
     #####################
     # Remote experiments
