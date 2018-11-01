@@ -17,6 +17,7 @@ def create_blueprint(communicator):
     zyre_communicator = communicator
     config = Config()
 
+    @robot_status.route('/')
     @robot_status.route('/robot_status')
     def robot_info():
         session['uid'] = uuid.uuid4()

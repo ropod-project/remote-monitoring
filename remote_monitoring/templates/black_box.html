@@ -36,7 +36,7 @@ body {
     var robot_variables = [];
     var robot_id = undefined;
 
-    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_robot_data');
+    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/black_box/get_robot_data');
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -59,7 +59,7 @@ body {
         $('#operation_indicator').show();
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_robot_ids',
+            url: SCRIPT_ROOT + '/black_box/get_robot_ids',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -99,7 +99,7 @@ body {
 
             robot_id = $(this).val();
             $.ajax({
-                url: SCRIPT_ROOT + '/get_robot_variables',
+                url: SCRIPT_ROOT + '/black_box/get_robot_variables',
                 type: 'get',
                 data: { robot_id: robot_id },
                 contentType: 'application/json',
@@ -408,7 +408,7 @@ body {
         }
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_download_query',
+            url: SCRIPT_ROOT + '/black_box/get_download_query',
             type: 'get',
             data: { robot_id: robot_id,
                     start_timestamp: date_str_to_timestamp('start_date'),
@@ -433,7 +433,7 @@ body {
 
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Robot Remote Monitoring</h1>
+        <h1 class="page-header">Black box interface</h1>
     </div>
 </div>
 
@@ -469,7 +469,7 @@ body {
 
         <div class="col-lg-2">
             <div class="form-group">
-                <form id="download_form" action="/send_download_file">
+                <form id="download_form" action="/black_box/send_download_file">
                     <input id="download_btn_form" class="btn btn-primary" type="button" name="download_btn_form" onclick="form_download_function()" value="Download data">
                 </form>
             </div>

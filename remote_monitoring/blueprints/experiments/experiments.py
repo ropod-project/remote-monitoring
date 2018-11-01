@@ -14,10 +14,10 @@ def create_blueprint(communicator):
     zyre_communicator = communicator
     config = Config()
 
-    @experiments.route('/run_experiment')
+    @experiments.route('/experiments')
     def run_experiment():
         session['uid'] = uuid.uuid4()
-        return render_template('run_experiment.html')
+        return render_template('remote_experiments.html')
 
     @experiments.route('/experiments/get_robot_ids', methods=['GET'])
     def get_robot_ids():

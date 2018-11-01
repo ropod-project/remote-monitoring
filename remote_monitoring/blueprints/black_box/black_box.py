@@ -13,12 +13,12 @@ def create_blueprint(communicator):
     config = Config()
     query_result_file_path = '/tmp/robot_query_data.json'
 
-    @black_box.route('/')
+    @black_box.route('/black_box')
     def index():
         session['uid'] = uuid.uuid4()
-        return render_template('index.html')
+        return render_template('black_box.html')
 
-    @black_box.route('/get_robot_ids', methods=['GET'])
+    @black_box.route('/black_box/get_robot_ids', methods=['GET'])
     def get_robot_ids():
         robots = list()
         feedback_msg = ''
@@ -29,7 +29,7 @@ def create_blueprint(communicator):
             feedback_msg = 'An error occurred while retrieving the robot IDs'
         return jsonify(robots=robots, message=feedback_msg)
 
-    @black_box.route('/get_robot_variables', methods=['GET'])
+    @black_box.route('/black_box/get_robot_variables', methods=['GET'])
     def get_robot_variables():
         robot_id = request.args.get('robot_id', '', type=str)
         black_box_id = get_black_box_id(robot_id)
@@ -64,7 +64,7 @@ def create_blueprint(communicator):
             message = 'Variable list could not be retrieved'
         return jsonify(robot_variables=variables, message=message)
 
-    @black_box.route('/get_robot_data', methods=['GET'])
+    @black_box.route('/black_box/get_robot_data', methods=['GET'])
     def get_robot_data():
         robot_id = request.args.get('robot_id', '', type=str)
         black_box_id = get_black_box_id(robot_id)
@@ -102,7 +102,7 @@ def create_blueprint(communicator):
             message = 'Data could not be retrieved'
         return jsonify(variables=variables, data=data, message=message)
 
-    @black_box.route('/get_download_query', methods=['GET'])
+    @black_box.route('/black_box/get_download_query', methods=['GET'])
     def get_download_query():
         """Responds to a data download query by sending a query to the appropriate
         black box and then saving the data to a temporary file for download.
@@ -134,7 +134,7 @@ def create_blueprint(communicator):
             message = 'Data could not be retrieved'
             return jsonify(message=message)
 
-    @black_box.route('/send_download_file', methods=['GET', 'POST'])
+    @black_box.route('/black_box/send_download_file', methods=['GET', 'POST'])
     def send_download_file():
         """Sends a stored data file for download.
         """
