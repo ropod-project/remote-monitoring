@@ -18,7 +18,7 @@
         $('#experiment_progress').hide();
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_robot_ids',
+            url: SCRIPT_ROOT + '/experiments/get_robot_ids',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -30,7 +30,7 @@
                 return;
             }
 
-            $.each(result.robot_ids, function(i, robot_id){
+            $.each(result.robots, function(i, robot_id){
                 $('#robot_ids').append($('<option>', {
                     value: robot_id,
                     text: robot_id
@@ -45,7 +45,7 @@
         });
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_experiment_list',
+            url: SCRIPT_ROOT + '/experiments/get_experiment_list',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -93,7 +93,7 @@
 
         $("#btn_execute_experiment").click(function(){
             $.ajax({
-                url: SCRIPT_ROOT + '/send_experiment_request',
+                url: SCRIPT_ROOT + '/experiments/send_experiment_request',
                 type: 'get',
                 data: { robot_id: robot_id, experiment: experiment },
                 contentType: 'application/json',

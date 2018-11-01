@@ -19,7 +19,7 @@ def create_blueprint(communicator):
         session['uid'] = uuid.uuid4()
         return render_template('run_experiment.html')
 
-    @experiments.route('/get_robot_ids', methods=['GET'])
+    @experiments.route('/experiments/get_robot_ids', methods=['GET'])
     def get_robot_ids():
         robots = list()
         feedback_msg = ''
@@ -28,9 +28,9 @@ def create_blueprint(communicator):
         except Exception as exc:
             print('[get_robot_ids] %s' % str(exc))
             feedback_msg = 'An error occurred while retrieving the robot IDs'
-        return jsonify(robot_ids=robots, message=feedback_msg)
+        return jsonify(robots=robots, message=feedback_msg)
 
-    @experiments.route('/get_experiment_list', methods=['GET'])
+    @experiments.route('/experiments/get_experiment_list', methods=['GET'])
     def get_experiment_list():
         experiments = dict()
         feedback_msg = ''
@@ -41,7 +41,7 @@ def create_blueprint(communicator):
             feedback_msg = 'An error occurred while retrieving the experiment list'
         return jsonify(experiments=experiments, message=feedback_msg)
 
-    @experiments.route('/send_experiment_request', methods=['GET', 'POST'])
+    @experiments.route('/experiments/send_experiment_request', methods=['GET', 'POST'])
     def send_experiment_request():
         '''Sends a "ROBOT-EXPERIMENT-REQUEST" message to a robot with ID "robot_id"
         for performing the experiment with ID "experiment" (both the robot ID and
