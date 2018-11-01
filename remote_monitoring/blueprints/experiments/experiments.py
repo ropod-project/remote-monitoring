@@ -64,7 +64,7 @@ def create_blueprint(communicator):
             with feedback_thread_lock:
                 if not feedback_thread:
                     feedback_thread = socketio.start_background_task(target=get_experiment_feedback,
-                                                                     session_id=session['uid'],
+                                                                     session_id=session['uid'].hex,
                                                                      robot_id=robot_id)
         except Exception as exc:
             print('[send_experiment_request] %s' % str(exc))
@@ -74,7 +74,7 @@ def create_blueprint(communicator):
     def get_experiment_feedback(session_id, robot_id):
         experiment_ongoing = True
         while experiment_ongoing:
-            feedback_msg = zyre_communicator.get_experiment_feedback(session_id)
+            feedback_msg = zyre_communicator.get_experiment_feedback(session_id, robot_id)
             if feedback_msg and feedback_msg['robot_id'] == robot_id:
                 if feedback_msg['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK':
                     socketio.emit('experiment_feedback',
