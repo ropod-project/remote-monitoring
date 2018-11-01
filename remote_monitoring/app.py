@@ -8,9 +8,7 @@ import remote_monitoring.blueprints.experiments.experiments as experiments
 from remote_monitoring.blueprints.ropod_status.ropod_status import ropod_status
 import remote_monitoring.blueprints.task_scheduling.task_scheduling as task_scheduling
 
-from remote_monitoring.common import zmq_context
 from remote_monitoring.common import socketio
-
 from remote_monitoring.zyre_communicator import ZyreWebCommunicator
 
 zyre_communicator = ZyreWebCommunicator('remote_monitoring',
@@ -31,4 +29,3 @@ if __name__ == '__main__':
         socketio.run(app, host='0.0.0.0')
     finally:
         zyre_communicator.shutdown()
-        zmq_context.term()

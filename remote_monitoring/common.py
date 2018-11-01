@@ -1,4 +1,3 @@
-import zmq
 import pymongo as pm
 from flask_socketio import SocketIO
 
@@ -36,9 +35,6 @@ class Config(object):
             experiment['name'] = doc['name']
             experiments.append(experiment)
         return experiments
-
-zmq_context = zmq.Context()
-zmq_port = "5670"
 
 msg_data = {
     "header":
@@ -99,10 +95,3 @@ ropod_status_msg = {
         }
     }
 }
-
-def communicate_zmq(data):
-    socket = zmq_context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:%s" % zmq_port)
-    socket.send(data.encode('ascii'))
-    reply = socket.recv()
-    return reply
