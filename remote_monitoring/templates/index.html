@@ -33,10 +33,10 @@ body {
 </style>
 
 <script>
-    var ropod_variables = [];
-    var ropod_id = undefined;
+    var robot_variables = [];
+    var robot_id = undefined;
 
-    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_ropod_data');
+    var plot = new Plot('plot_placeholder', 'plot_variable_selection', 'plot_variables', '/get_robot_data');
 
     $(document).ready(function() {
         $('#data_container').hide();
@@ -59,7 +59,7 @@ body {
         $('#operation_indicator').show();
 
         $.ajax({
-            url: SCRIPT_ROOT + '/get_blackbox_ids',
+            url: SCRIPT_ROOT + '/get_robot_ids',
             type: 'get',
             contentType: 'application/json',
             cache: false
@@ -71,10 +71,10 @@ body {
                 return;
             }
 
-            $.each(result.ids, function(i, ropod_id){
-                $('#ropod_ids').append($('<option>', {
-                    value: ropod_id,
-                    text: ropod_id
+            $.each(result.robots, function(i, robot_id){
+                $('#robot_ids').append($('<option>', {
+                    value: robot_id,
+                    text: robot_id
                 }));
             });
             $('#operation_indicator').hide();
@@ -85,7 +85,7 @@ body {
             $('#operation_indicator').hide();
         });
 
-        $('#ropod_ids').change(function() {
+        $('#robot_ids').change(function() {
             if ($(this).val() == "none")
             {
                 $('#btn_display_data').prop('disabled', true);
@@ -97,11 +97,11 @@ body {
                 return;
             }
 
-            ropod_id = $(this).val();
+            robot_id = $(this).val();
             $.ajax({
-                url: SCRIPT_ROOT + '/get_ropod_variables',
+                url: SCRIPT_ROOT + '/get_robot_variables',
                 type: 'get',
-                data: { ropod_id: ropod_id },
+                data: { robot_id: robot_id },
                 contentType: 'application/json',
                 cache: false
             }).done(function(result) {
@@ -115,8 +115,8 @@ body {
                 $('#variable_container').html('');
                 $('#variable_container').prop('disabled', false);
 
-                ropod_variables = result.ropod_variables;
-                var html_string = visualise_variable_names(ropod_variables);
+                robot_variables = result.robot_variables;
+                var html_string = visualise_variable_names(robot_variables);
                 $('#variable_container').html(html_string);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
@@ -146,7 +146,7 @@ body {
             }
             else
             {
-                if (end_date != 'End date' && $('#ropod_ids').val() != 'none')
+                if (end_date != 'End date' && $('#robot_ids').val() != 'none')
                 {
                     $('#btn_display_data').prop('disabled', false);
                     $('#download_btn_form').prop('disabled', false);
@@ -168,7 +168,7 @@ body {
             }
             else
             {
-                if (start_date != 'Start date' && $('#ropod_ids').val() != 'none')
+                if (start_date != 'Start date' && $('#robot_ids').val() != 'none')
                 {
                     $('#btn_display_data').prop('disabled', false);
                     $('#download_btn_form').prop('disabled', false);
@@ -335,7 +335,7 @@ body {
         var end_time_ms = date_str_to_timestamp(end_date);
 
         $('#operation_indicator').show();
-        plot.display_data(ropod_id, variable_list, start_time_ms, end_time_ms);
+        plot.display_data(robot_id, variable_list, start_time_ms, end_time_ms);
     }
 
     function reset_data_panel()
@@ -410,7 +410,7 @@ body {
         $.ajax({
             url: SCRIPT_ROOT + '/get_download_query',
             type: 'get',
-            data: { ropod_id: ropod_id,
+            data: { robot_id: robot_id,
                     start_timestamp: date_str_to_timestamp('start_date'),
                     end_timestamp: date_str_to_timestamp('end_date'),
                     variables: variable_list.join()
@@ -433,7 +433,7 @@ body {
 
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">ROPOD Remote Monitoring</h1>
+        <h1 class="page-header">Robot Remote Monitoring</h1>
     </div>
 </div>
 
@@ -447,12 +447,12 @@ body {
     <p id="info_message_container_content"></p>
 </div>
 
-<div id="ropod_selection_container">
+<div id="robot_selection_container">
     <div class="row">
         <div class="col-lg-2">
             <div class="form-group">
-                <select id="ropod_ids" class="form-control">
-                    <option value="none">Choose ropod id</option>
+                <select id="robot_ids" class="form-control">
+                    <option value="none">Choose robot id</option>
                 </select>
             </div>
         </div>

@@ -3,7 +3,7 @@
 from __future__ import print_function
 from flask import Flask
 
-from remote_monitoring.blueprints.black_box.black_box import black_box
+import remote_monitoring.blueprints.black_box.black_box as black_box
 import remote_monitoring.blueprints.experiments.experiments as experiments
 from remote_monitoring.blueprints.ropod_status.ropod_status import ropod_status
 from remote_monitoring.blueprints.task_scheduling.task_scheduling import task_scheduling
@@ -17,7 +17,7 @@ zyre_communicator = ZyreWebCommunicator('remote_monitoring',
                                         ['ROPOD', 'MONITORING'], 10.)
 
 app = Flask(__name__)
-app.register_blueprint(black_box)
+app.register_blueprint(black_box.create_blueprint(zyre_communicator))
 app.register_blueprint(experiments.create_blueprint(zyre_communicator))
 app.register_blueprint(ropod_status)
 app.register_blueprint(task_scheduling)
