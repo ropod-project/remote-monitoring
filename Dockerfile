@@ -5,6 +5,11 @@ ADD . /remote-monitoring
 ADD https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp /usr/include
 ENV PYTHONPATH=/remote-monitoring
 
+RUN apt update && apt install -y \
+    apache2-dev \
+    libapache2-mod-wsgi-py3 \
+    python3-pip
+
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
