@@ -9,7 +9,7 @@ function Plot(container_name, variable_selection_container_name, variable_select
     this.current_variable = null;
 }
 
-Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_time) {
+Plot.prototype.display_data = function(robot_id, variable_list, start_time, end_time) {
     var parent_obj = this;
 
     $.ajax({
@@ -17,7 +17,7 @@ Plot.prototype.display_data = function(ropod_id, variable_list, start_time, end_
         type: 'get',
         data:
         {
-            ropod_id: ropod_id,
+            robot_id: robot_id,
             variables: variable_list.join(),
             start_timestamp: start_time,
             end_timestamp: end_time

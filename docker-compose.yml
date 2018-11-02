@@ -3,15 +3,15 @@ services:
   monitoring:
     build: .
     image: ropod-monitoring
-    # restart: on-failure
     container_name: remote_monitoring
     network_mode: "host"
     working_dir: /remote-monitoring/remote_monitoring
     command: ["python3", "app.py"]
-  listener:
-    image: ropod-monitoring
-    # restart: on-failure
-    container_name: monitoring_listener
+  mongo:
+    container_name: remote_monitoring_mongo
+    image: mongo:4.0-xenial
+    volumes:
+      - /data/remote_monitoring_db:/data/remote_monitoring_db
+    ports:
+      - "27019:27019"
     network_mode: "host"
-    working_dir: /remote-monitoring/remote_monitoring/zyre/build
-    command: ["./zyre_listener"]
