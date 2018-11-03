@@ -76,20 +76,13 @@
         }
     });
 
-    function toggle_monitor(component_monitor_name_label) {
-        monitor_name = component_monitor_name_label;
-        console.log($('#'+monitor_name).parents().next('.monitor_modes'));
-        $('#' + monitor_name).parents().next('.monitor_modes').toggle();
-    }
-
     // receive status message (for a single robot)
     socket.on('status_msg', function(status_msg) {
         var robot_id = status_msg.payload.robotId;
         update_overview(robot_id, status_msg);
 
-        if (status_msg.payload.monitors == null) {
+        if (status_msg.payload.monitors == null)
             return;
-        }
 
         // only update the full table if it's the current robot_id
         if (robot_id == current_robot_id)
@@ -98,10 +91,18 @@
         }
     });
 
+    function toggle_monitor(component_monitor_name_label)
+    {
+        monitor_name = component_monitor_name_label;
+        console.log($('#'+monitor_name).parents().next('.monitor_modes'));
+        $('#' + monitor_name).parents().next('.monitor_modes').toggle();
+    }
+
     // function as seen on stackoverflow.com by Ponmudi VN
     // (https://stackoverflow.com/questions/6384421/check-whether-a-value-exists-in-json-object)
     // check if value is contained in any key of the json object
-    function containsAny(json, value) {
+    function containsAny(json, value)
+    {
         let contains = false;
         Object.keys(json).some(key => {
             contains = typeof json[key] === 'object' ? containsAny(json[key], value) : json[key] === value;
@@ -197,65 +198,107 @@
 
     function update_detailed_status(robot_id, status_msg)
     {
-        var monitors = status_msg.payload.monitors;
         var tbody = $("#detailed_component_monitors tbody");
 
         // if this is the first time the detailed status is displayed, we need to
         // initialise the table with the correct component monitor and mode names
         if (tbody.children().length == 0)
         {
-            var table = document.getElementById('detailed_component_monitors');
-            var title = table.getElementsByTagName('th')[0];
-            title.innerHTML = 'Status of <b>' + robot_id + '</b>';
-            var monitors = status_msg.payload.monitors;
-            for (var monitor in monitors)
-            {
-                var component_monitor_name = monitors[monitor].component;
-                var comp_tbody = document.createElement('tbody');
-                comp_tbody.className = 'component_monitor';
-
-                var header_row = comp_tbody.insertRow(-1);
-                header_row.style.backgroundColor = "rgba(0,0,0,.075)";
-
-                var monitor_cell = header_row.insertCell(-1);
-                var monitor_cell_id = component_monitor_name.split(' ').join('_') + '_label'
-                var monitor_cell_html = '<label for="' + monitor_cell_id + '" style="display:block">' + component_monitor_name + '</label>';
-                monitor_cell_html += '<input type="checkbox" name="' + component_monitor_name + '" id="' + monitor_cell_id + '" class="toggle" onclick="toggle_monitor(this.id)" />';
-                monitor_cell.innerHTML = monitor_cell_html;
-
-                var overall_status_cell = header_row.insertCell(-1);
-                overall_status_cell.id = component_monitor_name;
-                overall_status_cell.style.textAlign = 'center';
-                overall_status_cell.style.verticalAlign = 'middle';
-
-                table.appendChild(comp_tbody);
-
-                var modes_tbody = document.createElement('tbody');
-                modes_tbody.className = 'monitor_modes';
-                modes_tbody.style.display = "none";
-
-                var modes = monitors[monitor].modes;
-                for (var mode in modes)
-                {
-                    var mode_description = modes[mode].monitorDescription;
-
-                    var mode_row = modes_tbody.insertRow(-1);
-                    mode_row.style.backgroundColor = "#fdfdfe";
-
-                    var mode_description_cell = mode_row.insertCell(-1);
-                    mode_description_cell.innerText = mode_description;
-
-                    var mode_status_cell = mode_row.insertCell(-1);
-                    mode_status_cell.id = component_monitor_name + mode_description;
-                    mode_status_cell.style.textAlign = 'center';
-                    mode_status_cell.style.verticalAlign = 'middle';
-                }
-                table.appendChild(modes_tbody);
-            }
-            $('#status_container').show();
+            init_detailed_status_table(robot_id, status_msg);
         }
+        fill_detailed_status_table(robot_id, status_msg);
+    }
 
-        // display the status of each monitor and mode
+    function init_detailed_status_table(robot_id, status_msg)
+    {
+        var monitors = status_msg.payload.monitors;
+        var tbody = $("#detailed_component_monitors tbody");
+
+        var table = document.getElementById('detailed_component_monitors');
+        var title = table.getElementsByTagName('th')[0];
+        title.innerHTML = 'Status of <b>' + robot_id + '</b>';
+        var monitors = status_msg.payload.monitors;
+        for (var monitor in monitors)
+        {
+            var component_monitor_name = monitors[monitor].component;
+            var comp_tbody = document.createElement('tbody');
+            comp_tbody.className = 'component_monitor';
+
+            var header_row = comp_tbody.insertRow(-1);
+            header_row.style.backgroundColor = "rgba(0,0,0,.075)";
+
+            var monitor_cell = header_row.insertCell(-1);
+            var monitor_cell_id = component_monitor_name.split(' ').join('_') + '_label'
+            var monitor_cell_html = '<label for="' + monitor_cell_id + '" style="display:block">' + component_monitor_name + '</label>';
+            monitor_cell_html += '<input type="checkbox" name="' + component_monitor_name + '" id="' + monitor_cell_id + '" class="toggle" onclick="toggle_monitor(this.id)" />';
+            monitor_cell.innerHTML = monitor_cell_html;
+
+            var overall_status_cell = header_row.insertCell(-1);
+            overall_status_cell.id = component_monitor_name;
+            overall_status_cell.style.textAlign = 'center';
+            overall_status_cell.style.verticalAlign = 'middle';
+
+            table.appendChild(comp_tbody);
+
+            var modes_tbody = document.createElement('tbody');
+            modes_tbody.className = 'monitor_modes';
+            modes_tbody.style.display = "none";
+
+            var modes = monitors[monitor].modes;
+            for (var mode in modes)
+            {
+                var mode_description = modes[mode].monitorDescription;
+
+                var mode_row = modes_tbody.insertRow(-1);
+                mode_row.style.backgroundColor = "#fdfdfe";
+
+                var mode_description_cell = mode_row.insertCell(-1);
+                mode_description_cell.innerText = mode_description;
+
+                var mode_status_cell = mode_row.insertCell(-1);
+                mode_status_cell.id = component_monitor_name + mode_description;
+                mode_status_cell.style.textAlign = 'center';
+                mode_status_cell.style.verticalAlign = 'middle';
+
+                init_monitor_mode_outputs(mode_status_cell.id, modes[mode].healthStatus, modes_tbody);
+            }
+            table.appendChild(modes_tbody);
+        }
+        $('#status_container').show();
+    }
+
+    function init_monitor_mode_outputs(monitor_id, mode_output, mode_status_tbody, level=1)
+    {
+        for (field in mode_output)
+        {
+            if (field == 'status')
+                continue;
+
+            var mode_row = mode_status_tbody.insertRow(-1);
+            mode_row.style.backgroundColor = "#fdfdfe";
+
+            var output_description_cell = mode_row.insertCell(-1);
+            var output_description_tab = '';
+            for (var i=0; i<level*8; i++)
+            {
+                // we add empty spaces at the beginning of the description
+                output_description_tab += '\u00a0';
+            }
+            output_description_cell.innerText = output_description_tab + field;
+
+            var status_cell = mode_row.insertCell(-1);
+            status_cell.id = monitor_id + '_' + field;
+            status_cell.style.textAlign = 'center';
+            status_cell.style.verticalAlign = 'middle';
+
+            if (typeof(mode_output[field]) === 'object')
+                init_monitor_mode_outputs(monitor_id, mode_output[field], mode_status_tbody, level+1);
+        }
+    }
+
+    function fill_detailed_status_table(robot_id, status_msg)
+    {
+        var monitors = status_msg.payload.monitors;
         for (var monitor in monitors)
         {
             var component_monitor_name = monitors[monitor].component;
@@ -278,17 +321,45 @@
                 {
                     status_cell.innerHTML = '<span class="green_dot" title=' + JSON.stringify(healthStatus) + '></span>';
                 }
+
+                fill_monitor_mode_outputs(id, modes[mode].healthStatus);
             }
-            overall_status_cell = document.getElementById(component_monitor_name);
+
+            var overall_status_cell = document.getElementById(component_monitor_name);
             if (overall_status == false)
-            {
                 overall_status_cell.innerHTML = '<span class="red_dot"></span>';
+            else
+                overall_status_cell.innerHTML = '<span class="green_dot"></span>';
+        }
+    }
+
+    function fill_monitor_mode_outputs(monitor_id, mode_output)
+    {
+        for (field in mode_output)
+        {
+            if (field == 'status')
+                continue;
+
+            if (typeof(mode_output[field]) === 'object')
+            {
+                fill_monitor_mode_outputs(monitor_id, mode_output[field]);
             }
             else
             {
-                overall_status_cell.innerHTML = '<span class="green_dot"></span>';
+                var id = monitor_id + '_' + field;
+                var status_cell = document.getElementById(id);
+                if (typeof(mode_output[field]) === 'boolean')
+                {
+                    if (mode_output[field])
+                        status_cell.innerHTML = '<span class="green_dot" title="true"></span>';
+                    else
+                        status_cell.innerHTML = '<span class="red_dot" title="false"></span>';
+                }
+                else
+                {
+                    status_cell.innerHTML = mode_output[field];
+                }
             }
-
         }
     }
 </script>
