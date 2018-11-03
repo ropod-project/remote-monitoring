@@ -1,0 +1,205 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
+
+<script>
+    var robot_id = undefined;
+    var experiment = undefined;
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/experiments');
+
+    $(document).ready(function() {
+        $('#error_message_container').hide();
+        $('#info_message_container').hide();
+        $('#operation_indicator').show();
+        $('#btn_execute_experiment').prop('disabled', true);
+        $('#experiment_progress').hide();
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/experiments/get_robot_ids',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
+            }
+
+            $.each(result.robots, function(i, robot_id){
+                $('#robot_ids').append($('<option>', {
+                    value: robot_id,
+                    text: robot_id
+                }));
+            });
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+            $('#operation_indicator').hide();
+        });
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/experiments/get_experiment_list',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
+            }
+
+            $.each(result.experiments, function(i, experiment){
+                $('#experiments').append($('<option>', {
+                    value: experiment['id'],
+                    text: experiment['name']
+                }));
+            });
+            $('#operation_indicator').hide();
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+            $('#operation_indicator').hide();
+        });
+
+        $('#robot_ids').change(function() {
+            robot_id = $(this).val();
+            if (robot_id != 'none' && $('#experiments').val() != 'none') {
+                $('#btn_execute_experiment').prop('disabled', false);
+            }
+            else {
+                $('#btn_execute_experiment').prop('disabled', true);
+            }
+        });
+
+        $('#experiments').change(function() {
+            experiment = $(this).val();
+            if (experiment != 'none' && $('#robot_ids').val() != 'none') {
+                $('#btn_execute_experiment').prop('disabled', false);
+            }
+            else {
+                $('#btn_execute_experiment').prop('disabled', true);
+            }
+        });
+
+        $("#btn_execute_experiment").click(function(){
+            $.ajax({
+                url: SCRIPT_ROOT + '/experiments/send_experiment_request',
+                type: 'get',
+                data: { robot_id: robot_id, experiment: experiment },
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
+
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Experiment request sent');
+                $('#experiment_robot_id').html(robot_id);
+                $('#ongoing_experiment_id').html(experiment);
+                $('#experiment_feedback').val('')
+                $('#experiment_progress').show();
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
+            });
+        });
+    });
+
+    socket.on('experiment_feedback', function(msg) {
+        var feedback_data = JSON.parse(msg);
+        var feedback_str = $('#experiment_feedback').val();
+        if (feedback_data['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK') {
+            feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
+            feedback_str += 'State: ' + feedback_data['command'] + ' --- ';
+            feedback_str += 'Status: ' + feedback_data['state'] + '\n';
+        }
+        else if (feedback_data['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK') {
+            feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
+            feedback_str += 'Experiment result: ' + feedback_data['result'];
+        }
+        $('#experiment_feedback').val(feedback_str);
+        var bottom_height = $('#experiment_feedback').prop('scrollHeight') - $('#experiment_feedback').height();
+        $('#experiment_feedback').scrollTop(bottom_height);
+    });
+</script>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Remote experiments</h1>
+    </div>
+</div>
+
+<div id="error_message_container" class="alert alert-danger alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="error_message_container_content"></p>
+</div>
+
+<div id="info_message_container" class="alert alert-info alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="info_message_container_content"></p>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="robot_ids" class="form-control">
+                <option value="none">Choose robot id</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="experiments" class="form-control">
+                <option value="none">Choose experiment</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <button id="btn_execute_experiment" disabled="disabled" class="btn btn-primary" type="button">Execute experiment</button>
+    </div>
+
+    <div class="col-lg-1">
+        <div id="operation_indicator" class="indicator"></div>
+    </div>
+</div>
+
+<div id="experiment_progress">
+    <div class="row">
+        <div class="col-lg-1">
+            <label>Robot ID:</label>
+        </div>
+        <div class="col-lg-2">
+            <label id="experiment_robot_id"></label>
+        </div>
+
+        <div class="col-lg-2">
+            <label>Ongoing experiment ID:</label>
+        </div>
+        <div class="col-lg-2">
+            <label id="ongoing_experiment_id"></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <textarea id="experiment_feedback" style="width=100%;" rows="10" cols="100"></textarea>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

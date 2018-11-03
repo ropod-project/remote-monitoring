@@ -1,62 +1,93 @@
 from __future__ import print_function
-from flask import Blueprint, jsonify, render_template, request, session
-
-import ast
-import json
 import uuid
+import threading
+import json
 
-from remote_monitoring.common import msg_data, communicate_zmq
+from flask import Blueprint, jsonify, render_template, request, session
+from remote_monitoring.common import socketio, msg_data, Config
 
-experiments = Blueprint('experiments', __name__)
+feedback_thread = None
+feedback_thread_lock = threading.Lock()
 
-@experiments.route('/run_experiment')
-def run_experiment():
-    session['uid'] = uuid.uuid4()
-    return render_template('run_experiment.html')
+def create_blueprint(communicator):
+    experiments = Blueprint('experiments', __name__)
+    zyre_communicator = communicator
+    config = Config()
 
-@experiments.route('/get_ropod_ids', methods=['GET'])
-def get_ropod_ids():
-    msg_data['header']['type'] = "NAME_QUERY"
-    msg_data['payload']['sender_id'] = session['uid'].hex
-    communication_command = "GET_ROPOD_LIST"
-    msg_data_string = json.dumps(msg_data)
-    data = communication_command + "++" + msg_data_string
+    @experiments.route('/experiments')
+    def run_experiment():
+        session['uid'] = uuid.uuid4()
+        return render_template('remote_experiments.html')
 
-    ropod_ids = dict()
-    message = ''
-    try:
-        query_reply = communicate_zmq(data)
-        if query_reply:
-            ropods = ast.literal_eval(query_reply.decode('ascii'))
-            ropod_ids = []
-            for node in ropods:
-                sender_name = node[0]
-                suffix_idx = sender_name.find('_query_interface')
-                ropod_ids.append(sender_name[0:suffix_idx])
-    # except Exception, exc:
-    except Exception as exc:
-        print('[get_ropod_ids] %s' % str(exc))
-        message = 'Ropod list could not be retrieved'
-    return jsonify(ropod_ids=ropod_ids, message=message)
+    @experiments.route('/experiments/get_robot_ids', methods=['GET'])
+    def get_robot_ids():
+        robots = list()
+        feedback_msg = ''
+        try:
+            robots = config.get_robots()
+        except Exception as exc:
+            print('[get_robot_ids] %s' % str(exc))
+            feedback_msg = 'An error occurred while retrieving the robot IDs'
+        return jsonify(robots=robots, message=feedback_msg)
 
-@experiments.route('/send_experiment_request', methods=['GET','POST'])
-def send_experiment_request():
-    ropod_id = request.args.get('ropod_id', '', type=str)
-    experiment = request.args.get('experiment', '', type=str)
+    @experiments.route('/experiments/get_experiment_list', methods=['GET'])
+    def get_experiment_list():
+        experiments = dict()
+        feedback_msg = ''
+        try:
+            experiments = config.get_experiments()
+        except Exception as exc:
+            print('[get_experiment_list] %s' % str(exc))
+            feedback_msg = 'An error occurred while retrieving the experiment list'
+        return jsonify(experiments=experiments, message=feedback_msg)
 
-    msg_data['header']['type'] = "RUN_EXPERIMENT"
-    msg_data['payload']['sender_id'] = session['uid'].hex
-    msg_data['payload']['ropod_id'] = ropod_id
-    msg_data['payload']['experiment'] = experiment
+    @experiments.route('/experiments/send_experiment_request', methods=['GET', 'POST'])
+    def send_experiment_request():
+        '''Sends a "ROBOT-EXPERIMENT-REQUEST" message to a robot with ID "robot_id"
+        for performing the experiment with ID "experiment" (both the robot ID and
+        the experiment ID are expected to be passed in the request).
+        '''
+        robot_id = request.args.get('robot_id', '', type=str)
+        experiment = request.args.get('experiment', '', type=str)
 
-    message = ''
-    try:
-        communication_command = "DATA_QUERY"
-        msg_data_string = json.dumps(msg_data)
-        data = communication_command + "++" + msg_data_string
-        _ = communicate_zmq(data)
-    # except Exception, exc:
-    except Exception as exc:
-        print('[send_experiment_request] %s' % str(exc))
-        message = 'Command could not be sent'
-    return jsonify(success=True, message=message)
+        msg = dict(msg_data)
+        msg['header']['type'] = 'ROBOT-EXPERIMENT-REQUEST'
+        msg['payload']['userId'] = session['uid'].hex
+        msg['payload']['robotId'] = robot_id
+        msg['payload']['experimentType'] = experiment
+
+        client_feedback_msg = ''
+        try:
+            zyre_communicator.shout(msg)
+
+            global feedback_thread
+            with feedback_thread_lock:
+                if not feedback_thread:
+                    feedback_thread = socketio.start_background_task(target=get_experiment_feedback,
+                                                                     session_id=session['uid'].hex,
+                                                                     robot_id=robot_id)
+        except Exception as exc:
+            print('[send_experiment_request] %s' % str(exc))
+            client_feedback_msg = 'Command could not be sent'
+        return jsonify(success=True, message=client_feedback_msg)
+
+    def get_experiment_feedback(session_id, robot_id):
+        experiment_ongoing = True
+        while experiment_ongoing:
+            feedback_msg = zyre_communicator.get_experiment_feedback(session_id, robot_id)
+            if feedback_msg and feedback_msg['robot_id'] == robot_id:
+                if feedback_msg['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK':
+                    socketio.emit('experiment_feedback',
+                                  json.dumps(feedback_msg),
+                                  namespace='/experiments')
+                elif feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
+                    socketio.emit('experiment_feedback',
+                                  json.dumps(feedback_msg),
+                                  namespace='/experiments')
+                    experiment_ongoing = False
+                socketio.sleep(0.05)
+
+        global feedback_thread
+        feedback_thread = None
+
+    return experiments
