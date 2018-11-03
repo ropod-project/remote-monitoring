@@ -4,7 +4,8 @@ import pymongo as pm
 from remote_monitoring.common import Config
 
 robot_ids = ['ropod_001', 'ropod_002']
-experiments = [{'id': 'linear_motion', 'name': 'Linear motion'}]
+experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
+               {'id': 'in_place_rotation', 'name': 'In-place rotation'}]
 
 config = Config()
 client = pm.MongoClient(port=config.db_port)
