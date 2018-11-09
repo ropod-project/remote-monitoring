@@ -1,5 +1,5 @@
 import time
-from pyre_communicator.base_class import PyreBaseCommunicator
+from ropod.pyre_communicator.base_class import PyreBaseCommunicator
 
 class ZyreWebCommunicator(PyreBaseCommunicator):
     def __init__(self, node_name, groups, data_timeout=10., status_timeout=5.):
