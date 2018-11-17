@@ -1,5 +1,6 @@
 from __future__ import print_function
 import uuid
+import time
 import threading
 import json
 
@@ -73,9 +74,11 @@ def create_blueprint(communicator):
 
     def get_experiment_feedback(session_id, robot_id):
         experiment_ongoing = True
+        feedback_received = False
         while experiment_ongoing:
             feedback_msg = zyre_communicator.get_experiment_feedback(session_id, robot_id)
             if feedback_msg and feedback_msg['robot_id'] == robot_id:
+                feedback_received = True
                 if feedback_msg['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK':
                     socketio.emit('experiment_feedback',
                                   json.dumps(feedback_msg),
@@ -86,6 +89,21 @@ def create_blueprint(communicator):
                                   namespace='/experiments')
                     experiment_ongoing = False
                 socketio.sleep(0.05)
+            elif not feedback_msg:
+                feedback_msg = dict()
+                feedback_msg['timestamp'] = time.time()
+
+                if feedback_received:
+                    feedback_msg['feedback_type'] = 'ROBOT-EXPERIMENT-FEEDBACK'
+                    feedback_msg['result'] = '{0} is not responding anymore'.format(robot_id)
+                else:
+                    feedback_msg['feedback_type'] = 'EXPERIMENT-ERROR'
+                    feedback_msg['result'] = '{0} is not responding; could not start experiment'.format(robot_id)
+
+                socketio.emit('experiment_feedback',
+                              json.dumps(feedback_msg),
+                              namespace='/experiments')
+                experiment_ongoing = False
 
         global feedback_thread
         feedback_thread = None

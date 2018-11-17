@@ -131,6 +131,10 @@
             feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
             feedback_str += 'Experiment result: ' + feedback_data['result'];
         }
+        else if (feedback_data['feedback_type'] == 'EXPERIMENT-ERROR') {
+            $('#error_message_container').show();
+            $('#error_message_container_content').html(feedback_data['result']);
+        }
         $('#experiment_feedback').val(feedback_str);
         var bottom_height = $('#experiment_feedback').prop('scrollHeight') - $('#experiment_feedback').height();
         $('#experiment_feedback').scrollTop(bottom_height);
