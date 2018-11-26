@@ -26,16 +26,16 @@ Plot.prototype.get_data = function(robot_id, variable_list, start_time, end_time
         cache: false,
         async: false
     }).done(function(result) {
-        parent_obj.display_data(result);
+        parent_obj.display_data(result.variables, result.data);
     }).fail(function(jqXHR, status, error) {
         console.log(error);
         $('#operation_indicator').hide();
     });
 };
 
-Plot.prototype.display_data = function(json_data) {
-    this.data_labels = json_data.variables;
-    this.data = json_data.data;
+Plot.prototype.display_data = function(variables, data) {
+    this.data_labels = variables;
+    this.data = data;
     $('#operation_indicator').hide();
 
     if (!this.update_plot) {
