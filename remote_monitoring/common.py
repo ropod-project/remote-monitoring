@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pymongo as pm
 from flask_socketio import SocketIO
 
@@ -12,28 +13,46 @@ class Config(object):
         self.db_port = 27017
 
     def get_robots(self):
+        '''Returns a list of all known robot names.
+        '''
         collection_name = Config.ROBOT_COLLECTION
         client = pm.MongoClient(port=self.db_port)
         db = client[self.db_name]
         collection = db[collection_name]
         docs = collection.find({})
-        robots = list()
-        for doc in docs:
-            robots.append(doc['name'])
+        robots = [doc['name'] for doc in docs]
         return robots
 
+    def get_robot_smart_wheel_count(self, robot_id):
+        '''Returns the number of smart wheels of the given robot.
+
+        Keyword arguments:
+        robot_id -- ID of a robot
+
+        '''
+        collection_name = Config.ROBOT_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        doc = collection.find_one({'name': robot_id})
+        if doc:
+            return doc['smart_wheel_count']
+        print('{0} does not exist'.format(robot_id))
+        return 0
+
     def get_experiments(self):
+        '''Returns a list of dictionaries of the form
+        {
+            "id": experiment_id,
+            "name": descriptive_experiment_name
+        }
+        '''
         collection_name = Config.EXPERIMENT_COLLECTION
         client = pm.MongoClient(port=self.db_port)
         db = client[self.db_name]
         collection = db[collection_name]
         docs = collection.find({})
-        experiments = list()
-        for doc in docs:
-            experiment = dict()
-            experiment['id'] = doc['id']
-            experiment['name'] = doc['name']
-            experiments.append(experiment)
+        experiments = [{'id': doc['id'], 'name': doc['name']} for doc in docs]
         return experiments
 
 msg_data = {
