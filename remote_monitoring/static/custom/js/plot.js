@@ -9,7 +9,7 @@ function Plot(container_name, variable_selection_container_name, variable_select
     this.current_variable = null;
 }
 
-Plot.prototype.display_data = function(robot_id, variable_list, start_time, end_time) {
+Plot.prototype.get_data = function(robot_id, variable_list, start_time, end_time) {
     var parent_obj = this;
 
     $.ajax({
@@ -26,20 +26,24 @@ Plot.prototype.display_data = function(robot_id, variable_list, start_time, end_
         cache: false,
         async: false
     }).done(function(result) {
-        parent_obj.data_labels = result.variables;
-        parent_obj.data = result.data;
-        $('#operation_indicator').hide();
-
-        if (!parent_obj.update_plot) {
-            $('#' + parent_obj.plot_container_name).html('');
-            parent_obj.add_variable_selection_checkboxes();
-        }
-        parent_obj.display_selected_data();
+        parent_obj.display_data(result);
     }).fail(function(jqXHR, status, error) {
         console.log(error);
         $('#operation_indicator').hide();
     });
 };
+
+Plot.prototype.display_data = function(json_data) {
+    this.data_labels = json_data.variables;
+    this.data = json_data.data;
+    $('#operation_indicator').hide();
+
+    if (!this.update_plot) {
+        $('#' + this.plot_container_name).html('');
+        this.add_variable_selection_checkboxes();
+    }
+    this.display_selected_data();
+}
 
 Plot.prototype.add_variable_selection_checkboxes = function() {
     var html_string = '<div class="form-group">';
