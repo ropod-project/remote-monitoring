@@ -363,8 +363,8 @@ body {
 
         var local_time = new Date(time.setTime(time.getTime() - (time.getTimezoneOffset() * 60000)));
 
-        var time_ms = local_time.getTime() / 1000.;
-        return time_ms;
+        var time_s = local_time.getTime() / 1000.;
+        return time_s;
     }
 
     function form_download_function()
