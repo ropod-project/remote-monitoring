@@ -2,12 +2,11 @@ from __future__ import print_function
 import json
 import uuid
 import threading
-from copy import deepcopy
 
 from flask import Blueprint, render_template, session
 from flask_socketio import emit
 
-from remote_monitoring.common import socketio, Config, robot_status_msg
+from remote_monitoring.common import socketio, Config
 
 status_thread = None
 status_thread_lock = threading.Lock()
@@ -27,12 +26,6 @@ def create_blueprint(communicator):
     def on_connect():
         robots = config.get_robots()
         emit('deployed_robots', json.dumps(robots))
-
-        # we initialise the status messages for the robots
-        for robot in robots:
-            status_msg = deepcopy(robot_status_msg)
-            status_msg['payload']['robotId'] = robot
-            zyre_communicator.status_msgs[robot] = status_msg
 
         global status_thread
         with status_thread_lock:
