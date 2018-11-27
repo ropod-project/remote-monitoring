@@ -14,15 +14,15 @@ feedback_thread_lock = threading.Lock()
 data_thread = None
 data_thread_lock = threading.Lock()
 
-experiment_diagnostic_vars = ['ros_sw_ethercat_parser_data/*/velocity_1',
-                              'ros_sw_ethercat_parser_data/*/velocity_2',
-                              'ros_sw_ethercat_parser_data/*/velocity_pivot',
-                              'ros_sw_ethercat_parser_data/*/accel_x',
-                              'ros_sw_ethercat_parser_data/*/accel_y',
-                              'ros_sw_ethercat_parser_data/*/accel_z',
-                              'ros_sw_ethercat_parser_data/*/gyro_x',
-                              'ros_sw_ethercat_parser_data/*/gyro_y',
-                              'ros_sw_ethercat_parser_data/*/gyro_z']
+experiment_diagnostic_vars = ['ros_sw_ethercat_parser_data/sensors/*/velocity_1',
+                              'ros_sw_ethercat_parser_data/sensors/*/velocity_2',
+                              'ros_sw_ethercat_parser_data/sensors/*/velocity_pivot',
+                              'ros_sw_ethercat_parser_data/sensors/*/accel_x',
+                              'ros_sw_ethercat_parser_data/sensors/*/accel_y',
+                              'ros_sw_ethercat_parser_data/sensors/*/accel_z',
+                              'ros_sw_ethercat_parser_data/sensors/*/gyro_x',
+                              'ros_sw_ethercat_parser_data/sensors/*/gyro_y',
+                              'ros_sw_ethercat_parser_data/sensors/*/gyro_z']
 
 def create_blueprint(communicator):
     experiments = Blueprint('experiments', __name__)
