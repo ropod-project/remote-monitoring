@@ -27,19 +27,19 @@ class BBUtils(object):
     @staticmethod
     def expand_var_names(variables, index_count):
         '''Generates a new list of variable names from "variables" such that
-        the * character in each entry of "variables" is replaced by an index
+        the * character in each entry of "variables" is replaced by a one-based index
         (the number of indices is determined by "index_count").
 
         Example:
         If "variables" is the list ["var1/*", "var2/*"], and "index_count" is 3, the
-        resulting list will be ["var1/0", "var1/1", "var1/2", "var2/0", "var2/1", "var2/2"].
+        resulting list will be ["var1/1", "var1/2", "var1/3", "var2/1", "var2/2", "var2/3"].
 
         Keyword arguments:
         variables -- a list of variable names including a * as an index replacement
         index_count -- number of times each variable should be expanded
 
         '''
-        expanded_vars = [var.replace('*', str(i))
+        expanded_vars = [var.replace('*', str(i+1))
                          for var in variables
                          for i in range(index_count)]
         return expanded_vars
