@@ -1,5 +1,7 @@
+from copy import deepcopy
 import time
 from ropod.pyre_communicator.base_class import PyreBaseCommunicator
+from remote_monitoring.common import Config, robot_status_msg
 
 class ZyreWebCommunicator(PyreBaseCommunicator):
     def __init__(self, node_name, groups, data_timeout=10., status_timeout=5.):
@@ -23,6 +25,18 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
         # and the values are robot status messages
         self.status_msgs = dict()
 
+        # a dictionary in which the keys are robot IDs
+        # and the values are experiment feedback messages
+        self.experiment_feedback_msgs = dict()
+
+        config = Config()
+        robots = config.get_robots()
+        for robot in robots:
+            status_msg = deepcopy(robot_status_msg)
+            status_msg['payload']['robotId'] = robot
+            self.status_msgs[robot] = status_msg
+            self.experiment_feedback_msgs[robot] = None
+
     def receive_msg_cb(self, msg_content):
         dict_msg = self.convert_zyre_msg_to_dict(msg_content)
         if dict_msg is None:
@@ -39,27 +53,25 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             if robot_id in self.status_msgs:
                 self.status_msgs[robot_id] = dict_msg
         elif message_type == 'ROBOT-COMMAND-FEEDBACK':
-            for session_id in self.request_data:
-                if self.request_type[session_id] == 'ROBOT-EXPERIMENT-FEEDBACK' and \
-                   self.request_robots[session_id] == dict_msg['payload']['robotId']:
-                    feedback_data = dict()
-                    feedback_data['timestamp'] = timestamp
-                    feedback_data['feedback_type'] = message_type
-                    feedback_data['robot_id'] = dict_msg['payload']['robotId']
-                    feedback_data['command'] = dict_msg['payload']['command']
-                    feedback_data['state'] = dict_msg['payload']['state']
-                    self.request_data[session_id] = feedback_data
+            robot_id = dict_msg['payload']['robotId']
+            if robot_id in self.experiment_feedback_msgs:
+                feedback_data = dict()
+                feedback_data['timestamp'] = timestamp
+                feedback_data['feedback_type'] = message_type
+                feedback_data['robot_id'] = dict_msg['payload']['robotId']
+                feedback_data['command'] = dict_msg['payload']['command']
+                feedback_data['state'] = dict_msg['payload']['state']
+                self.experiment_feedback_msgs[robot_id] = feedback_data
         elif message_type == 'ROBOT-EXPERIMENT-FEEDBACK':
-            for session_id in self.request_data:
-                if self.request_type[session_id] == 'ROBOT-EXPERIMENT-FEEDBACK' and \
-                   self.request_robots[session_id] == dict_msg['payload']['robotId']:
-                    feedback_data = dict()
-                    feedback_data['timestamp'] = timestamp
-                    feedback_data['feedback_type'] = message_type
-                    feedback_data['robot_id'] = dict_msg['payload']['robotId']
-                    feedback_data['experiment'] = dict_msg['payload']['experimentType']
-                    feedback_data['result'] = dict_msg['payload']['result']
-                    self.request_data[session_id] = feedback_data
+            robot_id = dict_msg['payload']['robotId']
+            if robot_id in self.experiment_feedback_msgs:
+                feedback_data = dict()
+                feedback_data['timestamp'] = timestamp
+                feedback_data['feedback_type'] = message_type
+                feedback_data['robot_id'] = dict_msg['payload']['robotId']
+                feedback_data['experiment'] = dict_msg['payload']['experimentType']
+                feedback_data['result'] = dict_msg['payload']['result']
+                self.experiment_feedback_msgs[robot_id] = feedback_data
 
     def wait_for_data(self, session_id):
         start_time = time.time()
@@ -103,9 +115,23 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
     #####################
     # Remote experiments
     #####################
-    def get_experiment_feedback(self, session_id, robot_id):
-        self.request_data[session_id] = None
-        self.request_robots[session_id] = robot_id
-        self.request_type[session_id] = 'ROBOT-EXPERIMENT-FEEDBACK'
-        experiment_feedback = self.wait_for_data(session_id)
-        return experiment_feedback
+    def get_experiment_feedback(self, robot_id):
+        # if there are no experiment feedback messages, we wait until we
+        # get one or until the status timeout is reached
+        start_time = time.time()
+        elapsed_time = 0.
+        while not self.experiment_feedback_msgs[robot_id] and elapsed_time < self.status_timeout:
+            time.sleep(0.1)
+            elapsed_time = time.time() - start_time
+
+        # if we do have a saved feedback message, but it was received
+        # a long time ago, we clear the message
+        if self.experiment_feedback_msgs[robot_id]:
+            last_msg_time_diff = time.time() - self.experiment_feedback_msgs[robot_id]['timestamp']
+            if last_msg_time_diff > self.status_timeout:
+                self.experiment_feedback_msgs[robot_id] = None
+
+        feedback_msg = self.experiment_feedback_msgs[robot_id]
+        if feedback_msg and feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
+            self.experiment_feedback_msgs[robot_id] = None
+        return feedback_msg

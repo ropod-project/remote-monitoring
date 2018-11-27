@@ -6,9 +6,23 @@ import json
 
 from flask import Blueprint, jsonify, render_template, request, session
 from remote_monitoring.common import socketio, msg_data, Config
+from remote_monitoring.black_box_utils import BBUtils
 
 feedback_thread = None
 feedback_thread_lock = threading.Lock()
+
+data_thread = None
+data_thread_lock = threading.Lock()
+
+experiment_diagnostic_vars = ['ros_sw_ethercat_parser_data/*/velocity_1',
+                              'ros_sw_ethercat_parser_data/*/velocity_2',
+                              'ros_sw_ethercat_parser_data/*/velocity_pivot',
+                              'ros_sw_ethercat_parser_data/*/accel_x',
+                              'ros_sw_ethercat_parser_data/*/accel_y',
+                              'ros_sw_ethercat_parser_data/*/accel_z',
+                              'ros_sw_ethercat_parser_data/*/gyro_x',
+                              'ros_sw_ethercat_parser_data/*/gyro_y',
+                              'ros_sw_ethercat_parser_data/*/gyro_z']
 
 def create_blueprint(communicator):
     experiments = Blueprint('experiments', __name__)
@@ -73,39 +87,101 @@ def create_blueprint(communicator):
         return jsonify(success=True, message=client_feedback_msg)
 
     def get_experiment_feedback(session_id, robot_id):
+        global data_thread
         experiment_ongoing = True
         feedback_received = False
+        black_box_id = BBUtils.get_bb_id(robot_id)
+        robot_smart_wheel_count = config.get_robot_smart_wheel_count(robot_id)
+        diagnostic_vars = BBUtils.expand_var_names(experiment_diagnostic_vars,
+                                                   robot_smart_wheel_count)
+
         while experiment_ongoing:
-            feedback_msg = zyre_communicator.get_experiment_feedback(session_id, robot_id)
+            feedback_msg = zyre_communicator.get_experiment_feedback(robot_id)
             if feedback_msg and feedback_msg['robot_id'] == robot_id:
                 feedback_received = True
-                if feedback_msg['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK':
-                    socketio.emit('experiment_feedback',
-                                  json.dumps(feedback_msg),
-                                  namespace='/experiments')
-                elif feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
-                    socketio.emit('experiment_feedback',
-                                  json.dumps(feedback_msg),
-                                  namespace='/experiments')
-                    experiment_ongoing = False
-                socketio.sleep(0.05)
-            elif not feedback_msg:
-                feedback_msg = dict()
-                feedback_msg['timestamp'] = time.time()
+            experiment_ongoing = send_experiment_feedback(robot_id,
+                                                          feedback_msg,
+                                                          feedback_received)
 
-                if feedback_received:
-                    feedback_msg['feedback_type'] = 'ROBOT-EXPERIMENT-FEEDBACK'
-                    feedback_msg['result'] = '{0} is not responding anymore'.format(robot_id)
-                else:
-                    feedback_msg['feedback_type'] = 'EXPERIMENT-ERROR'
-                    feedback_msg['result'] = '{0} is not responding; could not start experiment'.format(robot_id)
-
-                socketio.emit('experiment_feedback',
-                              json.dumps(feedback_msg),
-                              namespace='/experiments')
-                experiment_ongoing = False
+            if experiment_ongoing:
+                with data_thread_lock:
+                    if not data_thread:
+                        data_thread = threading.Thread(target=send_diagnostic_data,
+                                                       kwargs={'session_id': session_id,
+                                                               'black_box_id': black_box_id,
+                                                               'diagnostic_vars': diagnostic_vars})
+                        data_thread.start()
 
         global feedback_thread
         feedback_thread = None
+
+    def send_experiment_feedback(robot_id, feedback_msg, prev_feedback_received):
+        experiment_ongoing = True
+        if feedback_msg and feedback_msg['robot_id'] == robot_id:
+            if feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
+                experiment_ongoing = False
+            socketio.sleep(0.1)
+        elif not feedback_msg:
+            feedback_msg = dict()
+            feedback_msg['timestamp'] = time.time()
+            if prev_feedback_received:
+                feedback_msg['feedback_type'] = 'ROBOT-EXPERIMENT-FEEDBACK'
+                feedback_msg['result'] = '{0} is not responding anymore'.format(robot_id)
+            else:
+                feedback_msg['feedback_type'] = 'EXPERIMENT-ERROR'
+                feedback_msg['result'] = '{0} is not responding; could not start experiment'.format(robot_id)
+            experiment_ongoing = False
+
+        socketio.emit('experiment_feedback',
+                      json.dumps(feedback_msg),
+                      namespace='/experiments')
+        return experiment_ongoing
+
+    def send_diagnostic_data(session_id, black_box_id, diagnostic_vars):
+        end_query_time = int(time.time())
+        start_query_time = end_query_time - 10
+
+        query_msg = BBUtils.get_bb_query_msg(session_id,
+                                             black_box_id,
+                                             diagnostic_vars,
+                                             start_query_time,
+                                             end_query_time)
+        query_result = zyre_communicator.get_black_box_data(query_msg)
+
+        try:
+            variables, data = BBUtils.parse_bb_data_msg(query_result)
+            vel_vars, vel_data = get_variable_data('velocity', variables, data)
+            socketio.emit('vel_data',
+                          json.dumps({'variables': vel_vars,
+                                      'data': vel_data}),
+                          namespace='/experiments')
+
+            accel_vars, accel_data = get_variable_data('accel', variables, data)
+            socketio.emit('accel_data',
+                          json.dumps({'variables': accel_vars,
+                                      'data': accel_data}),
+                          namespace='/experiments')
+
+            gyro_vars, gyro_data = get_variable_data('gyro', variables, data)
+            socketio.emit('gyro_data',
+                          json.dumps({'variables': gyro_vars,
+                                      'data': gyro_data}),
+                          namespace='/experiments')
+        except Exception as exc:
+            print('[send_diagnostic_data] {0} does not seem to be responding'.format(black_box_id))
+            print(str(exc))
+
+        global data_thread
+        data_thread = None
+
+    def get_variable_data(var_name_component, variables, data):
+        filtered_variables = list()
+        filtered_data = list()
+        if data:
+            for i, var in enumerate(variables):
+                if var.find(var_name_component) != -1:
+                    filtered_variables.append(var)
+                    filtered_data.append(data[i])
+        return filtered_variables, filtered_data
 
     return experiments

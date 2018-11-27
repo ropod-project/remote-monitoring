@@ -25,8 +25,29 @@ class BBUtils(object):
         return black_box_id
 
     @staticmethod
-    def get_bb_query_msg(sender_id, bb_id, variable_list, start_query_time, end_query_time):
+    def expand_var_names(variables, index_count):
+        '''Generates a new list of variable names from "variables" such that
+        the * character in each entry of "variables" is replaced by an index
+        (the number of indices is determined by "index_count").
+
+        Example:
+        If "variables" is the list ["var1/*", "var2/*"], and "index_count" is 3, the
+        resulting list will be ["var1/0", "var1/1", "var1/2", "var2/0", "var2/1", "var2/2"].
+
+        Keyword arguments:
+        variables -- a list of variable names including a * as an index replacement
+        index_count -- number of times each variable should be expanded
+
         '''
+        expanded_vars = [var.replace('*', str(i))
+                         for var in variables
+                         for i in range(index_count)]
+        return expanded_vars
+
+    @staticmethod
+    def get_bb_query_msg(sender_id, bb_id, variable_list, start_query_time, end_query_time):
+        '''Returns a black box query message as defined in
+        https://git.ropod.org/ropod/communication/ropod-models/blob/develop/schemas/black-box/ropod-black-box-data-query-schema.json
 
         Keyword arguments:
         sender_id -- ID of the user that queries the data (typically a session ID)
@@ -37,7 +58,7 @@ class BBUtils(object):
 
         '''
         query_msg = dict(msg_data)
-        query_msg['header']['type'] = "DATA_QUERY"
+        query_msg['header']['type'] = 'DATA_QUERY'
         query_msg['payload']['senderId'] = sender_id
         query_msg['payload']['blackBoxId'] = bb_id
         query_msg['payload']['variables'] = variable_list
@@ -52,18 +73,19 @@ class BBUtils(object):
         data[i] is a list of values corresponding to variables[i]
 
         Keyword arguments:
-        bb_data_msg -- a black box data message as defined in https://git.ropod.org/ropod/communication/ropod-models/blob/develop/schemas/black-box/ropod-black-box-data-query-schema.json
+        bb_data_msg -- a black box data query response
 
         '''
         variables = list()
         data = list()
-        variable_data = bb_data_msg['payload']['dataList']
-        if variable_data is not None and variable_data[0] is not None:
-            for data_dict in variable_data:
-                for key, value in data_dict.items():
-                    variables.append(key)
-                    variable_data_list = list()
-                    for item in value:
-                        variable_data_list.append(ast.literal_eval(item))
-                    data.append(variable_data_list)
+        if bb_data_msg:
+            variable_data = bb_data_msg['payload']['dataList']
+            if variable_data is not None and variable_data[0] is not None:
+                for data_dict in variable_data:
+                    for key, value in data_dict.items():
+                        variables.append(key)
+                        variable_data_list = list()
+                        for item in value:
+                            variable_data_list.append(ast.literal_eval(item))
+                        data.append(variable_data_list)
         return (variables, data)

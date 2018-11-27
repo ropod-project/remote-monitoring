@@ -34,11 +34,14 @@ Plot.prototype.get_data = function(robot_id, variable_list, start_time, end_time
 };
 
 Plot.prototype.display_data = function(variables, data) {
+    if (variables.length == 0) return;
+
     this.data_labels = variables;
     this.data = data;
     $('#operation_indicator').hide();
 
-    if (!this.update_plot) {
+    if (!this.update_plot)
+    {
         $('#' + this.plot_container_name).html('');
         this.add_variable_selection_checkboxes();
     }
@@ -57,7 +60,8 @@ Plot.prototype.add_variable_selection_checkboxes = function() {
 Plot.prototype.display_selected_data = function () {
     var checked = $('.' + this.variable_selection_class_name + ':checked');
     var flot_data = [];
-    for (var i=0; i<checked.length; i++) {
+    for (var i=0; i<checked.length; i++)
+    {
         var id = parseInt($(checked[i]).val());
         flot_data.push({ label: this.data_labels[id], data: this.data[id] });
     }
