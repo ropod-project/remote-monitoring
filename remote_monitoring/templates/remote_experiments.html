@@ -10,9 +10,9 @@
 <script>
     var robot_id = undefined;
     var experiment = undefined;
-    var vel_plot = new Plot('vel_plot_placeholder', 'vel_plot_variable_selection', 'plot_vel_variables', '');
-    var accel_plot = new Plot('accel_plot_placeholder', 'accel_plot_variable_selection', 'plot_accel_variables', '');
-    var gyro_plot = new Plot('gyro_plot_placeholder', 'gyro_plot_variable_selection', 'plot_gyro_variables', '');
+    var vel_plot = new Plot('vel_plot_placeholder', 'vel_plot_variable_selection', 'plot_vel_variables', '', false);
+    var accel_plot = new Plot('accel_plot_placeholder', 'accel_plot_variable_selection', 'plot_accel_variables', '', false);
+    var gyro_plot = new Plot('gyro_plot_placeholder', 'gyro_plot_variable_selection', 'plot_gyro_variables', '', false);
 
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/experiments');
 
@@ -22,6 +22,7 @@
         $('#operation_indicator').show();
         $('#btn_execute_experiment').prop('disabled', true);
         $('#experiment_progress').hide();
+        $('#data_container').hide();
 
         $.ajax({
             url: SCRIPT_ROOT + '/experiments/get_robot_ids',
@@ -118,6 +119,7 @@
                 $('#ongoing_experiment_id').html(experiment);
                 $('#experiment_feedback').val('')
                 $('#experiment_progress').show();
+                $('#data_container').show();
                 vel_plot.reset();
                 accel_plot.reset();
                 gyro_plot.reset();
@@ -244,19 +246,28 @@
 </div>
 
 <div id="data_container">
+    <div class="col-lg-2">
+        <label>Wheel velocities</label>
+    </div>
     <div class="col-lg-12">
         <div id="vel_plot_placeholder" class="col-lg-10 data-plot"></div>
         <div id="vel_plot_variable_selection" class="col-lg-2"></div>
     </div>
 
+    <div class="col-lg-2">
+        <label>Acceleration</label>
+    </div>
     <div class="col-lg-12">
         <div id="accel_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="accel_variable_selection" class="col-lg-2"></div>
+        <div id="accel_plot_variable_selection" class="col-lg-2"></div>
     </div>
 
+    <div class="col-lg-2">
+        <label>Gyro</label>
+    </div>
     <div class="col-lg-12">
         <div id="gyro_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="gyro_variable_selection" class="col-lg-2"></div>
+        <div id="gyro_plot_variable_selection" class="col-lg-2"></div>
     </div>
 </div>
 

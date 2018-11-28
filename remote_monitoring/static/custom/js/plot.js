@@ -1,8 +1,9 @@
-function Plot(container_name, variable_selection_container_name, variable_selection_class_name, data_route) {
+function Plot(container_name, variable_selection_container_name, variable_selection_class_name, data_route, variable_selection_visible) {
     this.plot_container_name = container_name;
     this.variable_selection_container_name = variable_selection_container_name;
     this.variable_selection_class_name = variable_selection_class_name;
     this.data_route = data_route;
+    this.variable_selection_visible = variable_selection_visible;
     this.data = [];
     this.data_labels = [];
     this.update_plot = false;
@@ -50,11 +51,16 @@ Plot.prototype.display_data = function(variables, data) {
 
 Plot.prototype.add_variable_selection_checkboxes = function() {
     var html_string = '<div class="form-group">';
-    for (var i=0; i<this.data_labels.length; i++) {
+    for (var i=0; i<this.data_labels.length; i++)
+    {
         html_string += '<div class="checkbox"><label><input class="' + this.variable_selection_class_name + '" type="checkbox" value="' + i + '" checked="true" />' + this.data_labels[i] + '</label></div>';
     }
     html_string += "</div>";
     $('#' + this.variable_selection_container_name).html(html_string);
+    if (!this.variable_selection_visible)
+    {
+        $('#' + this.variable_selection_container_name).hide();
+    }
 };
 
 Plot.prototype.display_selected_data = function () {
