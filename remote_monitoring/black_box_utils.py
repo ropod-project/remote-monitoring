@@ -84,8 +84,6 @@ class BBUtils(object):
                 for data_dict in variable_data:
                     for key, value in data_dict.items():
                         variables.append(key)
-                        variable_data_list = list()
-                        for item in value:
-                            variable_data_list.append(ast.literal_eval(item))
+                        variable_data_list = [ast.literal_eval(item) for item in value]
                         data.append(variable_data_list)
         return (variables, data)
