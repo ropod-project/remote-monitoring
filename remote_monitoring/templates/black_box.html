@@ -335,7 +335,7 @@ body {
         var end_time_ms = date_str_to_timestamp(end_date);
 
         $('#operation_indicator').show();
-        plot.display_data(robot_id, variable_list, start_time_ms, end_time_ms);
+        plot.get_data(robot_id, variable_list, start_time_ms, end_time_ms);
     }
 
     function reset_data_panel()
@@ -363,8 +363,8 @@ body {
 
         var local_time = new Date(time.setTime(time.getTime() - (time.getTimezoneOffset() * 60000)));
 
-        var time_ms = local_time.getTime() / 1000.;
-        return time_ms;
+        var time_s = local_time.getTime() / 1000.;
+        return time_s;
     }
 
     function form_download_function()
@@ -491,7 +491,6 @@ body {
     <div class="col-lg-12">
         <div id="plot_placeholder" class="col-lg-10 data-plot"></div>
         <div id="plot_variable_selection" class="col-lg-2"></div>
-
     </div>
 </div>
 

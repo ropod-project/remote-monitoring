@@ -1,11 +1,11 @@
 from __future__ import print_function
-import ast
 import json
 import uuid
 
 from flask import Blueprint, jsonify, render_template, request, session, send_file
 
 from remote_monitoring.common import msg_data, Config
+from remote_monitoring.black_box_utils import BBUtils
 
 def create_blueprint(communicator):
     black_box = Blueprint('black_box', __name__)
@@ -32,7 +32,7 @@ def create_blueprint(communicator):
     @black_box.route('/black_box/get_robot_variables', methods=['GET'])
     def get_robot_variables():
         robot_id = request.args.get('robot_id', '', type=str)
-        black_box_id = get_black_box_id(robot_id)
+        black_box_id = BBUtils.get_bb_id(robot_id)
 
         query_msg = dict(msg_data)
         query_msg['header']['type'] = 'VARIABLE_QUERY'
@@ -58,7 +58,6 @@ def create_blueprint(communicator):
                                 current_variable_dict = current_variable_dict[name_component]
                         name_component = full_variable_name[underscore_indices[-1]:]
                         current_variable_dict[name_component] = dict()
-        # except Exception, exc:
         except Exception as exc:
             print('[get_robot_variables] %s' % str(exc))
             message = 'Variable list could not be retrieved'
@@ -67,36 +66,23 @@ def create_blueprint(communicator):
     @black_box.route('/black_box/get_robot_data', methods=['GET'])
     def get_robot_data():
         robot_id = request.args.get('robot_id', '', type=str)
-        black_box_id = get_black_box_id(robot_id)
-
+        black_box_id = BBUtils.get_bb_id(robot_id)
         variable_list = request.args.get('variables').split(',')
-
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = dict(msg_data)
-        query_msg['header']['type'] = 'DATA_QUERY'
-        query_msg['payload']['senderId'] = session['uid'].hex
-        query_msg['payload']['blackBoxId'] = black_box_id
-        query_msg['payload']['variables'] = variable_list
-        query_msg['payload']['startTime'] = start_query_time
-        query_msg['payload']['endTime'] = end_query_time
+        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
+                                             black_box_id,
+                                             variable_list,
+                                             start_query_time,
+                                             end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         variables = list()
         data = list()
         message = ''
         try:
-            variable_data = query_result['payload']['dataList']
-            if variable_data is not None and variable_data[0] is not None:
-                for data_dict in variable_data:
-                    for key, value in data_dict.items():
-                        variables.append(key)
-                        variable_data_list = list()
-                        for item in value:
-                            variable_data_list.append(ast.literal_eval(item))
-                        data.append(variable_data_list)
-        # except Exception, exc:
+            variables, data = BBUtils.parse_bb_data_msg(query_result)
         except Exception as exc:
             print('[get_robot_data] %s' % str(exc))
             message = 'Data could not be retrieved'
@@ -104,24 +90,20 @@ def create_blueprint(communicator):
 
     @black_box.route('/black_box/get_download_query', methods=['GET'])
     def get_download_query():
-        """Responds to a data download query by sending a query to the appropriate
+        '''Responds to a data download query by sending a query to the appropriate
         black box and then saving the data to a temporary file for download.
-        """
+        '''
         robot_id = request.args.get('robot_id', '', type=str)
-        black_box_id = get_black_box_id(robot_id)
-
+        black_box_id = BBUtils.get_bb_id(robot_id)
         variable_list = request.args.get('variables').split(',')
-
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = dict(msg_data)
-        query_msg['header']['type'] = "DATA_QUERY"
-        query_msg['payload']['senderId'] = session['uid'].hex
-        query_msg['payload']['blackBoxId'] = black_box_id
-        query_msg['payload']['variables'] = variable_list
-        query_msg['payload']['startTime'] = start_query_time
-        query_msg['payload']['endTime'] = end_query_time
+        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
+                                             black_box_id,
+                                             variable_list,
+                                             start_query_time,
+                                             end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         message = ''
@@ -136,8 +118,8 @@ def create_blueprint(communicator):
 
     @black_box.route('/black_box/send_download_file', methods=['GET', 'POST'])
     def send_download_file():
-        """Sends a stored data file for download.
-        """
+        '''Sends a stored data file for download.
+        '''
         try:
             return send_file(query_result_file_path,
                              as_attachment=True,
@@ -146,14 +128,5 @@ def create_blueprint(communicator):
             print('[send_download_file] %s' % str(exc))
             message = 'File could not be sent'
             return jsonify(message=message)
-
-    #################
-    # Helper methods
-    #################
-    def get_black_box_id(robot_id):
-        robot_id = request.args.get('robot_id', '', type=str)
-        robot_number = robot_id[robot_id.rfind('_')+1:]
-        black_box_id = 'black_box_{0}'.format(robot_number)
-        return black_box_id
 
     return black_box

@@ -1,12 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<script src="{{ url_for('static', filename='flot/jquery.flot.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='custom/js/plot.js') }}" type="text/javascript"></script>
+
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
 
 <script>
     var robot_id = undefined;
     var experiment = undefined;
+    var vel_plot = new Plot('vel_plot_placeholder', 'vel_plot_variable_selection', 'plot_vel_variables', '', false);
+    var accel_plot = new Plot('accel_plot_placeholder', 'accel_plot_variable_selection', 'plot_accel_variables', '', false);
+    var gyro_plot = new Plot('gyro_plot_placeholder', 'gyro_plot_variable_selection', 'plot_gyro_variables', '', false);
+
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/experiments');
 
     $(document).ready(function() {
@@ -15,6 +22,7 @@
         $('#operation_indicator').show();
         $('#btn_execute_experiment').prop('disabled', true);
         $('#experiment_progress').hide();
+        $('#data_container').hide();
 
         $.ajax({
             url: SCRIPT_ROOT + '/experiments/get_robot_ids',
@@ -111,11 +119,27 @@
                 $('#ongoing_experiment_id').html(experiment);
                 $('#experiment_feedback').val('')
                 $('#experiment_progress').show();
+                $('#data_container').show();
+                vel_plot.reset();
+                accel_plot.reset();
+                gyro_plot.reset();
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
                 $('#error_message_container').show();
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
+        });
+
+        $(document).on('change', '.plot_vel_variables', function() {
+            vel_plot.display_selected_data();
+        });
+
+        $(document).on('change', '.plot_accel_variables', function() {
+            accel_plot.display_selected_data();
+        });
+
+        $(document).on('change', '.plot_gyro_variables', function() {
+            gyro_plot.display_selected_data();
         });
     });
 
@@ -131,9 +155,28 @@
             feedback_str += 'Timestamp: ' + feedback_data['timestamp']  + ' --- ';
             feedback_str += 'Experiment result: ' + feedback_data['result'];
         }
+        else if (feedback_data['feedback_type'] == 'EXPERIMENT-ERROR') {
+            $('#error_message_container').show();
+            $('#error_message_container_content').html(feedback_data['result']);
+        }
         $('#experiment_feedback').val(feedback_str);
         var bottom_height = $('#experiment_feedback').prop('scrollHeight') - $('#experiment_feedback').height();
         $('#experiment_feedback').scrollTop(bottom_height);
+    });
+
+    socket.on('vel_data', function(msg) {
+        var data_msg = JSON.parse(msg);
+        vel_plot.display_data(data_msg['variables'], data_msg['data']);
+    });
+
+    socket.on('accel_data', function(msg) {
+        var data_msg = JSON.parse(msg);
+        accel_plot.display_data(data_msg['variables'], data_msg['data']);
+    });
+
+    socket.on('gyro_data', function(msg) {
+        var data_msg = JSON.parse(msg);
+        gyro_plot.display_data(data_msg['variables'], data_msg['data']);
     });
 </script>
 
@@ -199,6 +242,32 @@
         <div class="col-lg-12">
             <textarea id="experiment_feedback" style="width=100%;" rows="10" cols="100"></textarea>
         </div>
+    </div>
+</div>
+
+<div id="data_container">
+    <div class="col-lg-2">
+        <label>Wheel velocities</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="vel_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="vel_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+
+    <div class="col-lg-2">
+        <label>Acceleration</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="accel_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="accel_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+
+    <div class="col-lg-2">
+        <label>Gyro</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="gyro_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="gyro_plot_variable_selection" class="col-lg-2"></div>
     </div>
 </div>
 
