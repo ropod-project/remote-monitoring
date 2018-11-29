@@ -115,10 +115,10 @@
     socket.on('connect', function(msg) {
         Plotly.plot('occupancy_grid', [{}],
          {
-          width: 3942*0.25,
-          height: 8659*0.25,
+          width: 3942*0.15,
+          height: 8659*0.15,
           xaxis: {
-           range: [-1250, 2000],
+           range: [-1250, 2500],
            showgrid: false
           },
           yaxis: {
@@ -144,30 +144,51 @@
     });
 
     socket.on('robot_pose', function(msg) {
-        var robot_pose = msg;
-        var img_x = (robot_pose.x / 0.02);
-        var img_y = (robot_pose.y / 0.02);
-        var robotId = robot_pose.robotId;
-        console.log(robotId + ': ' + img_x + ', ' + img_y, ' (' + robot_pose.timestamp + ')');
+        len = msg.length;
+        var shapes_dicts = [];
+        console.log(msg[0]);
+        for (var i = 0; i < len; i++)
+        {
+            var robot_pose = msg[i];
+            var img_x = (robot_pose.x / 0.02);
+            var img_y = (robot_pose.y / 0.02);
+            var robotId = robot_pose.robotId;
+            circle_dict = {}
+            circle_dict['type'] = 'circle';
+            circle_dict['xref'] = 'x';
+            circle_dict['yref'] = 'y';
+            circle_dict['fillcolor'] = 'rgba(55, 128, 191, 0.6)';
+            circle_dict['x0'] = img_x - 20;
+            circle_dict['y0'] = img_y + 20;
+            circle_dict['x1'] = img_x + 20;
+            circle_dict['y1'] = img_y - 20;
+            circle_dict['line'] = {}
+            circle_dict['line']['color'] = 'rgba(50, 171, 96, 1)';
+            shapes_dicts.push(circle_dict);
+            line1_dict = {}
+            line1_dict['type'] = 'line';
+            line1_dict['x0'] = img_x;
+            line1_dict['y0'] = img_y;
+            line1_dict['x1'] = robot_pose.line1x / 0.02;
+            line1_dict['y1'] = robot_pose.line1y / 0.02;
+            line1_dict['line'] = {}
+            line1_dict['line']['color'] = 'rgba(50, 171, 96, 1)';
+            line1_dict['line']['width'] = 1;
+            shapes_dicts.push(line1_dict);
+            line2_dict = {}
+            line2_dict['type'] = 'line';
+            line2_dict['x0'] = img_x;
+            line2_dict['y0'] = img_y;
+            line2_dict['x1'] = robot_pose.line2x / 0.02;
+            line2_dict['y1'] = robot_pose.line2y / 0.02;
+            line2_dict['line'] = {}
+            line2_dict['line']['color'] = 'rgba(50, 171, 96, 1)';
+            line2_dict['line']['width'] = 1;
+            shapes_dicts.push(line2_dict);
+        }
         Plotly.update('occupancy_grid', [{}],
-            {
-           shapes: [
-            {
-              type: 'rect',
-              xref: 'x',
-              yref: 'y',
-              x0: img_x - 10,
-              y0: img_y + 10,
-              x1: img_x + 10,
-              y1: img_y - 10,
-              line: {
-                color: 'rgb(55, 128, 191)',
-                width: 3
-              },
-              fillcolor: 'rgba(55, 128, 191, 0.6)',
-              name: robotId
-            }
-           ]
+        {
+           shapes: shapes_dicts
         })
     });
 

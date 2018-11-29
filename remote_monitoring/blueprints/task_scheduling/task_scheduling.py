@@ -1,6 +1,7 @@
 from __future__ import print_function
 import uuid
 import threading
+import math
 
 from flask import Blueprint, jsonify, render_template, request, session
 from flask_socketio import emit
@@ -66,6 +67,7 @@ def create_blueprint(communicator):
 
     def emit_robot_pose(robot_ids):
         while True:
+            robot_pose_msg_list = list()
             for robot in robot_ids:
                 msg = zyre_communicator.get_pose(robot)
                 robot_pose_msg = dict()
@@ -74,9 +76,16 @@ def create_blueprint(communicator):
                     robot_pose_msg['x'] = msg['payload']['pose']['x']
                     robot_pose_msg['y'] = msg['payload']['pose']['y']
                     robot_pose_msg['theta'] = msg['payload']['pose']['theta']
+                    t1 = float(msg['payload']['pose']['theta']) + (9*math.pi/10.0)
+                    t2 = float(msg['payload']['pose']['theta']) - (9*math.pi/10.0)
+                    robot_pose_msg['line1x'] = msg['payload']['pose']['x'] + 2*math.cos(t1)
+                    robot_pose_msg['line1y'] = msg['payload']['pose']['y'] + 2*math.sin(t1)
+                    robot_pose_msg['line2x'] = msg['payload']['pose']['x'] + 2*math.cos(t2)
+                    robot_pose_msg['line2y'] = msg['payload']['pose']['y'] + 2*math.sin(t2)
                     robot_pose_msg['timestamp'] = msg['header']['timestamp']
-                    socketio.emit('robot_pose', robot_pose_msg, namespace='/task_scheduling')
-                    socketio.sleep(0.1)
+                    robot_pose_msg_list.append(robot_pose_msg)
+            if robot_pose_msg_list:
+                socketio.emit('robot_pose', robot_pose_msg_list, namespace='/task_scheduling')
             socketio.sleep(1.0)
 
     return task_scheduling
