@@ -40,6 +40,10 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
         # and the values are experiment feedback messages
         self.__experiment_feedback_msgs = dict()
 
+        # a dictionary in which the keys are robot IDs
+        # and the values are the corresponding robot poses
+        self.__robot_pose_msgs = dict()
+
         config = Config()
         robots = config.get_robots()
         for robot in robots:
@@ -47,6 +51,7 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             status_msg['payload']['robotId'] = robot
             self.__status_msgs[robot] = status_msg
             self.__experiment_feedback_msgs[robot] = None
+            self.__robot_pose_msgs[robot] = None
 
     def receive_msg_cb(self, msg_content):
         '''Processes incoming messages. Only listens to messages of type
@@ -106,6 +111,11 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
                     if 'totalNumber' in dict_msg['payload']['status']:
                         feedback_data['total_number'] = dict_msg['payload']['status']['totalNumber']
                     self.__request_data[session_id] = feedback_data
+        elif message_type == 'RobotPose2D':
+            robot_id = dict_msg['payload']['robotId']
+            if robot_id in self.__robot_pose_msgs:
+                self.__robot_pose_msgs[robot_id] = dict_msg
+
 
     ############
     # Black box
@@ -139,6 +149,15 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             if time_since_last_msg > self.__status_timeout:
                 self.__status_msgs[robot_id]['payload']['monitors'] = None
         return self.__status_msgs[robot_id]
+
+    #####################
+    # Robot pose
+    #####################
+    def get_pose(self, robot_id):
+        if robot_id in self.__robot_pose_msgs.keys() and self.__robot_pose_msgs[robot_id]:
+            return self.__robot_pose_msgs[robot_id]
+        else:
+            return None
 
     #####################
     # Remote experiments
