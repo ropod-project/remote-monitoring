@@ -1,9 +1,14 @@
 from __future__ import print_function
 import uuid
+import threading
 
 from flask import Blueprint, jsonify, render_template, request, session
+from flask_socketio import emit
 
-from remote_monitoring.common import msg_data, Config
+from remote_monitoring.common import msg_data, Config, socketio
+
+status_thread = None
+status_thread_lock = threading.Lock()
 
 def create_blueprint(communicator):
     task_scheduling = Blueprint('task_scheduling', __name__)
@@ -50,4 +55,29 @@ def create_blueprint(communicator):
         zyre_communicator.shout(request_msg)
         return jsonify(message='')
 
+    @socketio.on('connect', namespace='/task_scheduling')
+    def on_connect():
+        robots = config.get_robots()
+        global status_thread
+        with status_thread_lock:
+            if status_thread is None:
+                status_thread = socketio.start_background_task(target=emit_robot_pose,
+                                                               robot_ids=robots)
+
+    def emit_robot_pose(robot_ids):
+        while True:
+            for robot in robot_ids:
+                msg = zyre_communicator.get_pose(robot)
+                robot_pose_msg = dict()
+                if msg:
+                    robot_pose_msg['robotId'] = msg['payload']['robotId']
+                    robot_pose_msg['x'] = msg['payload']['pose']['x']
+                    robot_pose_msg['y'] = msg['payload']['pose']['y']
+                    robot_pose_msg['theta'] = msg['payload']['pose']['theta']
+                    robot_pose_msg['timestamp'] = msg['header']['timestamp']
+                    socketio.emit('robot_pose', robot_pose_msg, namespace='/task_scheduling')
+                    socketio.sleep(0.1)
+            socketio.sleep(1.0)
+
     return task_scheduling
+

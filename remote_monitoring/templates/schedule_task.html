@@ -3,6 +3,9 @@
 
 <script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='plotly-latest.min.js') }}" type="text/javascript"></script>
+
 
 <script>
     var user_id = 'admin';
@@ -107,6 +110,68 @@
             });
         });
     });
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/task_scheduling');
+    socket.on('connect', function(msg) {
+        Plotly.plot('occupancy_grid', [{}],
+         {
+          width: 3942*0.25,
+          height: 8659*0.25,
+          xaxis: {
+           range: [-1250, 2000],
+           showgrid: false
+          },
+          yaxis: {
+           range: [-7500, 2700],
+           showgrid: false
+          },
+          images: [
+              {
+                "source": "/static/map.png",
+                "xref": "x",
+                "yref": "y",
+                "xanchor": "left",
+                "yanchor": "top",
+                "x": -1250,
+                "y": 1250,
+                "sizex": 3942,
+                "sizey": 8659,
+                "sizing": "stretch",
+                "opacity": 0.2
+              }
+            ]
+        })
+    });
+
+    socket.on('robot_pose', function(msg) {
+        var robot_pose = msg;
+        var img_x = (robot_pose.x / 0.02);
+        var img_y = (robot_pose.y / 0.02);
+        var robotId = robot_pose.robotId;
+        console.log(robotId + ': ' + img_x + ', ' + img_y, ' (' + robot_pose.timestamp + ')');
+        Plotly.update('occupancy_grid', [{}],
+            {
+           shapes: [
+            {
+              type: 'rect',
+              xref: 'x',
+              yref: 'y',
+              x0: img_x - 10,
+              y0: img_y + 10,
+              x1: img_x + 10,
+              y1: img_y - 10,
+              line: {
+                color: 'rgb(55, 128, 191)',
+                width: 3
+              },
+              fillcolor: 'rgba(55, 128, 191, 0.6)',
+              name: robotId
+            }
+           ]
+        })
+    });
+
+
 </script>
 
 
@@ -187,5 +252,8 @@
 </div>
 
 <button id="btn_schedule_task" class="btn btn-primary" type="button">Schedule task</button>
+
+<div id="occupancy_grid"></div>
+
 
 {% endblock %}

@@ -29,6 +29,10 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
         # and the values are experiment feedback messages
         self.experiment_feedback_msgs = dict()
 
+        # a dictionary in which the keys are robot IDs
+        # and the values are the corresponding robot poses
+        self.robot_pose_msgs = dict()
+
         config = Config()
         robots = config.get_robots()
         for robot in robots:
@@ -72,6 +76,10 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
                 feedback_data['experiment'] = dict_msg['payload']['experimentType']
                 feedback_data['result'] = dict_msg['payload']['result']
                 self.experiment_feedback_msgs[robot_id] = feedback_data
+        elif message_type == 'RobotPose2D':
+            robot_id = dict_msg['payload']['robotId']
+            if robot_id in self.experiment_feedback_msgs:
+                self.robot_pose_msgs[robot_id] = dict_msg
 
     def wait_for_data(self, session_id):
         start_time = time.time()
@@ -111,6 +119,15 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             if time_since_last_msg > self.status_timeout:
                 self.status_msgs[robot_id]['payload']['monitors'] = None
         return self.status_msgs[robot_id]
+
+    #####################
+    # Robot pose
+    #####################
+    def get_pose(self, robot_id):
+        if robot_id in self.robot_pose_msgs.keys() and self.robot_pose_msgs[robot_id]['header']['timestamp']:
+            return self.robot_pose_msgs[robot_id]
+        else:
+            return None
 
     #####################
     # Remote experiments
