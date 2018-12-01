@@ -69,6 +69,25 @@ class BBUtils(object):
         return query_msg
 
     @staticmethod
+    def get_bb_latest_data_query_msg(sender_id, bb_id, variable_list):
+        '''Returns a black box query message as defined in
+        https://git.ropod.org/ropod/communication/ropod-models/blob/develop/schemas/black-box/ropod-black-box-latest-data-query-schema.json
+
+        Keyword arguments:
+        sender_id -- ID of the user that queries the data (typically a session ID)
+        bb_id -- ID of the black box that should be queried (of the form black_box_<xxx>)
+        variable_list -- a list of variables whose values are queried
+
+        '''
+        query_msg = dict(msg_data)
+        query_msg['header']['type'] = 'LATEST-DATA-QUERY'
+        query_msg['header']['timestamp'] = time.time()
+        query_msg['payload']['senderId'] = sender_id
+        query_msg['payload']['blackBoxId'] = bb_id
+        query_msg['payload']['variables'] = variable_list
+        return query_msg
+
+    @staticmethod
     def parse_bb_variable_msg(bb_variable_msg):
         '''Returns a nested dictionary that reconstructs the structure of the
         data represented by the variables in bb_variable_msg["payload"]["variableList"]
@@ -139,7 +158,7 @@ class BBUtils(object):
     def parse_bb_data_msg(bb_data_msg):
         '''Returns a tuple (variables, data), where variables is a list of
         variables that were queried and data a list of variable values, namely
-        data[i] is a list of values corresponding to variables[i]
+        data[i] is a list of [timestamp, value] lists corresponding to variables[i]
 
         Keyword arguments:
         bb_data_msg -- a black box data query response
@@ -152,4 +171,23 @@ class BBUtils(object):
                 variables.append(var_name)
                 variable_data_list = [ast.literal_eval(item) for item in var_data]
                 data.append(variable_data_list)
+        return (variables, data)
+
+    @staticmethod
+    def parse_bb_latest_data_msg(bb_data_msg):
+        '''Returns a tuple (variables, data), where variables is a list of
+        variables that were queried and data a list of the latest variable values,
+        namely data[i] is a list [timestamp, value] corresponding to
+        the latest value of variables[i] along with its timestamp
+
+        Keyword arguments:
+        bb_data_msg -- a black box latest data query response
+
+        '''
+        variables = list()
+        data = list()
+        if bb_data_msg:
+            for var_name, var_data in bb_data_msg['payload']['dataList'].items():
+                variables.append(var_name)
+                data.append(ast.literal_eval(var_data))
         return (variables, data)
