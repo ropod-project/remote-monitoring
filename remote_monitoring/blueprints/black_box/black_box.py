@@ -43,20 +43,20 @@ def create_blueprint(communicator):
         variables = dict()
         message = ''
         try:
-            for interface in query_result['payload']['variableList']:
-                values = list(interface.values())
-                if values is not None and values[0] is not None:
-                    for full_variable_name in values[0]:
-                        underscore_indices = [0]
+            for variable_names in query_result['payload']['variableList'].values():
+                if variable_names:
+                    for full_variable_name in variable_names:
+                        slash_indices = [0]
                         current_variable_dict = variables
                         for i, char in enumerate(full_variable_name):
                             if char == '/':
-                                underscore_indices.append(i+1)
-                                name_component = full_variable_name[underscore_indices[-2]:underscore_indices[-1]-1]
+                                slash_indices.append(i+1)
+                                name_component = full_variable_name[slash_indices[-2]:
+                                                                    slash_indices[-1]-1]
                                 if name_component not in current_variable_dict:
                                     current_variable_dict[name_component] = dict()
                                 current_variable_dict = current_variable_dict[name_component]
-                        name_component = full_variable_name[underscore_indices[-1]:]
+                        name_component = full_variable_name[slash_indices[-1]:]
                         current_variable_dict[name_component] = dict()
         except Exception as exc:
             print('[get_robot_variables] %s' % str(exc))
