@@ -35,7 +35,7 @@ def create_blueprint(communicator):
         black_box_id = BBUtils.get_bb_id(robot_id)
 
         query_msg = dict(msg_data)
-        query_msg['header']['type'] = 'VARIABLE_QUERY'
+        query_msg['header']['type'] = 'VARIABLE-QUERY'
         query_msg['payload']['senderId'] = session['uid'].hex
         query_msg['payload']['blackBoxId'] = black_box_id
         query_result = zyre_communicator.get_black_box_data(query_msg)
@@ -43,21 +43,7 @@ def create_blueprint(communicator):
         variables = dict()
         message = ''
         try:
-            for variable_names in query_result['payload']['variableList'].values():
-                if variable_names:
-                    for full_variable_name in variable_names:
-                        slash_indices = [0]
-                        current_variable_dict = variables
-                        for i, char in enumerate(full_variable_name):
-                            if char == '/':
-                                slash_indices.append(i+1)
-                                name_component = full_variable_name[slash_indices[-2]:
-                                                                    slash_indices[-1]-1]
-                                if name_component not in current_variable_dict:
-                                    current_variable_dict[name_component] = dict()
-                                current_variable_dict = current_variable_dict[name_component]
-                        name_component = full_variable_name[slash_indices[-1]:]
-                        current_variable_dict[name_component] = dict()
+            variables = BBUtils.parse_bb_variable_msg(query_result)
         except Exception as exc:
             print('[get_robot_variables] %s' % str(exc))
             message = 'Variable list could not be retrieved'

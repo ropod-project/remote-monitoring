@@ -1,3 +1,4 @@
+import time
 import ast
 
 from remote_monitoring.common import msg_data
@@ -58,13 +59,81 @@ class BBUtils(object):
 
         '''
         query_msg = dict(msg_data)
-        query_msg['header']['type'] = 'DATA_QUERY'
+        query_msg['header']['type'] = 'DATA-QUERY'
+        query_msg['header']['timestamp'] = time.time()
         query_msg['payload']['senderId'] = sender_id
         query_msg['payload']['blackBoxId'] = bb_id
         query_msg['payload']['variables'] = variable_list
         query_msg['payload']['startTime'] = start_query_time
         query_msg['payload']['endTime'] = end_query_time
         return query_msg
+
+    @staticmethod
+    def parse_bb_variable_msg(bb_variable_msg):
+        '''Returns a nested dictionary that reconstructs the structure of the
+        data represented by the variables in bb_variable_msg["payload"]["variableList"]
+
+        Example:
+        If bb_variable_msg["payload"]["variableList"] is the nested dictionary
+        {
+            'ros': ['ros_cmd_vel/linear/z', 'ros_cmd_vel/linear/x', 'ros_cmd_vel/angular/x',
+                    'ros_cmd_vel/angular/z', 'ros_cmd_vel/angular/y', 'ros_cmd_vel/linear/y',
+                    'ros_pose/x', 'ros_pose_y', 'ros_pose_z'],
+            'zyre': ['zyre_pose/x', 'zyre_pose_y', 'zyre_pose_z']
+        }
+        the resulting nested dictionary will be
+        {
+            'ros_cmd_vel':
+            {
+                'linear':
+                {
+                    'x': {}
+                    'y': {},
+                    'z': {}
+                },
+                'angular':
+                {
+                    'x': {}
+                    'y': {},
+                    'z': {}
+                }
+            },
+            'ros_pose':
+            {
+                'x': {},
+                'y': {},
+                'z': {}
+            },
+            'zyre_pose':
+            {
+                'x': {},
+                'y': {},
+                'z': {}
+            }
+        }
+
+        Keyword arguments:
+        bb_variable_msg -- a black box variable query response
+
+        '''
+        variables = dict()
+        if bb_variable_msg:
+            for variable_names in bb_variable_msg['payload']['variableList'].values():
+                if variable_names:
+                    for full_variable_name in variable_names:
+                        slash_indices = [0]
+                        current_variable_dict = variables
+                        for i, char in enumerate(full_variable_name):
+                            if char == '/':
+                                slash_indices.append(i+1)
+                                name_component = full_variable_name[slash_indices[-2]:
+                                                                    slash_indices[-1]-1]
+                                if name_component not in current_variable_dict:
+                                    current_variable_dict[name_component] = dict()
+                                current_variable_dict = current_variable_dict[name_component]
+                        name_component = full_variable_name[slash_indices[-1]:]
+                        current_variable_dict[name_component] = dict()
+        return variables
 
     @staticmethod
     def parse_bb_data_msg(bb_data_msg):
@@ -79,11 +148,8 @@ class BBUtils(object):
         variables = list()
         data = list()
         if bb_data_msg:
-            variable_data = bb_data_msg['payload']['dataList']
-            if variable_data is not None and variable_data[0] is not None:
-                for data_dict in variable_data:
-                    for key, value in data_dict.items():
-                        variables.append(key)
-                        variable_data_list = [ast.literal_eval(item) for item in value]
-                        data.append(variable_data_list)
+            for var_name, var_data in bb_data_msg['payload']['dataList'].items():
+                variables.append(var_name)
+                variable_data_list = [ast.literal_eval(item) for item in var_data]
+                data.append(variable_data_list)
         return (variables, data)
