@@ -1,3 +1,4 @@
+from copy import deepcopy
 import time
 import ast
 
@@ -24,6 +25,21 @@ class BBUtils(object):
         robot_number = robot_id[robot_id.rfind('_')+1:]
         black_box_id = 'black_box_{0}'.format(robot_number)
         return black_box_id
+
+    @staticmethod
+    def get_robot_id(black_box_id):
+        '''Extracts the ID of the black box and creates the ID of the robot
+        corresponding to that black box. The black box ID is assumed to be in the form
+        black_box_<xxx>, where <xxx> is the actual ID and the resulting
+        robot ID will have the form robot_<xxx>
+
+        Keyword arguments:
+        black_box_id -- ID of a black box
+
+        '''
+        black_box_number = black_box_id[black_box_id.rfind('_')+1:]
+        robot_id = 'robot_{0}'.format(black_box_number)
+        return robot_id
 
     @staticmethod
     def expand_var_names(variables, index_count):
@@ -58,7 +74,7 @@ class BBUtils(object):
         end_query_time -- UNIX timestamp denoting the end data query time
 
         '''
-        query_msg = dict(msg_data)
+        query_msg = deepcopy(msg_data)
         query_msg['header']['type'] = 'DATA-QUERY'
         query_msg['header']['timestamp'] = time.time()
         query_msg['payload']['senderId'] = sender_id
@@ -79,7 +95,7 @@ class BBUtils(object):
         variable_list -- a list of variables whose values are queried
 
         '''
-        query_msg = dict(msg_data)
+        query_msg = deepcopy(msg_data)
         query_msg['header']['type'] = 'LATEST-DATA-QUERY'
         query_msg['header']['timestamp'] = time.time()
         query_msg['payload']['senderId'] = sender_id
@@ -189,5 +205,8 @@ class BBUtils(object):
         if bb_data_msg:
             for var_name, var_data in bb_data_msg['payload']['dataList'].items():
                 variables.append(var_name)
-                data.append(ast.literal_eval(var_data))
+                if var_data:
+                    data.append(ast.literal_eval(var_data))
+                else:
+                    data.append(None)
         return (variables, data)

@@ -68,7 +68,8 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
 
         timestamp = dict_msg['header']['timestamp']
         message_type = dict_msg['header']['type']
-        if message_type == 'VARIABLE-QUERY' or message_type == 'DATA-QUERY':
+        if message_type == 'VARIABLE-QUERY' or message_type == 'DATA-QUERY' or \
+           message_type == 'LATEST-DATA-QUERY':
             for session_id in self.__request_data:
                 if dict_msg['payload']['receiverId'] == session_id:
                     self.__request_data[session_id] = dict_msg
