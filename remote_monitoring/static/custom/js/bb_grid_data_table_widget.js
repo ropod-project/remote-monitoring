@@ -36,10 +36,11 @@ BBGridDataTableWidget.prototype.init = function() {
     for (var i=0; i<this.variables.length; i++)
     {
         table_html += '<tr><td>' + (i+1).toString() + '</td>';
+        this.id_var_map[i] = {};
         for (var key in this.variables[i])
         {
             var var_data_id = this.container_id + '_' + key.replace(/\//g, '_') + '_' + i.toString();
-            this.id_var_map[this.variables[i][key]] = var_data_id;
+            this.id_var_map[i][this.variables[i][key]] = var_data_id;
             table_html += '<td id="' + var_data_id + '"></td>';
         }
         table_html += '</tr>';
@@ -64,7 +65,7 @@ BBGridDataTableWidget.prototype.update = function(variables, timestamped_data) {
             // timestamped_data[0] is the timestamp of the data item
             if (timestamped_data[i][key] != null)
             {
-                var var_data_id = this.id_var_map[variables[i][key]];
+                var var_data_id = this.id_var_map[i][variables[i][key]];
                 $('#' + var_data_id).html(timestamped_data[i][key][1].toFixed(2));
             }
         }
