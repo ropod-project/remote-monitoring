@@ -9,6 +9,15 @@ experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'in_place_rotation', 'name': 'In-place rotation'},
                {'id': 'area_navigation', 'name': 'Area navigation'}]
 
+maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
+         'display_scale': 0.15, 'width': 3942, 'height': 8659,
+         'xrange': [-1250, 2500], 'yrange': [-7500, 2700],
+         'origin_x': -1250, 'origin_y': 1250, 'resolution': 0.02},
+        {'name': 'brsu-c-floor0', 'path': '/static/maps/brsu/c-floor0.png',
+         'display_scale': 0.15, 'width': 4598, 'height': 4228,
+         'xrange': [-1200, 3500], 'yrange': [-200, 4000],
+         'origin_x': -1250, 'origin_y': 4000, 'resolution': 0.02}]
+
 config = Config()
 client = pm.MongoClient(port=config.db_port)
 db = client[config.db_name]
@@ -26,3 +35,10 @@ collection = db[Config.EXPERIMENT_COLLECTION]
 for experiment in experiments:
     doc = experiment
     collection.insert_one(doc)
+
+print('Initialising "{0}" collection'.format(Config.MAP_COLLECTION))
+collection = db[Config.MAP_COLLECTION]
+for m in maps:
+    doc = m
+    collection.insert_one(doc)
+collection.insert_one({'current_map':'brsu-c-floor0'})
