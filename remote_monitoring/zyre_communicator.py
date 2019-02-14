@@ -1,9 +1,9 @@
 from copy import deepcopy
 import time
-from ropod.pyre_communicator.base_class import PyreBaseCommunicator
+from ropod.pyre_communicator.base_class import RopodPyre
 from remote_monitoring.common import Config, robot_status_msg
 
-class ZyreWebCommunicator(PyreBaseCommunicator):
+class ZyreWebCommunicator(RopodPyre):
     def __init__(self, node_name, groups, data_timeout=10., status_timeout=5.):
         '''
         Keyword arguments:
@@ -52,6 +52,7 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             self.__status_msgs[robot] = status_msg
             self.__experiment_feedback_msgs[robot] = None
             self.__robot_pose_msgs[robot] = None
+        self.start()
 
     def receive_msg_cb(self, msg_content):
         '''Processes incoming messages. Only listens to messages of type
