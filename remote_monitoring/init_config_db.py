@@ -8,6 +8,10 @@ smart_wheel_counts = {'ropod_001': 4, 'ropod_002': 4}
 experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'in_place_rotation', 'name': 'In-place rotation'},
                {'id': 'area_navigation', 'name': 'Area navigation'}]
+queries = [ {'id': 'get_all_ongoing_tasks', 'name': 'All ongoing tasks'},
+            {'id': 'get_all_scheduled_tasks', 'name': 'All scheduled tasks'},
+            {'id': 'get_robots_assigned_to_task', 'name': 'Robots assigned to task'},
+            {'id': 'get_tasks_assigned_to_robot', 'name': 'Tasks assigned to robot'}, ]
 
 maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
          'display_scale': 0.15, 'width': 3942, 'height': 8659,
@@ -42,3 +46,8 @@ for m in maps:
     doc = m
     collection.insert_one(doc)
 collection.insert_one({'current_map':'brsu-c-floor0'})
+
+print('Initialising "{0}" collectino'.format(Config.QUERY_COLLECTION))
+collection = db[Config.QUERY_COLLECTION]
+for query in queries :
+    collection.insert_one(query)
