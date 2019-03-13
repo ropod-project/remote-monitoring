@@ -7,7 +7,8 @@ robot_ids = ['ropod_001', 'ropod_002']
 smart_wheel_counts = {'ropod_001': 4, 'ropod_002': 4}
 experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'in_place_rotation', 'name': 'In-place rotation'},
-               {'id': 'area_navigation', 'name': 'Area navigation'}]
+               {'id': 'area_navigation', 'name': 'Area navigation'},
+               {'id': 'elevator_entering', 'name': 'Elevator entering'}]
 
 maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
          'display_scale': 0.15, 'width': 3942, 'height': 8659,
