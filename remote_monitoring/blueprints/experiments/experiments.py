@@ -67,8 +67,8 @@ def create_blueprint(communicator):
 
         msg = dict(msg_data)
         msg['header']['type'] = 'ROBOT-EXPERIMENT-REQUEST'
+        msg['header']['robotId'] = robot_id
         msg['payload']['userId'] = session['uid'].hex
-        msg['payload']['robotId'] = robot_id
         msg['payload']['experimentType'] = experiment
 
         client_feedback_msg = ''
