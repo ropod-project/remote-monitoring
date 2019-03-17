@@ -6,6 +6,8 @@ import threading
 from flask import Blueprint, render_template, jsonify, request, session
 from flask_socketio import emit
 
+from black_box_tools.data_utils import DataUtils
+
 from remote_monitoring.common import socketio, Config
 from remote_monitoring.black_box_utils import BBUtils
 
@@ -100,7 +102,7 @@ def create_blueprint(communicator):
 
         while True:
             data_msg = zyre_communicator.get_black_box_data(robot_data_query_msgs[robot_id])
-            variables, data = BBUtils.parse_bb_latest_data_msg(data_msg)
+            variables, data = DataUtils.parse_bb_latest_data_msg(data_msg)
 
             short_vel_vars = [cmd_vel_var_name_mapping[x] for x in cmd_vel_vars]
             wheel_data = []
@@ -145,11 +147,11 @@ def create_blueprint(communicator):
             # data query message
             black_box_id = BBUtils.get_bb_id(robot)
             robot_smart_wheel_count = config.get_robot_smart_wheel_count(robot)
-            expanded_wheel_vars = BBUtils.expand_var_names(wheel_vars, robot_smart_wheel_count)
+            expanded_wheel_vars = DataUtils.expand_var_names(wheel_vars, robot_smart_wheel_count)
             query_vars = expanded_wheel_vars + cmd_vel_vars
-            query_msg = BBUtils.get_bb_latest_data_query_msg(session['uid'].hex,
-                                                             black_box_id,
-                                                             query_vars)
+            query_msg = DataUtils.get_bb_latest_data_query_msg(session['uid'].hex,
+                                                               black_box_id,
+                                                               query_vars)
             robot_data_query_msgs[robot] = query_msg
 
             # for each robot, we get a short variable name mapping for the smart wheel variables

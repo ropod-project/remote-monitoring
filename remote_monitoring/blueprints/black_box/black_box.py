@@ -4,6 +4,8 @@ import uuid
 
 from flask import Blueprint, jsonify, render_template, request, session, send_file
 
+from black_box_tools.data_utils import DataUtils
+
 from remote_monitoring.common import msg_data, Config
 from remote_monitoring.black_box_utils import BBUtils
 
@@ -43,7 +45,7 @@ def create_blueprint(communicator):
         variables = dict()
         message = ''
         try:
-            variables = BBUtils.parse_bb_variable_msg(query_result)
+            variables = DataUtils.parse_bb_variable_msg(query_result)
         except Exception as exc:
             print('[get_robot_variables] %s' % str(exc))
             message = 'Variable list could not be retrieved'
@@ -57,18 +59,18 @@ def create_blueprint(communicator):
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
-                                             black_box_id,
-                                             variable_list,
-                                             start_query_time,
-                                             end_query_time)
+        query_msg = DataUtils.get_bb_query_msg(session['uid'].hex,
+                                               black_box_id,
+                                               variable_list,
+                                               start_query_time,
+                                               end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         variables = list()
         data = list()
         message = ''
         try:
-            variables, data = BBUtils.parse_bb_data_msg(query_result)
+            variables, data = DataUtils.parse_bb_data_msg(query_result)
         except Exception as exc:
             print('[get_robot_data] %s' % str(exc))
             message = 'Data could not be retrieved'
@@ -85,11 +87,11 @@ def create_blueprint(communicator):
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
-                                             black_box_id,
-                                             variable_list,
-                                             start_query_time,
-                                             end_query_time)
+        query_msg = DataUtils.get_bb_query_msg(session['uid'].hex,
+                                               black_box_id,
+                                               variable_list,
+                                               start_query_time,
+                                               end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         message = ''

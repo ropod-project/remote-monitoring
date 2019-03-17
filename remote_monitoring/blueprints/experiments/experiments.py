@@ -5,6 +5,9 @@ import threading
 import json
 
 from flask import Blueprint, jsonify, render_template, request, session
+
+from black_box_tools.data_utils import DataUtils
+
 from remote_monitoring.common import socketio, msg_data, Config
 from remote_monitoring.black_box_utils import BBUtils
 
@@ -92,8 +95,8 @@ def create_blueprint(communicator):
         feedback_received = False
         black_box_id = BBUtils.get_bb_id(robot_id)
         robot_smart_wheel_count = config.get_robot_smart_wheel_count(robot_id)
-        diagnostic_vars = BBUtils.expand_var_names(experiment_diagnostic_vars,
-                                                   robot_smart_wheel_count)
+        diagnostic_vars = DataUtils.expand_var_names(experiment_diagnostic_vars,
+                                                     robot_smart_wheel_count)
 
         while experiment_ongoing:
             feedback_msg = zyre_communicator.get_experiment_feedback(robot_id)
@@ -141,15 +144,15 @@ def create_blueprint(communicator):
         end_query_time = int(time.time())
         start_query_time = end_query_time - 10
 
-        query_msg = BBUtils.get_bb_query_msg(session_id,
-                                             black_box_id,
-                                             diagnostic_vars,
-                                             start_query_time,
-                                             end_query_time)
+        query_msg = DataUtils.get_bb_query_msg(session_id,
+                                               black_box_id,
+                                               diagnostic_vars,
+                                               start_query_time,
+                                               end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         try:
-            variables, data = BBUtils.parse_bb_data_msg(query_result)
+            variables, data = DataUtils.parse_bb_data_msg(query_result)
             vel_vars, vel_data = get_variable_data('velocity', variables, data)
             socketio.emit('vel_data',
                           json.dumps({'variables': vel_vars,
