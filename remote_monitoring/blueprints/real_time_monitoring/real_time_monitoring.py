@@ -109,7 +109,7 @@ def create_blueprint(communicator):
             for i in range(robot_smart_wheel_count):
                 wheel_data.append({})
                 for var in wheel_vars:
-                    expanded_var_name = var.replace('*', str(i+1))
+                    expanded_var_name = var.replace('*', str(i))
                     wheel_data[i][expanded_var_name] = None
 
             vel_data = list()
@@ -117,7 +117,7 @@ def create_blueprint(communicator):
                 try:
                     for i in range(robot_smart_wheel_count):
                         for var in wheel_vars:
-                            expanded_var_name = var.replace('*', str(i+1))
+                            expanded_var_name = var.replace('*', str(i))
                             wheel_data[i][expanded_var_name] = data[variables.index(expanded_var_name)]
                     socketio.emit('wheel_data',
                                   json.dumps({'variables': robot_wheel_var_name_mapping[robot_id],
