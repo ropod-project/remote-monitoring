@@ -164,6 +164,15 @@ class ZyreWebCommunicator(RopodPyre):
     #####################
     # Remote experiments
     #####################
+    def reset_experiment_feedback(self, robot_id):
+        '''Resets the experiment feedback messages for the given robot.
+
+        Keyword arguments:
+        robot_id -- ID of a robot
+
+        '''
+        self.__experiment_feedback_msgs[robot_id] = None
+
     def get_experiment_feedback(self, robot_id):
         '''Returns a dictionary representing an experiment feedback message from the given robot
 

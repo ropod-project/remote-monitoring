@@ -98,6 +98,7 @@ def create_blueprint(communicator):
         diagnostic_vars = DataUtils.expand_var_names(experiment_diagnostic_vars,
                                                      robot_smart_wheel_count)
 
+        zyre_communicator.reset_experiment_feedback(robot_id)
         while experiment_ongoing:
             feedback_msg = zyre_communicator.get_experiment_feedback(robot_id)
             if feedback_msg and feedback_msg['robot_id'] == robot_id:
