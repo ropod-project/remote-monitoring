@@ -11,7 +11,8 @@ experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'elevator_entering', 'name': 'Elevator entering'},
                {'id': 'dock', 'name': 'Docking'},
                {'id': 'undock', 'name': 'Undocking'},
-               {'id': 'nav_dock_undock', 'name': 'Navigation, docking, and undocking'}]
+               {'id': 'nav_dock_undock', 'name': 'Navigation, docking, and undocking'},
+               {'id': 'dock_and_enter_elevator', 'name': 'Docking and elevator entering'}]
 
 maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
          'display_scale': 0.15, 'width': 3942, 'height': 8659,
