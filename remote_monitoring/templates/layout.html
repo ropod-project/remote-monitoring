@@ -9,34 +9,15 @@
     <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='metisMenu/css/metisMenu.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='sb-admin-2.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='bs_pagination/jquery.bs_pagination.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='jui_filter_rules/minified/jquery.jui_filter_rules.bs.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='bs_grid/minified/jquery.bs_grid.bs2.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='renderjson/renderjson.css') }}" rel="stylesheet">
 
     <script src="{{ url_for('static', filename='jquery-1.11.2.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='jquery-ui.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='metisMenu/js/metisMenu.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='sb-admin-2.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='bs_pagination/jquery.bs_pagination.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='bs_pagination/localization/en.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='jui_filter_rules/minified/jquery.jui_filter_rules.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='jui_filter_rules/minified/localization/en.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='bs_grid/minified/jquery.bs_grid.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='bs_grid/minified/localization/en.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='renderjson/renderjson.js') }}" type="text/javascript"></script>
     
-    <!--  JQUERY-UI (only sortable and datepicker is needed) -->
-    <!--  if timepicker is used in filters -->
-    <!--
-    <link rel="stylesheet" type="text/css" href="/path/to/jquery-ui-timepicker-addon.min.css"/>
-    <script type="text/javascript" src="/path/to/jquery-ui-timepicker-addon.min.js"></script>
-    -->
-      
-    <!--  FILTERS plugin --> 
-    <!--  required from filters plugin -->
-    <!-- <script type="text/javascript" src="/path/to/moment.min.js"></script> -->
-     
-
     <script type=text/javascript>
       var SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>

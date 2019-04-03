@@ -14,7 +14,7 @@
         $('#robot_ids').hide();
         $('#task_list').hide();
         $('#robot_list').hide();
-        $('#query_result_label').hide();
+        $('#expanded_entry').hide();
         query_id = null;
         task_id = null;
         robot_id = null;
@@ -143,8 +143,8 @@
         });
 
         $("#btn_execute_query").click(function(){
-            $('#query_result_label').html(' ');
-            $('#query_result_label').hide();
+            $('#expanded_entry').html('');
+            $('#expanded_entry').hide();
             $('#task_list').hide();
             $('#robot_list').hide();
             $.ajax({
@@ -176,15 +176,17 @@
 
         $('.query_table').on('click', 'button', function() {
             id = $(this).val();
-
+            $('#query_result_label').show();
             if (task_list == null) {
-                $('#query_result_label').show();
-                $('#query_result_label').html(JSON.stringify(robot_list[id]));
+                output = robot_list[id]
             }
             else {
-                $('#query_result_label').show();
-                $('#query_result_label').html(JSON.stringify(task_list[id]));
+                output = task_list[id]
             }
+            <!-- $('#query_result_label').html(JSON.stringify(output, null, 2)); -->
+            document.getElementById('expanded_entry').appendChild(renderjson.set_icons('►', '▼').set_show_to_level(1)(output));
+            $('#expanded_entry').show();
+            $('#info_message_container').html("Details expanded at the bottom of the page.");
 
         });
     });
@@ -273,10 +275,6 @@
         }
     }
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/central_operator_console');
-    socket.on('connect', function(msg) {
-    });
-
 </script>
 
 
@@ -329,7 +327,6 @@
 <button id="btn_execute_query" class="btn btn-primary" type="button">Execute query</button>
 
 <div id="query_result" class="query_table" disabled="disabled">
-    <label id="query_result_label"></label>
     <table id="task_list" width="100%" class="table table-striped table-bordered table-hover">
         <thead>
             <th width="50%">Task ID</th>
@@ -346,6 +343,7 @@
         </thead>
         <tbody> </tbody>
     </table>
+    <div id="expanded_entry"></div>
     <div class="panel panel-default">
     </div>
 </div>
