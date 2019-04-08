@@ -3,16 +3,22 @@ from __future__ import print_function
 import pymongo as pm
 from remote_monitoring.common import Config
 
-robot_ids = ['ropod_001', 'ropod_002']
-smart_wheel_counts = {'ropod_001': 4, 'ropod_002': 4}
+robot_ids = ['ropod_001', 'ropod_002', 'ropod_003']
+smart_wheel_counts = {'ropod_001': 4, 'ropod_002': 4, 'ropod_003': 4}
 experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'in_place_rotation', 'name': 'In-place rotation'},
                {'id': 'area_navigation', 'name': 'Area navigation'}]
+               {'id': 'elevator_entering', 'name': 'Elevator entering'},
+               {'id': 'dock', 'name': 'Docking'},
+               {'id': 'undock', 'name': 'Undocking'},
+               {'id': 'nav_dock_undock', 'name': 'Navigation, docking, and undocking'},
+               {'id': 'dock_and_enter_elevator', 'name': 'Docking and elevator entering'}]
+               
 queries = [ {'id': 'get_all_ongoing_tasks', 'name': 'All ongoing tasks'},
             {'id': 'get_all_scheduled_tasks', 'name': 'All scheduled tasks'},
             {'id': 'get_robots_assigned_to_task', 'name': 'Robots assigned to task'},
             {'id': 'get_tasks_assigned_to_robot', 'name': 'Tasks assigned to robot'}, ]
-
+            
 maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
          'display_scale': 0.15, 'width': 3942, 'height': 8659,
          'xrange': [-1250, 2500], 'yrange': [-7500, 2700],
