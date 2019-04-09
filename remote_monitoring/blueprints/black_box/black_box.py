@@ -40,7 +40,7 @@ def create_blueprint(communicator):
         query_msg['header']['type'] = 'VARIABLE-QUERY'
         query_msg['payload']['senderId'] = session['uid'].hex
         query_msg['payload']['blackBoxId'] = black_box_id
-        query_result = zyre_communicator.get_black_box_data(query_msg)
+        query_result = zyre_communicator.get_query_data(query_msg)
 
         variables = dict()
         message = ''

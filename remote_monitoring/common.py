@@ -9,6 +9,7 @@ class Config(object):
     ROBOT_COLLECTION = 'robots'
     EXPERIMENT_COLLECTION = 'experiments'
     MAP_COLLECTION = 'maps'
+    QUERY_COLLECTION = 'queries'
 
     def __init__(self):
         self.db_name = 'remote_monitoring_config'
@@ -72,6 +73,20 @@ class Config(object):
         collection = db[collection_name]
         docs = collection.find({'name': map_name})
         return docs[0]
+
+    def get_queries(self) :
+        '''Returns a list of all known queries
+
+        :Returns: list of dict
+
+        '''
+        collection_name = Config.QUERY_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({})
+        queries = [{'id': doc['id'], 'name': doc['name']} for doc in docs]
+        return queries
 
 class MapUtils(object):
 

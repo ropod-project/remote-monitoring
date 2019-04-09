@@ -117,21 +117,22 @@ class ZyreWebCommunicator(RopodPyre):
             robot_id = dict_msg['payload']['robotId']
             if robot_id in self.__robot_pose_msgs:
                 self.__robot_pose_msgs[robot_id] = dict_msg
+        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS", 
+                "GET-ALL-SCHEDULED-TASK-IDS", "GET-ROBOTS-ASSIGNED-TO-TASK",
+                "GET-TASKS-ASSIGNED-TO-ROBOT"] :
+            for session_id in self.__request_data:
+                if dict_msg['payload']['receiverId'] == session_id:
+                    self.__request_data[session_id] = dict_msg
 
-
-    ############
-    # Black box
-    ###########
-    def get_black_box_data(self, query_msg):
-        '''Queries data from a black box and waits for a response
+    def get_query_data(self, query_msg):
+        '''Queries data and waits for a response
 
         Keyword arguments:
-        query_msg -- a dictionary black box query message
+        query_msg -- a dictionary query message
 
         '''
         session_id = query_msg['payload']['senderId']
         self.__request_data[session_id] = None
-        self.__request_robots[session_id] = query_msg['payload']['blackBoxId']
         self.shout(query_msg)
         data = self.__wait_for_data(session_id)
         return data

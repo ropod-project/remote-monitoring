@@ -4,6 +4,7 @@ from __future__ import print_function
 from flask import Flask
 
 import remote_monitoring.blueprints.black_box.black_box as black_box
+import remote_monitoring.blueprints.central_operator_console.central_operator_console as central_operator_console
 import remote_monitoring.blueprints.experiments.experiments as experiments
 import remote_monitoring.blueprints.ropod_status.robot_status as robot_status
 import remote_monitoring.blueprints.real_time_monitoring.real_time_monitoring as real_time_monitoring
@@ -21,6 +22,7 @@ app.register_blueprint(experiments.create_blueprint(zyre_communicator))
 app.register_blueprint(robot_status.create_blueprint(zyre_communicator))
 app.register_blueprint(task_scheduling.create_blueprint(zyre_communicator))
 app.register_blueprint(real_time_monitoring.create_blueprint(zyre_communicator))
+app.register_blueprint(central_operator_console.create_blueprint(zyre_communicator))
 
 socketio.init_app(app)
 
