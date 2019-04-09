@@ -4,6 +4,8 @@ import uuid
 
 from flask import Blueprint, jsonify, render_template, request, session, send_file
 
+from black_box_tools.data_utils import DataUtils
+
 from remote_monitoring.common import msg_data, Config
 from remote_monitoring.black_box_utils import BBUtils
 
@@ -35,29 +37,15 @@ def create_blueprint(communicator):
         black_box_id = BBUtils.get_bb_id(robot_id)
 
         query_msg = dict(msg_data)
-        query_msg['header']['type'] = 'VARIABLE_QUERY'
+        query_msg['header']['type'] = 'VARIABLE-QUERY'
         query_msg['payload']['senderId'] = session['uid'].hex
         query_msg['payload']['blackBoxId'] = black_box_id
-        query_result = zyre_communicator.get_black_box_data(query_msg)
+        query_result = zyre_communicator.get_query_data(query_msg)
 
         variables = dict()
         message = ''
         try:
-            for interface in query_result['payload']['variableList']:
-                values = list(interface.values())
-                if values is not None and values[0] is not None:
-                    for full_variable_name in values[0]:
-                        underscore_indices = [0]
-                        current_variable_dict = variables
-                        for i, char in enumerate(full_variable_name):
-                            if char == '/':
-                                underscore_indices.append(i+1)
-                                name_component = full_variable_name[underscore_indices[-2]:underscore_indices[-1]-1]
-                                if name_component not in current_variable_dict:
-                                    current_variable_dict[name_component] = dict()
-                                current_variable_dict = current_variable_dict[name_component]
-                        name_component = full_variable_name[underscore_indices[-1]:]
-                        current_variable_dict[name_component] = dict()
+            variables = DataUtils.parse_bb_variable_msg(query_result)
         except Exception as exc:
             print('[get_robot_variables] %s' % str(exc))
             message = 'Variable list could not be retrieved'
@@ -71,18 +59,18 @@ def create_blueprint(communicator):
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
-                                             black_box_id,
-                                             variable_list,
-                                             start_query_time,
-                                             end_query_time)
+        query_msg = DataUtils.get_bb_query_msg(session['uid'].hex,
+                                               black_box_id,
+                                               variable_list,
+                                               start_query_time,
+                                               end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         variables = list()
         data = list()
         message = ''
         try:
-            variables, data = BBUtils.parse_bb_data_msg(query_result)
+            variables, data = DataUtils.parse_bb_data_msg(query_result)
         except Exception as exc:
             print('[get_robot_data] %s' % str(exc))
             message = 'Data could not be retrieved'
@@ -99,11 +87,11 @@ def create_blueprint(communicator):
         start_query_time = request.args.get('start_timestamp')
         end_query_time = request.args.get('end_timestamp')
 
-        query_msg = BBUtils.get_bb_query_msg(session['uid'].hex,
-                                             black_box_id,
-                                             variable_list,
-                                             start_query_time,
-                                             end_query_time)
+        query_msg = DataUtils.get_bb_query_msg(session['uid'].hex,
+                                               black_box_id,
+                                               variable_list,
+                                               start_query_time,
+                                               end_query_time)
         query_result = zyre_communicator.get_black_box_data(query_msg)
 
         message = ''

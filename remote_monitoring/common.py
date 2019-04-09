@@ -1,12 +1,15 @@
 from __future__ import print_function
 import pymongo as pm
 from flask_socketio import SocketIO
+import math
 
 socketio = SocketIO()
 
 class Config(object):
     ROBOT_COLLECTION = 'robots'
     EXPERIMENT_COLLECTION = 'experiments'
+    MAP_COLLECTION = 'maps'
+    QUERY_COLLECTION = 'queries'
 
     def __init__(self):
         self.db_name = 'remote_monitoring_config'
@@ -54,6 +57,56 @@ class Config(object):
         docs = collection.find({})
         experiments = [{'id': doc['id'], 'name': doc['name']} for doc in docs]
         return experiments
+
+    def get_current_map(self):
+        collection_name = Config.MAP_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({'current_map': {"$exists":"true"}})
+        return docs[0]['current_map']
+
+    def get_map(self, map_name):
+        collection_name = Config.MAP_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({'name': map_name})
+        return docs[0]
+
+    def get_queries(self) :
+        '''Returns a list of all known queries
+
+        :Returns: list of dict
+
+        '''
+        collection_name = Config.QUERY_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({})
+        queries = [{'id': doc['id'], 'name': doc['name']} for doc in docs]
+        return queries
+
+class MapUtils(object):
+
+    def __init__(self):
+        pass
+
+    def get_robot_pose_msg(self, msg):
+        robot_pose_msg = dict()
+        robot_pose_msg['robotId'] = msg['payload']['robotId']
+        robot_pose_msg['x'] = msg['payload']['pose']['x']
+        robot_pose_msg['y'] = msg['payload']['pose']['y']
+        robot_pose_msg['theta'] = msg['payload']['pose']['theta']
+        t1 = float(msg['payload']['pose']['theta']) + (9*math.pi/10.0)
+        t2 = float(msg['payload']['pose']['theta']) - (9*math.pi/10.0)
+        robot_pose_msg['line1x'] = (msg['payload']['pose']['x'] + 2*math.cos(t1))
+        robot_pose_msg['line1y'] = (msg['payload']['pose']['y'] + 2*math.sin(t1))
+        robot_pose_msg['line2x'] = (msg['payload']['pose']['x'] + 2*math.cos(t2))
+        robot_pose_msg['line2y'] = (msg['payload']['pose']['y'] + 2*math.sin(t2))
+        robot_pose_msg['timestamp'] = msg['header']['timestamp']
+        return robot_pose_msg
 
 msg_data = {
     "header":

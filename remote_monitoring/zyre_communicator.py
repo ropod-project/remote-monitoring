@@ -1,9 +1,9 @@
 from copy import deepcopy
 import time
-from ropod.pyre_communicator.base_class import PyreBaseCommunicator
+from ropod.pyre_communicator.base_class import RopodPyre
 from remote_monitoring.common import Config, robot_status_msg
 
-class ZyreWebCommunicator(PyreBaseCommunicator):
+class ZyreWebCommunicator(RopodPyre):
     def __init__(self, node_name, groups, data_timeout=10., status_timeout=5.):
         '''
         Keyword arguments:
@@ -52,6 +52,7 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             self.__status_msgs[robot] = status_msg
             self.__experiment_feedback_msgs[robot] = None
             self.__robot_pose_msgs[robot] = None
+        self.start()
 
     def receive_msg_cb(self, msg_content):
         '''Processes incoming messages. Only listens to messages of type
@@ -68,7 +69,8 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
 
         timestamp = dict_msg['header']['timestamp']
         message_type = dict_msg['header']['type']
-        if message_type == 'VARIABLE_QUERY' or message_type == 'DATA_QUERY':
+        if message_type == 'VARIABLE-QUERY' or message_type == 'DATA-QUERY' or \
+           message_type == 'LATEST-DATA-QUERY':
             for session_id in self.__request_data:
                 if dict_msg['payload']['receiverId'] == session_id:
                     self.__request_data[session_id] = dict_msg
@@ -115,21 +117,22 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
             robot_id = dict_msg['payload']['robotId']
             if robot_id in self.__robot_pose_msgs:
                 self.__robot_pose_msgs[robot_id] = dict_msg
+        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS", 
+                "GET-ALL-SCHEDULED-TASK-IDS", "GET-ROBOTS-ASSIGNED-TO-TASK",
+                "GET-TASKS-ASSIGNED-TO-ROBOT"] :
+            for session_id in self.__request_data:
+                if dict_msg['payload']['receiverId'] == session_id:
+                    self.__request_data[session_id] = dict_msg
 
-
-    ############
-    # Black box
-    ###########
-    def get_black_box_data(self, query_msg):
-        '''Queries data from a black box and waits for a response
+    def get_query_data(self, query_msg):
+        '''Queries data and waits for a response
 
         Keyword arguments:
-        query_msg -- a dictionary black box query message
+        query_msg -- a dictionary query message
 
         '''
         session_id = query_msg['payload']['senderId']
         self.__request_data[session_id] = None
-        self.__request_robots[session_id] = query_msg['payload']['blackBoxId']
         self.shout(query_msg)
         data = self.__wait_for_data(session_id)
         return data
@@ -162,6 +165,15 @@ class ZyreWebCommunicator(PyreBaseCommunicator):
     #####################
     # Remote experiments
     #####################
+    def reset_experiment_feedback(self, robot_id):
+        '''Resets the experiment feedback messages for the given robot.
+
+        Keyword arguments:
+        robot_id -- ID of a robot
+
+        '''
+        self.__experiment_feedback_msgs[robot_id] = None
+
     def get_experiment_feedback(self, robot_id):
         '''Returns a dictionary representing an experiment feedback message from the given robot
 

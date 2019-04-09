@@ -12,9 +12,15 @@ This interface is developed as part of the ROPOD project and thus has multiple d
 
 The web application provides four main functionalities:
 1. **Monitoring the status of robot components**: Information on various robot components (both hardware and software) is provided so that robots can be monitored in real time
-2. **Retrieving and displaying black box data associated with a particular robot**: Data stored on the black box associated with a robot can be queried and displayed
-3. **Performing remote experiments for simplified remote debugging**: Requests for various predefined experiments can be sent to robots; during the execution of an experiment, continuous progress feedback and live data from the robot's black box are displayed
-4. **Sending task requests**: Simple transportation task requests can be sent to the [fleet management library](https://git.ropod.org/ropod/ccu/fleet-management)
+![Robot status](docs/images/robot_status.png)
+2. **Retrieving and displaying historical black box data associated with a particular robot**: Data stored on the black box associated with a robot can be queried and displayed
+![Black box historical data interface](docs/images/black_box_interface.png)
+3. **Displaying the latest black box data associated with a particular robot**: Important variables (such as measurements from the sensor wheels and velocity commands) are shown in real time
+![Real-time monitoring](docs/images/real_time_monitoring.png)
+4. **Performing remote experiments for simplified remote debugging**: Requests for various predefined experiments can be sent to robots; during the execution of an experiment, continuous progress feedback and live data from the robot's black box are displayed
+![Remote experiment interface](docs/images/remote_experiments.png)
+5. **Sending task requests**: Simple transportation task requests can be sent to the [fleet management library](https://git.ropod.org/ropod/ccu/fleet-management)
+![Task scheduling](docs/images/task_scheduling.png)
 
 ## Assumptions
 
