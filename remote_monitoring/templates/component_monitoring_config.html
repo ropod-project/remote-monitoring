@@ -69,8 +69,8 @@
                 $('#info_message_container_content').html('Query request successfull');
                 $('#query_result').show();
                 <!-- $('#expanded_entry').html(JSON.stringify(result.config)); -->
-                document.getElementById('expanded_entry').appendChild(renderjson.set_icons('►', '▼').set_show_to_level(1)(result.config));
-                console.log(result.config);
+                document.getElementById('expanded_entry').appendChild(renderjson.set_icons('►', '▼').set_show_to_level(1)(result.response.config));
+                console.log(result.response.config);
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
                 $('#error_message_container').show();
