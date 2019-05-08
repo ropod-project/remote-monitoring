@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
+
+<script>
+    var user_id = 'admin';
+    $(document).ready(function() {
+        $('#error_message_container').hide();
+        $('#info_message_container').hide();
+        $('#btn_get_config').prop('disabled', true);
+        $('#expanded_entry').hide();
+        robot_id = null;
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/experiments/get_robot_ids',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
+            }
+
+            $.each(result.robots, function(i, robot_id){
+                $('#robot_ids').append($('<option>', {
+                    value: robot_id,
+                    text: robot_id
+                }));
+            });
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+        });
+
+        $('#robot_ids').change(function() {
+            robot_id = $(this).val();
+            if (robot_id != 'none') {
+                $('#btn_get_config').prop('disabled', false);
+            }
+            else {
+                $('#btn_get_config').prop('disabled', true);
+            }
+        });
+
+        $("#btn_get_config").click(function(){
+            $('#expanded_entry').html('');
+            $('#expanded_entry').show();
+            $.ajax({
+                url: SCRIPT_ROOT + '/component_monitoring_config/get_config',
+                type: 'get',
+                data: { robot_id: robot_id},
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
+                
+                $('#info_message_container').show();
+                $('#info_message_container_content').html('Query request successfull');
+                $('#query_result').show();
+                <!-- $('#expanded_entry').html(JSON.stringify(result.config)); -->
+                document.getElementById('expanded_entry').appendChild(renderjson.set_icons('►', '▼').set_show_to_level(1)(result.config));
+                console.log(result.config);
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
+            });
+        });
+    });
+
+
+</script>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Central operator console</h1>
+    </div>
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="robot_ids" class="form-control">
+                <option value="none">Choose robot id</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="error_message_container" class="alert alert-danger alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="error_message_container_content"></p>
+</div>
+
+<div id="info_message_container" class="alert alert-info alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="info_message_container_content"></p>
+</div>
+
+<div class="row">
+</div>
+
+<button id="btn_get_config" class="btn btn-primary" type="button">Get Config</button>
+
+<div id="query_result" class="query_table" disabled="disabled">
+    <div id="expanded_entry"></div>
+    <div class="panel panel-default">
+    </div>
+</div>
+
+{% endblock %}
