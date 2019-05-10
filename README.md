@@ -13,13 +13,15 @@ This interface is developed as part of the ROPOD project and thus has multiple d
 The web application provides four main functionalities:
 1. **Monitoring the status of robot components**: Information on various robot components (both hardware and software) is provided so that robots can be monitored in real time
 ![Robot status](docs/images/robot_status.png)
-2. **Retrieving and displaying historical black box data associated with a particular robot**: Data stored on the black box associated with a robot can be queried and displayed
+2. **Retrieving the configuration of the component monitors**: The status of the robot components is obtained by component monitors, whose configuration can be retrieved for the purpose of transparency
+![Robot status](docs/images/component_monitor_config.png)
+3. **Retrieving and displaying historical black box data associated with a particular robot**: Data stored on the black box associated with a robot can be queried and displayed
 ![Black box historical data interface](docs/images/black_box_interface.png)
-3. **Displaying the latest black box data associated with a particular robot**: Important variables (such as measurements from the sensor wheels and velocity commands) are shown in real time
+4. **Displaying the latest black box data associated with a particular robot**: Important variables (such as measurements from the sensor wheels and velocity commands) are shown in real time
 ![Real-time monitoring](docs/images/real_time_monitoring.png)
-4. **Performing remote experiments for simplified remote debugging**: Requests for various predefined experiments can be sent to robots; during the execution of an experiment, continuous progress feedback and live data from the robot's black box are displayed
+5. **Performing remote experiments for simplified remote debugging**: Requests for various predefined experiments can be sent to robots; during the execution of an experiment, continuous progress feedback and live data from the robot's black box are displayed
 ![Remote experiment interface](docs/images/remote_experiments.png)
-5. **Sending task requests**: Simple transportation task requests can be sent to the [fleet management library](https://git.ropod.org/ropod/ccu/fleet-management)
+6. **Sending task requests**: Simple transportation task requests can be sent to the [fleet management library](https://git.ropod.org/ropod/ccu/fleet-management)
 ![Task scheduling](docs/images/task_scheduling.png)
 
 ## Assumptions
