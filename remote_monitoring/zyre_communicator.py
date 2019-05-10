@@ -123,6 +123,10 @@ class ZyreWebCommunicator(RopodPyre):
             for session_id in self.__request_data:
                 if dict_msg['payload']['receiverId'] == session_id:
                     self.__request_data[session_id] = dict_msg
+        elif message_type == 'COMP-MON-CONFIG':
+            receiver_id = dict_msg.get('payload', {'receiverId':None}).get('receiverId', None)
+            if receiver_id in self.__request_data:
+                self.__request_data[receiver_id] = dict_msg
 
     def get_query_data(self, query_msg):
         '''Queries data and waits for a response
