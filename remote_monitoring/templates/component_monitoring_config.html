@@ -79,7 +79,7 @@
                     $('#error_message_container_content').html(result.message);
                     return;
                 }
-                
+
                 $('#info_message_container').show();
                 $('#info_message_container_content').html('Query request successfull');
                 $('#query_result').show();
@@ -93,7 +93,7 @@
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
         });
-        
+
         $('.query_table').on('click', 'button', function() {
             $('#expanded_entry').html('');
             id = $(this).val();
@@ -163,8 +163,8 @@
                 config_key_cell.innerHTML = key;
 
                 var button = row.insertCell(-1);
-                button.innerHTML = '<td><button id="' + key + 
-                    '" value="' + key + 
+                button.innerHTML = '<td><button id="' + key +
+                    '" value="' + key +
                     '" class="btn btn-primary" type="button" disabled="disabled">+</button></td>';
                 $('#' + key).prop('disabled', false);
             }
@@ -184,8 +184,8 @@
             component_description_cell.innerHTML = data_obj[component_name].description;
 
             var button = row.insertCell(-1);
-            button.innerHTML = '<td><button id="' + component_name + 
-                '" value="' + component_name + 
+            button.innerHTML = '<td><button id="' + component_name +
+                '" value="' + component_name +
                 '" class="btn btn-primary" type="button" disabled="disabled">+</button></td>';
             $('#' + component_name).prop('disabled', false);
         }
@@ -197,7 +197,7 @@
 
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Central operator console</h1>
+        <h1 class="page-header">Component monitoring configuration</h1>
     </div>
     <div class="col-lg-3">
         <div class="form-group">
