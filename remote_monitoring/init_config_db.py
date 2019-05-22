@@ -8,6 +8,7 @@ smart_wheel_counts = {'ropod_001': 4, 'ropod_002': 4, 'ropod_003': 4}
 experiments = [{'id': 'linear_motion', 'name': 'Linear motion'},
                {'id': 'in_place_rotation', 'name': 'In-place rotation'},
                {'id': 'area_navigation', 'name': 'Area navigation'},
+               {'id': 'path_planner_area_navigation', 'name': 'Area navigation using Path planner'},
                {'id': 'elevator_entering', 'name': 'Elevator entering'},
                {'id': 'dock', 'name': 'Docking'},
                {'id': 'undock', 'name': 'Undocking'},
@@ -30,6 +31,9 @@ maps = [{'name': 'amk-basement', 'path': '/static/maps/amk/basement.png',
 
 config = Config()
 client = pm.MongoClient(port=config.db_port)
+# clear the database if it already exists
+if config.db_name in client.list_database_names():
+    client.drop_database(config.db_name)
 db = client[config.db_name]
 
 print('Initialising "{0}" collection'.format(Config.ROBOT_COLLECTION))
