@@ -5,3 +5,6 @@ gevent
 pyzmq
 flask-socketio
 pymongo
+glob
+yaml
+PIL
