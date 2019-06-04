@@ -1,0 +1,3 @@
+[submodule "occupancy_grids"]
+	path = occupancy_grids
+	url = git@git.ropod.org:ropod/wm/occupancy_grids.git
