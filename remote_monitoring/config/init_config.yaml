@@ -57,3 +57,4 @@ collections:
           origin_x: -1250
           origin_y: 4000
           resolution: 0.02
+        - current_map: 'brsu-c-floor0'
