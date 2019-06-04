@@ -19,13 +19,14 @@ def init_collection(db_obj, config_collections, collection_name):
     """Initialise collection with all the documents in mongo db based on the config
     file.
 
+    :config_collections: list of dicts
     :collection_name: string
     :returns: None
 
     """
     print('Initialising "{0}" collection'.format(collection_name))
     collection = db_obj[collection_name]
-    collection.insert_many(config_collections[collection_name])
+    collection.insert_many(config_collections)
 
 def get_map_dict():
     code_dir = os.path.abspath(os.path.dirname(__file__))
@@ -62,11 +63,26 @@ def get_map_dict():
             map_dict['path'] = os.path.join(map_dir, map_dict['name']+'.png')
             image = Image.open(image_file_path)
             image.save(map_dict['path'])
+            map_dict['path'] = os.path.join('/static/generated_maps', map_dict['name']+'.png')
+
+            map_dict['width'] = image.size[0]
+            map_dict['height'] = image.size[1]
+
+            map_dict['resolution'] = info['resolution']
+
+            map_dict['display_scale'] = 0.15
+            origin = info['origin']
+            map_dict['origin_x'] = round(origin[0] / map_dict['resolution'])
+            map_dict['origin_y'] = map_dict['height'] - round(origin[1] / map_dict['resolution'])
+
+            map_dict['xrange'] = [map_dict['origin_x'], map_dict['width'] + map_dict['origin_x']]
+            map_dict['yrange'] = [map_dict['height'] - map_dict['origin_y'], map_dict['origin_y']]
 
             map_dict_list.append(map_dict)
 
     print(map_dict_list)
     os.chdir(current_dir)
+    return map_dict_list
 
 def main():
     ''' Read a config file and insert all dict as collections in mongo db
@@ -85,11 +101,14 @@ def main():
 
     config_collections = data['collections']
 
-    init_collection(db_obj, config_collections, Config.ROBOT_COLLECTION)
-    init_collection(db_obj, config_collections, Config.EXPERIMENT_COLLECTION)
-    init_collection(db_obj, config_collections, Config.MAP_COLLECTION)
-    init_collection(db_obj, config_collections, Config.QUERY_COLLECTION)
-    get_map_dict()
+    init_collection(db_obj, config_collections[Config.ROBOT_COLLECTION], Config.ROBOT_COLLECTION)
+    init_collection(db_obj, config_collections[Config.EXPERIMENT_COLLECTION], Config.EXPERIMENT_COLLECTION)
+    # init_collection(db_obj, config_collections[Config.MAP_COLLECTION], Config.MAP_COLLECTION)
+    init_collection(db_obj, config_collections[Config.QUERY_COLLECTION], Config.QUERY_COLLECTION)
+    map_dict_list = get_map_dict()
+    # make first map as default map
+    map_dict_list.append({'current_map':map_dict_list[0]['name']})
+    init_collection(db_obj, map_dict_list, Config.MAP_COLLECTION)
 
 if __name__ == "__main__":
     main()
