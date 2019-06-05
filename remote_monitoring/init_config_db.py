@@ -32,7 +32,7 @@ def get_map_dict():
     code_dir = os.path.abspath(os.path.dirname(__file__))
     main_dir = os.path.dirname(code_dir)
     occ_grid_dir = os.path.join(main_dir, 'occupancy_grids')
-    map_dir = os.path.join(code_dir, 'static/generated_maps')
+    map_dir = os.path.join(code_dir, 'static/maps')
     # make directory is it doesn't exist. If is exists then clean it
     if not os.path.isdir(map_dir):
         os.makedirs(map_dir)
@@ -47,11 +47,10 @@ def get_map_dict():
     current_dir = os.getcwd()
     os.chdir(occ_grid_dir)
     maps = glob.glob('**/map.yaml', recursive=True)
-    print(len(maps))
     map_dict_list = []
 
     for map_file in maps:
-        if 'brsu' in map_file and 'osm' in map_file:
+        try:
             map_dict = {}
             map_dict['name'] = map_file.replace('/', '_').split('.')[0]
             info = {}
@@ -63,9 +62,11 @@ def get_map_dict():
             map_dict['path'] = os.path.join(map_dir, map_dict['name']+'.png')
             image = Image.open(image_file_path)
             image.save(map_dict['path'])
-            map_dict['path'] = os.path.join('/static/generated_maps', map_dict['name']+'.png')
+            # absolute path does not work so this is a hack
+            map_dict['path'] = os.path.join('/static/maps', map_dict['name']+'.png')
 
             # fill out all the necessary info about the map
+            map_dict['resolution'] = info['resolution']
             map_dict['width'] = image.size[0]
             map_dict['height'] = image.size[1]
 
@@ -78,15 +79,13 @@ def get_map_dict():
             map_dict['xrange'] = [map_dict['origin_x'], map_dict['width'] + map_dict['origin_x']]
             map_dict['yrange'] = [- map_dict['height'] + map_dict['origin_y'], map_dict['origin_y']]
 
-            map_dict['resolution'] = info['resolution']
-
             # the larger the image, the smaller the display scale
             map_dict['display_scale'] = 1000.0/map_dict['width']
 
-
             map_dict_list.append(map_dict)
+        except Exception as e:
+            print("Encountered following error while initialising map\n", str(e))
 
-    print(map_dict_list)
     os.chdir(current_dir)
     return map_dict_list
 
