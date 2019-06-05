@@ -74,6 +74,15 @@ class Config(object):
         docs = collection.find({'name': map_name})
         return docs[0]
 
+    def get_maps(self):
+        collection_name = Config.MAP_COLLECTION
+        client = pm.MongoClient(port=self.db_port)
+        db = client[self.db_name]
+        collection = db[collection_name]
+        docs = collection.find({})
+        maps = [doc for doc in docs if 'name' in doc.keys()]
+        return maps
+
     def get_queries(self) :
         '''Returns a list of all known queries
 

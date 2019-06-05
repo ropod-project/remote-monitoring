@@ -65,18 +65,24 @@ def get_map_dict():
             image.save(map_dict['path'])
             map_dict['path'] = os.path.join('/static/generated_maps', map_dict['name']+'.png')
 
+            # fill out all the necessary info about the map
             map_dict['width'] = image.size[0]
             map_dict['height'] = image.size[1]
 
-            map_dict['resolution'] = info['resolution']
-
-            map_dict['display_scale'] = 0.15
+            # calculation for y is different because y axis is fliped in image 
+            # coordinate compared to plot coordinate
             origin = info['origin']
             map_dict['origin_x'] = round(origin[0] / map_dict['resolution'])
-            map_dict['origin_y'] = map_dict['height'] - round(origin[1] / map_dict['resolution'])
+            map_dict['origin_y'] = map_dict['height'] + round(origin[1] / map_dict['resolution'])
 
             map_dict['xrange'] = [map_dict['origin_x'], map_dict['width'] + map_dict['origin_x']]
-            map_dict['yrange'] = [map_dict['height'] - map_dict['origin_y'], map_dict['origin_y']]
+            map_dict['yrange'] = [- map_dict['height'] + map_dict['origin_y'], map_dict['origin_y']]
+
+            map_dict['resolution'] = info['resolution']
+
+            # the larger the image, the smaller the display scale
+            map_dict['display_scale'] = 1000.0/map_dict['width']
+
 
             map_dict_list.append(map_dict)
 

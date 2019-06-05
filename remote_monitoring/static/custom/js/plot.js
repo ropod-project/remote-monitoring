@@ -89,8 +89,8 @@ Plot.prototype.reset = function() {
 
 
 // plotly for occupancy grid plotting
-function sendOccupancyGrid(msg) {
-    Plotly.plot('occupancy_grid', [{}],
+function sendOccupancyGrid(msg, plot_function) {
+    plot_function('occupancy_grid', [{}],
      {
       title: msg['name'],
       width: msg['width']*msg['display_scale'],
@@ -122,7 +122,7 @@ function sendOccupancyGrid(msg) {
             "opacity": 0.2
           }
         ]
-    })
+    });
 }
 
 function plotRobotPoses(msg, resolution) {
