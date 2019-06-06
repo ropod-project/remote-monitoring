@@ -289,11 +289,12 @@
         return formatted_time;
     }
 
-	var width,height
-	var chartWidth, chartHeight
-	var margin
-    <!-- showGraph(); -->
-	showForceGraph();
+    var link_dict = [
+        {'source':'A', 'target':'B'},
+        {'source':'A', 'target':'C'}
+    ];
+
+	showForceGraph(link_dict);
 
 </script>
 

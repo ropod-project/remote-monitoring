@@ -39,15 +39,18 @@ function showGraph(){
     console.log(graph);
 }
 
-function showForceGraph(){
-    // hardcoded for testing
-    var node_names = ['A', 'B', 'C'];
-    var link_dict = [
-        {'source':'A', 'target':'B'},
-        {'source':'A', 'target':'C'}
-    ];
-
-    var data = getData(node_names, link_dict);
+function showForceGraph(link_list){
+    // create node names from link list
+    node_names = [];
+    link_list.forEach(function(link) {
+        if (node_names.indexOf(link.source) < 0){
+            node_names.push(link.source);
+        }
+        if (node_names.indexOf(link.target) < 0){
+            node_names.push(link.target);
+        }
+    });    
+    var data = getData(node_names, link_list);
 	var svg = d3.select("#graph").append("svg")
 	var chartLayer = svg.append("g").classed("chartLayer", true)
 
@@ -56,11 +59,9 @@ function showForceGraph(){
 }
 
 function getData(node_names, link_dict){
-    var node_radius = 20 //pixels
-
     var nodes = [];
     for(i = 0; i<node_names.length; i++){
-        nodes.push({label:node_names[i], r:node_radius});
+        nodes.push({label:node_names[i], r:10});
     }
     var links = [];
     var node_dict = {};
@@ -91,7 +92,7 @@ function setSize(data, svg, chartLayer) {
 }
     
 function drawChart(data, svg) {
-    var link_distance = 30;
+    var link_distance = 40;
     var link_width = 5;
     var link_color = "black";
     var node_color = "lightblue";
