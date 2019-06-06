@@ -35,7 +35,6 @@ def create_blueprint(communicator):
     @task_scheduling.route('/task/get_maps')
     def get_maps():
         maps = config.get_maps()
-        print(maps)
         for map_dict in maps:
             del map_dict['_id']
         return jsonify(maps=maps, message='')
@@ -66,9 +65,6 @@ def create_blueprint(communicator):
 
     @socketio.on('connect', namespace='/task_scheduling')
     def on_connect():
-        # TODO: eventually this should be based on user selection from the page
-        # for now get current map from the config database
-        print("inside on connect")
         current_map = config.get_current_map()
         map_msg = config.get_map(current_map)
         map_msg.pop('_id', None)

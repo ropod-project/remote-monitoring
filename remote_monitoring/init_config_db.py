@@ -33,7 +33,7 @@ def get_map_dict():
     main_dir = os.path.dirname(code_dir)
     occ_grid_dir = os.path.join(main_dir, 'occupancy_grids')
     map_dir = os.path.join(code_dir, 'static/maps')
-    # make directory is it doesn't exist. If is exists then clean it
+    # make directory if it doesn't exist. If is exists then clean it
     if not os.path.isdir(map_dir):
         os.makedirs(map_dir)
     else:
@@ -108,8 +108,8 @@ def main():
 
     init_collection(db_obj, config_collections[Config.ROBOT_COLLECTION], Config.ROBOT_COLLECTION)
     init_collection(db_obj, config_collections[Config.EXPERIMENT_COLLECTION], Config.EXPERIMENT_COLLECTION)
-    # init_collection(db_obj, config_collections[Config.MAP_COLLECTION], Config.MAP_COLLECTION)
     init_collection(db_obj, config_collections[Config.QUERY_COLLECTION], Config.QUERY_COLLECTION)
+
     map_dict_list = get_map_dict()
     # make first map as default map
     map_dict_list.append({'current_map':map_dict_list[0]['name']})

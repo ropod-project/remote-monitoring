@@ -143,7 +143,6 @@
 
         $('#map_name').change(function() {
             map_name = $(this).val();
-            console.log(map_name);
             showOccGrid(maps[map_name], Plotly.update);
         });
     });
@@ -151,8 +150,6 @@
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/task_scheduling');
     var map_res = 0.02
     socket.on('connect', function(msg) {
-        <!-- socket.emit('get_map', {}); -->
-        console.log("inside connect");
     });
 
     socket.on('map', function(msg) {
