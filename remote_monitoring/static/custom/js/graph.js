@@ -95,8 +95,10 @@ function drawChart(data, svg) {
     var link_width = 5;
     var link_color = "black";
     var node_color = "lightblue";
+    var current_node_color = "green";
     var node_outline_color = "black";
     var node_radius = 20;
+    var current = data.nodes[0].label;
 
 	var simulation = d3.forceSimulation()
 		.force("link", d3.forceLink().id(function(d) { return d.label }))
@@ -137,6 +139,7 @@ function drawChart(data, svg) {
 		.attr("r", function(d){  return node_radius })
         .attr("stroke", node_outline_color)
         .attr("fill", node_color)
+        .attr("id", function(d){ return d.label })
 		.call(d3.drag()
 				.on("start", dragstarted)
 				.on("drag", dragged)
@@ -150,6 +153,7 @@ function drawChart(data, svg) {
 			.attr("y2", function(d) { return d.target.y; });
 
 		node
+            .attr("fill", function(d) { return d.label == current ? current_node_color : node_color })
 			.attr("cx", function(d) { return d.x; })
 			.attr("cy", function(d) { return d.y; });
         text
@@ -186,5 +190,9 @@ function drawChart(data, svg) {
 		d.fx = null;
 		d.fy = null;
 	} 
+
+    function updateCurrent(string){
+        current = string;
+    }
 
 }
