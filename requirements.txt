@@ -5,3 +5,4 @@ gevent
 pyzmq
 flask-socketio
 pymongo
+pillow
