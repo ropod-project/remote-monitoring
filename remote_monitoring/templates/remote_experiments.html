@@ -7,6 +7,104 @@
 <script src="{{ url_for('static', filename='datatables/js/jquery.dataTables.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='socket.io.slim.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='d3/js/d3.min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='custom/js/graph.js') }}" type="text/javascript"></script>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Remote experiments</h1>
+    </div>
+</div>
+
+<div id="error_message_container" class="alert alert-danger alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="error_message_container_content"></p>
+</div>
+
+<div id="info_message_container" class="alert alert-info alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="info_message_container_content"></p>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="robot_ids" class="form-control">
+                <option value="none">Choose robot id</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="form-group">
+            <select id="experiments" class="form-control">
+                <option value="none">Choose experiment</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-lg-2">
+        <button id="btn_execute_experiment" disabled="disabled" class="btn btn-primary" type="button">Execute experiment</button>
+    </div>
+
+    <div class="col-lg-1">
+        <div id="operation_indicator" class="indicator"></div>
+    </div>
+</div>
+
+<div id="experiment_progress">
+    <div class="row">
+        <div class="col-lg-1">
+            <label>Robot ID:</label>
+        </div>
+        <div class="col-lg-2">
+            <label id="experiment_robot_id"></label>
+        </div>
+
+        <div class="col-lg-2">
+            <label>Ongoing experiment ID:</label>
+        </div>
+        <div class="col-lg-2">
+            <label id="ongoing_experiment_id"></label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <textarea id="experiment_feedback" style="width=100%;" rows="10" cols="100"></textarea>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div id="graph"></div>
+</div>
+
+<div id="data_container">
+    <div class="col-lg-2">
+        <label>Wheel velocities</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="vel_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="vel_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+
+    <div class="col-lg-2">
+        <label>Acceleration</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="accel_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="accel_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+
+    <div class="col-lg-2">
+        <label>Gyro</label>
+    </div>
+    <div class="col-lg-12">
+        <div id="gyro_plot_placeholder" class="col-lg-10 data-plot"></div>
+        <div id="gyro_plot_variable_selection" class="col-lg-2"></div>
+    </div>
+</div>
+
 
 <script>
     var robot_id = undefined;
@@ -191,100 +289,12 @@
         return formatted_time;
     }
 
+	var width,height
+	var chartWidth, chartHeight
+	var margin
+    <!-- showGraph(); -->
+	showForceGraph();
+
 </script>
-
-
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Remote experiments</h1>
-    </div>
-</div>
-
-<div id="error_message_container" class="alert alert-danger alert-dismissible">
-    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
-    <p id="error_message_container_content"></p>
-</div>
-
-<div id="info_message_container" class="alert alert-info alert-dismissible">
-    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
-    <p id="info_message_container_content"></p>
-</div>
-
-<div class="row">
-    <div class="col-lg-3">
-        <div class="form-group">
-            <select id="robot_ids" class="form-control">
-                <option value="none">Choose robot id</option>
-            </select>
-        </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="form-group">
-            <select id="experiments" class="form-control">
-                <option value="none">Choose experiment</option>
-            </select>
-        </div>
-    </div>
-    <div class="col-lg-2">
-        <button id="btn_execute_experiment" disabled="disabled" class="btn btn-primary" type="button">Execute experiment</button>
-    </div>
-
-    <div class="col-lg-1">
-        <div id="operation_indicator" class="indicator"></div>
-    </div>
-</div>
-
-<div id="experiment_progress">
-    <div class="row">
-        <div class="col-lg-1">
-            <label>Robot ID:</label>
-        </div>
-        <div class="col-lg-2">
-            <label id="experiment_robot_id"></label>
-        </div>
-
-        <div class="col-lg-2">
-            <label>Ongoing experiment ID:</label>
-        </div>
-        <div class="col-lg-2">
-            <label id="ongoing_experiment_id"></label>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-12">
-            <textarea id="experiment_feedback" style="width=100%;" rows="10" cols="100"></textarea>
-        </div>
-    </div>
-
-</div>
-
-<div id="data_container">
-    <div class="col-lg-2">
-        <label>Wheel velocities</label>
-    </div>
-    <div class="col-lg-12">
-        <div id="vel_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="vel_plot_variable_selection" class="col-lg-2"></div>
-    </div>
-
-    <div class="col-lg-2">
-        <label>Acceleration</label>
-    </div>
-    <div class="col-lg-12">
-        <div id="accel_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="accel_plot_variable_selection" class="col-lg-2"></div>
-    </div>
-
-    <div class="col-lg-2">
-        <label>Gyro</label>
-    </div>
-    <div class="col-lg-12">
-        <div id="gyro_plot_placeholder" class="col-lg-10 data-plot"></div>
-        <div id="gyro_plot_variable_selection" class="col-lg-2"></div>
-    </div>
-</div>
-
-<div id="mygraph"></div>
 
 {% endblock %}
