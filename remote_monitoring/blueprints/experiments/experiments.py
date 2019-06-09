@@ -48,6 +48,22 @@ def create_blueprint(communicator):
             feedback_msg = 'An error occurred while retrieving the robot IDs'
         return jsonify(robots=robots, message=feedback_msg)
 
+    @experiments.route('/experiments/get_sm', methods=['GET'])
+    def get_sm():
+        robot_id = request.args.get('robot_id', '', type=str)
+        transitions = None
+        feedback_msg = ''
+        try:
+            start_time = time.time()
+            wait_threshold = 10.0
+            while not transitions and time.time() < start_time + wait_threshold:
+                transitions = zyre_communicator.get_experiment_sm(robot_id)
+        except Exception as exc:
+            print('[get_transitions] %s' % str(exc))
+            feedback_msg = 'An error occurred while retrieving the experiment SM transitions'
+        print(transitions)
+        return jsonify(transitions=transitions, message=feedback_msg)
+
     @experiments.route('/experiments/get_experiment_list', methods=['GET'])
     def get_experiment_list():
         experiments = dict()

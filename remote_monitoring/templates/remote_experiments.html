@@ -122,7 +122,7 @@
         $('#btn_execute_experiment').prop('disabled', true);
         $('#experiment_progress').hide();
         $('#data_container').hide();
-        $('#mygraph').show();
+        $('#graph').hide();
 
         $.ajax({
             url: SCRIPT_ROOT + '/experiments/get_robot_ids',
@@ -228,6 +228,28 @@
                 $('#error_message_container').show();
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
+            $.ajax({
+                url: SCRIPT_ROOT + '/experiments/get_sm',
+                type: 'get',
+                data: { robot_id: robot_id},
+                contentType: 'application/json',
+                cache: false
+            }).done(function(result) {
+                if (result.message != '')
+                {
+                    $('#error_message_container').show();
+                    $('#error_message_container_content').html(result.message);
+                    return;
+                }
+
+                $('#graph').show();
+                console.log(result.transitions);
+                showForceGraph(result.transitions);
+            }).fail(function(jqXHR, status, error) {
+                console.log(error);
+                $('#error_message_container').show();
+                $('#error_message_container_content').html('An unexpected error has occurred');
+            });
         });
 
         $(document).on('change', '.plot_vel_variables', function() {
@@ -289,12 +311,12 @@
         return formatted_time;
     }
 
-    var link_dict = [
-        {'source':'A', 'target':'B'},
-        {'source':'A', 'target':'C'}
-    ];
+    <!-- var link_dict = [ -->
+    <!--     {'source':'A', 'target':'B'}, -->
+    <!--     {'source':'A', 'target':'C'} -->
+    <!-- ]; -->
 
-	showForceGraph(link_dict);
+	<!-- showForceGraph(link_dict); -->
 
 </script>
 
