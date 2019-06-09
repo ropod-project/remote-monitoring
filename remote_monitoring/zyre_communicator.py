@@ -131,7 +131,7 @@ class ZyreWebCommunicator(RopodPyre):
             receiver_id = dict_msg.get('payload', {'receiverId':None}).get('receiverId', None)
             if receiver_id in self.__request_data:
                 self.__request_data[receiver_id] = dict_msg
-        elif message_type == 'ROBOT-EXPERIMENT-TRANSITION':
+        elif message_type == 'ROBOT-EXPERIMENT-SM':
             robot_id = dict_msg['payload']['robotId']
             self.__transition_msgs[robot_id] = dict_msg['payload']['transitions']
 

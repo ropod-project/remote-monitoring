@@ -61,7 +61,6 @@ def create_blueprint(communicator):
         except Exception as exc:
             print('[get_transitions] %s' % str(exc))
             feedback_msg = 'An error occurred while retrieving the experiment SM transitions'
-        print(transitions)
         return jsonify(transitions=transitions, message=feedback_msg)
 
     @experiments.route('/experiments/get_experiment_list', methods=['GET'])
