@@ -150,7 +150,7 @@ def create_blueprint(communicator):
                                                diagnostic_vars,
                                                start_query_time,
                                                end_query_time)
-        query_result = zyre_communicator.get_black_box_data(query_msg)
+        query_result = zyre_communicator.get_query_data(query_msg)
 
         try:
             variables, data = DataUtils.parse_bb_data_msg(query_result)
