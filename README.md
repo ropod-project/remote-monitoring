@@ -55,7 +55,9 @@ If all application dependencies are installed natively, running the application 
 1. installing the `remote_monitoring` Python package: `sudo python3 setup.py install` (or `sudo python3 setup.py develop` if installation is not desired)
 2. starting the `app.py` script, namely running the command `python3 app.py`; the application is then accessible at port `5000`
 
-**Note**: The configuration database should be populated before starting the application for the first time (the `init_config_db.py` script can be used for this purpose).
+**Note**:
+1. When cloning for the first time, clone recursively using: `git clone -b develop --recursive <url>`
+2. The configuration database should be populated before starting the application for the first time (the `init_config_db.py` script can be used for this purpose).
 
 ### Docker
 
