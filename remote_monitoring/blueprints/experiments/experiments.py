@@ -59,7 +59,7 @@ def create_blueprint(communicator):
             while not transitions and time.time() < start_time + wait_threshold:
                 transitions = zyre_communicator.get_experiment_sm(robot_id)
         except Exception as exc:
-            print('[get_transitions] %s' % str(exc))
+            print('[get_sm] %s' % str(exc))
             feedback_msg = 'An error occurred while retrieving the experiment SM transitions'
         return jsonify(transitions=transitions, message=feedback_msg)
 
