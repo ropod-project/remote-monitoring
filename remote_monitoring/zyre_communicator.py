@@ -46,7 +46,7 @@ class ZyreWebCommunicator(RopodPyre):
 
         # a dictionary in which the keys are robot IDs
         # and the values are the corresponding robot's experiment SM transitions
-        self.__transition_msgs = dict()
+        self.__sm_msgs = dict()
 
         config = Config()
         robots = config.get_robots()
@@ -133,7 +133,7 @@ class ZyreWebCommunicator(RopodPyre):
                 self.__request_data[receiver_id] = dict_msg
         elif message_type == 'ROBOT-EXPERIMENT-SM':
             robot_id = dict_msg['payload']['robotId']
-            self.__transition_msgs[robot_id] = dict_msg['payload']['transitions']
+            self.__sm_msgs[robot_id] = dict_msg['payload']['transitions']
 
     def get_query_data(self, query_msg):
         '''Queries data and waits for a response
@@ -213,9 +213,9 @@ class ZyreWebCommunicator(RopodPyre):
         return feedback_msg
 
     def get_experiment_sm(self, robot_id):
-        if robot_id in self.__transition_msgs.keys() and self.__transition_msgs[robot_id]:
-            sm = self.__transition_msgs[robot_id]
-            del self.__transition_msgs[robot_id]
+        if robot_id in self.__sm_msgs.keys() and self.__sm_msgs[robot_id]:
+            sm = self.__sm_msgs[robot_id]
+            del self.__sm_msgs[robot_id]
             return sm
         else:
             return None
