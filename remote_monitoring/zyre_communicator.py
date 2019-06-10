@@ -44,6 +44,10 @@ class ZyreWebCommunicator(RopodPyre):
         # and the values are the corresponding robot poses
         self.__robot_pose_msgs = dict()
 
+        # a dictionary in which the keys are robot IDs
+        # and the values are the corresponding robot's experiment SM transitions
+        self.__sm_msgs = dict()
+
         config = Config()
         robots = config.get_robots()
         for robot in robots:
@@ -127,6 +131,9 @@ class ZyreWebCommunicator(RopodPyre):
             receiver_id = dict_msg.get('payload', {'receiverId':None}).get('receiverId', None)
             if receiver_id in self.__request_data:
                 self.__request_data[receiver_id] = dict_msg
+        elif message_type == 'ROBOT-EXPERIMENT-SM':
+            robot_id = dict_msg['payload']['robotId']
+            self.__sm_msgs[robot_id] = dict_msg['payload']['transitions']
 
     def get_query_data(self, query_msg):
         '''Queries data and waits for a response
@@ -204,6 +211,14 @@ class ZyreWebCommunicator(RopodPyre):
         if feedback_msg and feedback_msg['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK':
             self.__experiment_feedback_msgs[robot_id] = None
         return feedback_msg
+
+    def get_experiment_sm(self, robot_id):
+        if robot_id in self.__sm_msgs.keys() and self.__sm_msgs[robot_id]:
+            sm = self.__sm_msgs[robot_id]
+            del self.__sm_msgs[robot_id]
+            return sm
+        else:
+            return None
 
     #################
     # Task execution
