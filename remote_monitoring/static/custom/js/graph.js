@@ -1,60 +1,32 @@
-function showGraph(){
-    var graph = d3.select("#graph")
-        .append("svg")
-        .attr("width", 200)
-        .attr("height", 200);    
+// global variables
+var width = 500;
+var height = 300;
+var data = null;
+var svg = null; 
+var simulation = null;
 
-    var nodes = [
-        {x: 10, y: 50},
-        {x: 70, y: 10},
-        {x: 140, y: 50}   
-    ];
-    var links = [
-        {source: nodes[0], target: nodes[1]},
-        {source: nodes[2], target: nodes[1]}
-    ]
-
-    console.log(graph);
-    graph.selectAll("circle.nodes")
-       .data(nodes)
-       .enter()
-       .append("svg:circle")
-       .attr("cx", function(d) { return d.x; })
-       .attr("cy", function(d) { return d.y; })
-       .attr("r", "10px")
-       .attr("fill", "black")
-    graph.selectAll(".line")
-       .data(links)
-       .enter()
-       .append("line")
-       .attr("x1", function(d) { return d.source.x })
-       .attr("y1", function(d) { return d.source.y })
-       .attr("x2", function(d) { return d.target.x })
-       .attr("y2", function(d) { return d.target.y })
-       .attr('stroke', 'black').
-       attr('stroke-width', 2);
-       // .style({'stroke': 'black', 'stroke-width': '20px'});
-               // , 'stroke-width':'2px'});
-
-    console.log(graph);
-}
 
 function showForceGraph(link_list){
+    // if no graphs exist, then create svg element otherwise clear existing svg
+    if (svg == null){
+        svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+    }
+    else {
+        clearGraph();
+    }
+
     // create node names from link list
     node_names = [];
     link_list.forEach(function(link) {
-        if (node_names.indexOf(link.source) < 0){
-            node_names.push(link.source);
-        }
-        if (node_names.indexOf(link.target) < 0){
-            node_names.push(link.target);
-        }
-    });    
-    var data = getData(node_names, link_list);
-	var svg = d3.select("#graph").append("svg")
-	var chartLayer = svg.append("g").classed("chartLayer", true)
+        if (node_names.indexOf(link.source) < 0){ node_names.push(link.source); }
+        if (node_names.indexOf(link.target) < 0){ node_names.push(link.target); }
+    });
+    // get graph data from nodes and links
+    data = getData(node_names, link_list);
 
-	setSize(data, svg, chartLayer);
 	drawChart(data, svg);
 }
 
@@ -72,23 +44,11 @@ function getData(node_names, link_dict){
             'target':node_dict[link_dict[i].target]
         });
     }
-	var data = {
+	var graphData = {
         'nodes':nodes,
         'links':links
 	}
-    return data;
-}
-    
-function setSize(data, svg, chartLayer) {
-    width = 500;
-    height = 300;
-
-	svg.attr("width", width).attr("height", height);
-
-	chartLayer
-		.attr("width", width)
-		.attr("height", height)
-		.attr("transform", "translate("+[0, 0]+")");
+    return graphData;
 }
     
 function drawChart(data, svg) {
@@ -101,7 +61,7 @@ function drawChart(data, svg) {
     var node_radius = 20;
     var current = data.nodes[0].label;
 
-	var simulation = d3.forceSimulation()
+	simulation = d3.forceSimulation()
 		.force("link", d3.forceLink().id(function(d) { return d.label }))
 		.force("collide",d3.forceCollide( function(d){return d.r + link_distance }).iterations(16) )
 		.force("charge", d3.forceManyBody())
@@ -195,5 +155,8 @@ function drawChart(data, svg) {
     function updateCurrent(string){
         current = string;
     }
-
+}
+function clearGraph(){
+    // remove existing svg elements
+    svg.selectAll("*").remove();   
 }

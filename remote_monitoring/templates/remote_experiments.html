@@ -244,7 +244,9 @@
 
                 $('#graph').show();
                 console.log(result.transitions);
-                showForceGraph(result.transitions);
+                if (result.transitions != null){
+                    showForceGraph(result.transitions);
+                }
             }).fail(function(jqXHR, status, error) {
                 console.log(error);
                 $('#error_message_container').show();
