@@ -4,6 +4,19 @@ var height = 300;
 var data = null;
 var svg = null; 
 var simulation = null;
+var current_state = null;
+var node = null;
+var link = null;
+var text = null;
+
+// graph settings
+var link_distance = 40;
+var link_width = 5;
+var link_color = "black";
+var node_color = "lightblue";
+var current_node_color = "green";
+var node_outline_color = "black";
+var node_radius = 20;
 
 
 function showForceGraph(link_list){
@@ -52,14 +65,7 @@ function getData(node_names, link_dict){
 }
     
 function drawChart(data, svg) {
-    var link_distance = 40;
-    var link_width = 5;
-    var link_color = "black";
-    var node_color = "lightblue";
-    var current_node_color = "green";
-    var node_outline_color = "black";
-    var node_radius = 20;
-    var current = data.nodes[0].label;
+    current_state = data.nodes[0].label;
 
 	simulation = d3.forceSimulation()
 		.force("link", d3.forceLink().id(function(d) { return d.label }))
@@ -82,7 +88,7 @@ function drawChart(data, svg) {
         .attr("fill", link_color)
         .attr("stroke", link_color);
 
-    var link = svg.append("g")
+    link = svg.append("g")
 		.attr("class", "links")
 		.selectAll("line")
 		.data(data.links)
@@ -92,7 +98,7 @@ function drawChart(data, svg) {
 		.attr("stroke", link_color)
         .attr("stroke-width", link_width);
 
-    var node = svg.append("g")
+    node = svg.append("g")
 		.attr("class", "nodes")
 		.selectAll("circle")
 		.data(data.nodes)
@@ -106,21 +112,6 @@ function drawChart(data, svg) {
 				.on("drag", dragged)
 				.on("end", dragended));    
 
-	var ticked = function() {
-		link
-			.attr("x1", function(d) { return d.source.x; })
-			.attr("y1", function(d) { return d.source.y; })
-			.attr("x2", function(d) { return d.target.x; })
-			.attr("y2", function(d) { return d.target.y; });
-
-		node
-            .attr("fill", function(d) { return d.label == current ? current_node_color : node_color })
-			.attr("cx", function(d) { return d.x; })
-			.attr("cy", function(d) { return d.y; });
-        text
-            .attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"; });
-	}  
-
 	simulation
 		.nodes(data.nodes)
 		.on("tick", ticked);
@@ -128,7 +119,7 @@ function drawChart(data, svg) {
 	simulation.force("link")
 		.links(data.links);    
 
-    var text = svg.append("g").selectAll("text")
+    text = svg.append("g").selectAll("text")
         .data(simulation.nodes())
         .enter().append("text")
         .attr("x", node_radius+5)
@@ -152,10 +143,28 @@ function drawChart(data, svg) {
 		d.fy = null;
 	} 
 
-    function updateCurrent(string){
-        current = string;
-    }
 }
+
+function ticked(){
+    link
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node
+        .attr("fill", function(d) { return d.label == current_state ? current_node_color : node_color })
+        .attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+    text
+        .attr("transform", function(d) {return "translate(" + d.x + "," + d.y + ")"; });
+}  
+
+function updateCurrent(string){
+    current_state = string;
+    ticked();
+}
+
 function clearGraph(){
     // remove existing svg elements
     svg.selectAll("*").remove();   

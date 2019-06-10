@@ -69,7 +69,7 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <textarea id="experiment_feedback" style="width=100%;" rows="10" cols="100"></textarea>
+            <textarea id="experiment_feedback" style="width=100%;" rows="2" cols="80"></textarea>
         </div>
     </div>
 
@@ -270,14 +270,22 @@
     socket.on('experiment_feedback', function(msg) {
         var feedback_data = JSON.parse(msg);
         var feedback_str = $('#experiment_feedback').val();
+        <!-- var feedback_str = ''; -->
+
         if (feedback_data['feedback_type'] == 'ROBOT-COMMAND-FEEDBACK') {
             feedback_str += 'Timestamp: ' + timestampToDate(feedback_data['timestamp'])  + ' --- ';
             feedback_str += 'State: ' + feedback_data['command'] + ' --- ';
             feedback_str += 'Status: ' + feedback_data['state'] + '\n';
+            updateCurrent(feedback_data['command']);
         }
         else if (feedback_data['feedback_type'] == 'ROBOT-EXPERIMENT-FEEDBACK') {
             feedback_str += 'Timestamp: ' + timestampToDate(feedback_data['timestamp'])  + ' --- ';
             feedback_str += 'Experiment result: ' + feedback_data['result'];
+            if (feedback_data['result'] == 'FINISHED'){
+                updateCurrent('DONE');
+            } else if (feedback_data['result'] == 'FAILED'){
+                updateCurrent('FAILED');
+            }
         }
         else if (feedback_data['feedback_type'] == 'EXPERIMENT-ERROR') {
             $('#error_message_container').show();
@@ -309,16 +317,10 @@
         var hours = date.getHours();
         var minutes = "0" + date.getMinutes();
         var seconds = "0" + date.getSeconds();
-        var formatted_time = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+        var milliseconds = "0" + date.getMilliseconds();
+        var formatted_time = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2) + '.' + milliseconds.substr(-3);
         return formatted_time;
     }
-
-    <!-- var link_dict = [ -->
-    <!--     {'source':'A', 'target':'B'}, -->
-    <!--     {'source':'A', 'target':'C'} -->
-    <!-- ]; -->
-
-	<!-- showForceGraph(link_dict); -->
 
 </script>
 
