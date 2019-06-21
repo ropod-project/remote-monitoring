@@ -110,6 +110,41 @@
                 $('#error_message_container_content').html('An unexpected error has occurred');
             });
         });
+
+        $.ajax({
+            url: SCRIPT_ROOT + '/task/get_maps',
+            type: 'get',
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            if (result.message != '')
+            {
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
+            }
+
+            $.each(result.maps, function(i, map){
+                $('#map_name').append($('<option>', {
+                    value: map.name,
+                    text: map.name
+                }));
+            });
+            maps = {};
+            for (i=0; i<result.maps.length; i++){
+                maps[result.maps[i].name] = result.maps[i];
+            }
+            console.log(maps);
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+        });
+
+        $('#map_name').change(function() {
+            map_name = $(this).val();
+            showOccGrid(maps[map_name], Plotly.update);
+        });
     });
 
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/task_scheduling');
@@ -118,9 +153,13 @@
     });
 
     socket.on('map', function(msg) {
-        sendOccupancyGrid(msg);
-        map_res = msg['resolution']
+        showOccGrid(msg, Plotly.plot);
     });
+
+    function showOccGrid(msg, plot_function){
+        sendOccupancyGrid(msg, plot_function);
+        map_res = msg['resolution'];
+    }
 
     socket.on('robot_pose', function(msg) {
         plotRobotPoses(msg, map_res);
@@ -208,6 +247,15 @@
 
 <button id="btn_schedule_task" class="btn btn-primary" type="button">Schedule task</button>
 
+<div class="row">
+    <div class="col-lg-2">
+        <div class="form-group">
+            <select id="map_name" class="form-control">
+                <option value="none">Choose map name</option>
+            </select>
+        </div>
+    </div>
+</div>
 <div id="occupancy_grid"></div>
 
 

@@ -32,6 +32,13 @@ def create_blueprint(communicator):
         device_types = [{'name': 'Mobidik cart', 'id': 'mobidik'}]
         return jsonify(device_types=device_types, message='')
 
+    @task_scheduling.route('/task/get_maps')
+    def get_maps():
+        maps = config.get_maps()
+        for map_dict in maps:
+            del map_dict['_id']
+        return jsonify(maps=maps, message='')
+
     @task_scheduling.route('/task/send_task_request', methods=['POST'])
     def send_task_request():
         data = request.get_json()
@@ -58,8 +65,6 @@ def create_blueprint(communicator):
 
     @socketio.on('connect', namespace='/task_scheduling')
     def on_connect():
-        # TODO: eventually this should be based on user selection from the page
-        # for now get current map from the config database
         current_map = config.get_current_map()
         map_msg = config.get_map(current_map)
         map_msg.pop('_id', None)
