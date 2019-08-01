@@ -37,10 +37,10 @@ class DummyPosePublisher(RopodPyre):
     """This class publishes dummy pose of robot/s with a given frequency"""
 
     def __init__(self):
-        super(DummyPosePublisher, self).__init__(
-            'dummy_pose_publisher',
-            ['ROPOD'],
-            [],
+        super(DummyPosePublisher, self).__init__({
+            'node_name': 'dummy_pose_publisher',
+            'groups': ['ROPOD'],
+            'message_types': []},
             verbose=False,
             acknowledge=False)
         self.start()
