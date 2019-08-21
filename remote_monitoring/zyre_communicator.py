@@ -119,7 +119,7 @@ class ZyreWebCommunicator(RopodPyre):
                     if 'totalNumber' in dict_msg['payload']['status']:
                         feedback_data['total_number'] = dict_msg['payload']['status']['totalNumber']
                     self.__request_data[session_id] = feedback_data
-        elif message_type == 'RobotPose2D':
+        elif message_type == 'ROBOT-POSE-2D':
             robot_id = dict_msg['payload']['robotId']
             if robot_id in self.__robot_pose_msgs:
                 self.__robot_pose_msgs[robot_id] = dict_msg
