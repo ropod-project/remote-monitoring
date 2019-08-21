@@ -8,7 +8,7 @@ from __future__ import print_function
 MESSAGE EXAMPLE
 {
   "header":{
-    "type":"RobotPose2D",
+    "type":"ROBOT-POSE-2D",
     "metamodel":"ropod-msg-schema.json",
     "msgId":"5073dcfb-4849-42cd-a17a-ef33fa7c7a69"
   },
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     try:
         while True:
             DUMMY_POSE_PUBLISHER.send_message(
-                'RobotPose2D', 
+                'ROBOT-POSE-2D', 
                 {
                     'metamodel':'ropod-demo-robot-pose-2d-schema.json',
                     'robotId':'ropod_001',
