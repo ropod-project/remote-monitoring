@@ -15,7 +15,7 @@ from remote_monitoring.common import socketio
 from remote_monitoring.zyre_communicator import ZyreWebCommunicator
 
 zyre_communicator = ZyreWebCommunicator('remote_monitoring', ['ROPOD', 'MONITOR'],
-                                        data_timeout=10., status_timeout=5.)
+                                        data_timeout=10., status_timeout=30.)
 
 app = Flask(__name__)
 app.register_blueprint(black_box.create_blueprint(zyre_communicator))
