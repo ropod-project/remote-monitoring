@@ -8,8 +8,10 @@
     // currently selected robot. Full status of this robot
     // is to be shown
     var current_robot_id = '';
+    var current_robot_components = [];
 
     $(document).ready(function() {
+        $('#info_message_container').hide();
         $('#error_message_container').hide();
         $('#operation_indicator').hide();
         $('#status_container').hide();
@@ -17,10 +19,11 @@
         // click on 'Detailed status' button
         $('.robot_table').on('click', 'button', function() {
             current_robot_id = $(this).val();
+            current_robot_components = [];
 
             // clear the current table
-            $("#detailed_component_monitors tbody").html('');
-            var table = document.getElementById('detailed_component_monitors');
+            $("#detailed_component_statuses tbody").html('');
+            var table = document.getElementById('detailed_component_statuses');
             var title = table.getElementsByTagName('th')[0];
             title.innerHTML = '';
         });
@@ -28,26 +31,27 @@
         // click on 'Hide detailed status' button
         $(document).on('click', 'button#hide_detailed_status', function() {
             current_robot_id = '';
-            $('#detailed_component_monitors tbody').html('');
-            var table = document.getElementById('detailed_component_monitors');
+            $('#detailed_component_statuses tbody').html('');
+            var table = document.getElementById('detailed_component_statuses');
             var title = table.getElementsByTagName('th')[0];
             title.innerHTML = '';
             $('#status_container').hide();
         });
 
-        // expand all component monitor modes
-        $(document).on('click', 'button#expand_all', function() {
-            $('.monitor_modes').show();
+        $(document).on('click', '#start_components', function() {
+            request_component_management(get_component_names_with_action('start'), 'start');
         });
 
-        // collapse all component monitor modes
-        $(document).on('click', 'button#collapse_all', function() {
-            $('.monitor_modes').hide();
+        $(document).on('click', '#stop_components', function() {
+            request_component_management(get_component_names_with_action('stop'), 'stop');
         });
 
+        $(document).on('click', '#restart_components', function() {
+            request_component_management(get_component_names_with_action('restart'), 'restart');
+        });
     });
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/robot_status');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/component_management');
     // receive list of deployed robot ids
     socket.on('deployed_robots', function(msg) {
         $("#robot_list tr:not(:first)").remove();
@@ -72,31 +76,23 @@
             timestamp_cell.style.verticalAlign = 'middle';
 
             var button = row.insertCell(-1);
-            button.innerHTML = '<td><button id="' + robot_list[i] + '" value="' + robot_list[i] + '" class="btn btn-primary" type="button" disabled="disabled">Get detailed status</button></td>';
+            button.innerHTML = '<td><button id="' + robot_list[i] + '" value="' + robot_list[i] + '" class="btn btn-primary" type="button" disabled="disabled">Manage components</button></td>';
         }
     });
 
     // receive status message (for a single robot)
     socket.on('status_msg', function(status_msg) {
-        var robot_id = status_msg.payload.robotId;
-        update_overview(robot_id, status_msg);
+        update_overview(status_msg);
 
-        if (status_msg.payload.monitors == null)
+        if (status_msg.component_statuses == null)
             return;
 
         // only update the full table if it's the current robot_id
-        if (robot_id == current_robot_id)
+        if (status_msg.robot_id == current_robot_id)
         {
-            update_detailed_status(robot_id, status_msg);
+            update_detailed_status(status_msg);
         }
     });
-
-    function toggle_monitor(component_monitor_name_label)
-    {
-        monitor_name = component_monitor_name_label;
-        console.log($('#'+monitor_name).parents().next('.monitor_modes'));
-        $('#' + monitor_name).parents().next('.monitor_modes').toggle();
-    }
 
     // function as seen on stackoverflow.com by Ponmudi VN
     // (https://stackoverflow.com/questions/6384421/check-whether-a-value-exists-in-json-object)
@@ -111,7 +107,7 @@
         return contains;
     }
 
-    function update_overview(robot_id, status_msg)
+    function update_overview(status_msg)
     {
         var robot_list = document.getElementById('robot_list');
         var row = null;
@@ -121,19 +117,18 @@
             row = robot_list.rows[i];
 
             // we only update the status of the current robot
-            if (robot_id != row.cells[0].innerHTML)
+            if (status_msg.robot_id != row.cells[0].innerHTML)
                 continue;
 
-            // if the message contains any monitor information,
-            // we set an online status
-            if (status_msg.payload.monitors != null)
+            // if the message contains any monitor information, we set an online status
+            if (status_msg.component_statuses != null)
             {
                 row.cells[1].innerHTML = '<span class="green_dot"></span>';
 
-                var status_time = get_status_time(status_msg.header.timestamp);
+                var status_time = get_status_time(status_msg.timestamp);
                 row.cells[3].innerHTML = status_time;
 
-                overall_status = get_overall_status(status_msg);
+                overall_status = get_overall_status(status_msg.component_statuses);
                 if (overall_status)
                 {
                     row.cells[2].innerHTML = '<span class="grey_dot"></span>';
@@ -143,7 +138,7 @@
                     row.cells[2].innerHTML = '<span class="red_dot"></span>';
                 }
 
-                $('#' + robot_id).prop('disabled', false);
+                $('#' + status_msg.robot_id).prop('disabled', false);
             }
             else
             {
@@ -154,11 +149,11 @@
                 row.cells[2].innerHTML = '<span class="grey_dot"></span>';
 
                 // we disable the button for getting the overall status
-                $('#' + robot_id).prop('disabled', true);
+                $('#' + status_msg.robot_id).prop('disabled', true);
 
-                if (robot_id == current_robot_id)
+                if (status_msg.robot_id == current_robot_id)
                 {
-                    $('#detailed_component_monitors tbody').html('');
+                    $('#detailed_component_statuses tbody').html('');
                     $('#status_container').hide();
                     current_robot_id = '';
                 }
@@ -166,9 +161,9 @@
         }
     }
 
-    function get_overall_status(status_msg)
+    function get_overall_status(component_statuses)
     {
-        var overall_status = !(containsAny(status_msg.payload.monitors, false));
+        var overall_status = !(containsAny(component_statuses, false));
         return overall_status;
     }
 
@@ -196,171 +191,114 @@
         return status_time;
     }
 
-    function update_detailed_status(robot_id, status_msg)
+    function update_detailed_status(status_msg)
     {
-        var tbody = $("#detailed_component_monitors tbody");
+        var tbody = $("#detailed_component_statuses tbody");
 
         // if this is the first time the detailed status is displayed, we need to
-        // initialise the table with the correct component monitor and mode names
+        // initialise the table with the correct component names
         if (tbody.children().length == 0)
         {
-            init_detailed_status_table(robot_id, status_msg);
+            current_robot_components = init_detailed_status(status_msg);
         }
-        fill_detailed_status_table(robot_id, status_msg);
+        else
+        {
+            update_component_status(status_msg);
+        }
     }
 
-    function init_detailed_status_table(robot_id, status_msg)
+    function init_detailed_status(status_msg)
     {
-        var monitors = status_msg.payload.monitors;
-        var tbody = $("#detailed_component_monitors tbody");
-
-        var table = document.getElementById('detailed_component_monitors');
+        var components = [];
+        var table = document.getElementById('detailed_component_statuses');
         var title = table.getElementsByTagName('th')[0];
-        title.innerHTML = 'Status of <b>' + robot_id + '</b>';
-        var monitors = status_msg.payload.monitors;
-        for (var monitor in monitors)
+        title.innerHTML = 'Status of <b>' + status_msg.robot_id + '</b>';
+        for (var component in status_msg.component_statuses)
         {
-            var component_monitor_name = monitors[monitor].component;
+            components.push(component);
             var comp_tbody = document.createElement('tbody');
-            comp_tbody.className = 'component_monitor';
+            var component_row = comp_tbody.insertRow(-1);
 
-            var header_row = comp_tbody.insertRow(-1);
-            header_row.style.backgroundColor = "rgba(0,0,0,.075)";
+            var component_name_cell = component_row.insertCell(-1);
+            component_name_cell.innerHTML = component;
 
-            var monitor_cell = header_row.insertCell(-1);
-            var monitor_cell_id = component_monitor_name.split(' ').join('_') + '_label'
-            var monitor_cell_html = '<label for="' + monitor_cell_id + '" style="display:block">' + component_monitor_name + '</label>';
-            monitor_cell_html += '<input type="checkbox" name="' + component_monitor_name + '" id="' + monitor_cell_id + '" class="toggle" onclick="toggle_monitor(this.id)" />';
-            monitor_cell.innerHTML = monitor_cell_html;
-
-            var overall_status_cell = header_row.insertCell(-1);
-            overall_status_cell.id = component_monitor_name;
-            overall_status_cell.style.textAlign = 'center';
-            overall_status_cell.style.verticalAlign = 'middle';
-
-            table.appendChild(comp_tbody);
-
-            var modes_tbody = document.createElement('tbody');
-            modes_tbody.className = 'monitor_modes';
-            modes_tbody.style.display = "none";
-
-            var modes = monitors[monitor].modes;
-            for (var mode in modes)
-            {
-                var mode_description = modes[mode].monitorDescription;
-
-                var mode_row = modes_tbody.insertRow(-1);
-                mode_row.style.backgroundColor = "#fdfdfe";
-
-                var mode_description_cell = mode_row.insertCell(-1);
-                mode_description_cell.innerText = mode_description;
-
-                var mode_status_cell = mode_row.insertCell(-1);
-                mode_status_cell.id = component_monitor_name + mode_description;
-                mode_status_cell.style.textAlign = 'center';
-                mode_status_cell.style.verticalAlign = 'middle';
-
-                init_monitor_mode_outputs(mode_status_cell.id, modes[mode].healthStatus, modes_tbody);
-            }
-            table.appendChild(modes_tbody);
-        }
-        $('#status_container').show();
-    }
-
-    function init_monitor_mode_outputs(monitor_id, mode_output, mode_status_tbody, level=1)
-    {
-        for (field in mode_output)
-        {
-            if (field == 'status')
-                continue;
-
-            var mode_row = mode_status_tbody.insertRow(-1);
-            mode_row.style.backgroundColor = "#fdfdfe";
-
-            var output_description_cell = mode_row.insertCell(-1);
-            var output_description_tab = '';
-            for (var i=0; i<level*8; i++)
-            {
-                // we add empty spaces at the beginning of the description
-                output_description_tab += '\u00a0';
-            }
-            output_description_cell.innerText = output_description_tab + field;
-
-            var status_cell = mode_row.insertCell(-1);
-            status_cell.id = monitor_id + '_' + field;
+            var status_cell = component_row.insertCell(-1);
+            status_cell.id = component;
             status_cell.style.textAlign = 'center';
             status_cell.style.verticalAlign = 'middle';
+            if (status_msg.component_statuses[component])
+                status_cell.innerHTML = '<span class="green_dot" title="true"></span>';
+            else
+                status_cell.innerHTML = '<span class="red_dot" title="false"></span>';
 
-            if (typeof(mode_output[field]) === 'object')
-                init_monitor_mode_outputs(monitor_id, mode_output[field], mode_status_tbody, level+1);
+            var action_button_cell = component_row.insertCell(-1);
+            var action_buttons_html = '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
+            action_buttons_html += '<label class="btn btn-secondary"><input type="radio" name="options" id="' + component + '_start" autocomplete="off"> Start</label>';
+            action_buttons_html += '<label class="btn btn-secondary"><input type="radio" name="options" id="' + component + '_stop" autocomplete="off"> Stop</label>';
+            action_buttons_html += '<label class="btn btn-secondary"><input type="radio" name="options" id="' + component + '_restart" autocomplete="off"> Restart</label>';
+            action_buttons_html += '<label class="btn btn-secondary active"><input type="radio" name="options" id="' + component + '_cancel" autocomplete="off">x</label>';
+            action_buttons_html += '</div>';
+
+            action_button_cell.innerHTML = '<td>' + action_buttons_html + '</td>';
+            table.appendChild(comp_tbody);
+        }
+        $('#status_container').show();
+        return components;
+    }
+
+    function update_component_status(status_msg)
+    {
+        for (var component in status_msg.component_statuses)
+        {
+            var status_cell = document.getElementById(component);
+            if (status_msg.component_statuses[component])
+                status_cell.innerHTML = '<span class="green_dot" title="true"></span>';
+            else
+                status_cell.innerHTML = '<span class="red_dot" title="false"></span>';
         }
     }
 
-    function fill_detailed_status_table(robot_id, status_msg)
+    function get_component_names_with_action(action)
     {
-        var monitors = status_msg.payload.monitors;
-        for (var monitor in monitors)
+        var components_for_action = [];
+        for (var i=0; i<current_robot_components.length; i++)
         {
-            var component_monitor_name = monitors[monitor].component;
-            var modes = monitors[monitor].modes;
-            var overall_status = true;
-
-            for (var mode in modes)
+            if ($('#' + current_robot_components[i] + '_' + action).parent().hasClass('active'))
             {
-                var healthStatus = modes[mode].healthStatus;
-                var stat = healthStatus['status'];
-                var modeDescription = modes[mode].monitorDescription;
-                var id = component_monitor_name + modeDescription;
-                status_cell = document.getElementById(id);
-                if (stat == false)
-                {
-                    status_cell.innerHTML = '<span class="red_dot" title=' + JSON.stringify(healthStatus) + '></span>';
-                    overall_status = false;
-                }
-                else
-                {
-                    status_cell.innerHTML = '<span class="green_dot" title=' + JSON.stringify(healthStatus) + '></span>';
-                }
-
-                fill_monitor_mode_outputs(id, modes[mode].healthStatus);
+                components_for_action.push(current_robot_components[i]);
             }
-
-            var overall_status_cell = document.getElementById(component_monitor_name);
-            if (overall_status == false)
-                overall_status_cell.innerHTML = '<span class="red_dot"></span>';
-            else
-                overall_status_cell.innerHTML = '<span class="green_dot"></span>';
         }
+        return components_for_action;
     }
 
-    function fill_monitor_mode_outputs(monitor_id, mode_output)
+    function request_component_management(components, action)
     {
-        for (field in mode_output)
-        {
-            if (field == 'status')
-                continue;
-
-            if (typeof(mode_output[field]) === 'object')
+        $.ajax({
+            url: SCRIPT_ROOT + '/component_management/manage_components',
+            type: 'post',
+            data: JSON.stringify({ robot_id: current_robot_id,
+                                   components: components,
+                                   action: action}),
+            contentType: 'application/json',
+            cache: false
+        }).done(function(result) {
+            if (!result.error)
             {
-                fill_monitor_mode_outputs(monitor_id, mode_output[field]);
+                $('#info_message_container').show();
+                $('#info_message_container_content').html(result.message);
+                return;
             }
-            else
+            else if (result.error)
             {
-                var id = monitor_id + '_' + field;
-                var status_cell = document.getElementById(id);
-                if (typeof(mode_output[field]) === 'boolean')
-                {
-                    if (mode_output[field])
-                        status_cell.innerHTML = '<span class="green_dot" title="true"></span>';
-                    else
-                        status_cell.innerHTML = '<span class="red_dot" title="false"></span>';
-                }
-                else
-                {
-                    status_cell.innerHTML = mode_output[field];
-                }
+                $('#error_message_container').show();
+                $('#error_message_container_content').html(result.message);
+                return;
             }
-        }
+        }).fail(function(jqXHR, status, error) {
+            console.log(error);
+            $('#error_message_container').show();
+            $('#error_message_container_content').html('An unexpected error has occurred');
+        });
     }
 </script>
 
@@ -381,12 +319,19 @@
     <p id="error_message_container_content"></p>
 </div>
 
+<div id="info_message_container" class="alert alert-info alert-dismissible">
+    <a href="#" class="close" onclick="$('.alert').hide()">&times;</a>
+    <p id="info_message_container_content"></p>
+</div>
+
 <div id="overall_robot_status_container" class="robot_table" disabled="disabled">
     <table id="robot_list" width="100%" class="table table-striped table-bordered table-hover">
         <thead>
-            <th width="50%">Component</th>
+            <th width="70%">Robot</th>
+            <th width="5%">Online</th>
             <th width="5%">Status</th>
-            <th width="45%">Actions</th>
+            <th width="10%">Latest status time</th>
+            <th width="10%">Manage components</th>
         </thead>
         <tbody>
         </tbody>
@@ -396,13 +341,15 @@
 </div>
 
 <div id="status_container" disabled="disabled">
-    <table id="detailed_component_monitors" width="100%" class="table table-bordered">
+    <button id="hide_detailed_status" class="btn btn-primary" type="button">Hide detailed status</button>
+    <table id="detailed_component_statuses" width="100%" class="table table-bordered">
         <thead>
-            <th width="76%"></th>
-            <th width="24%">
-                <button id="expand_all" class="btn btn-primary" type="button">Expand all</button>
-                <button id="collapse_all" class="btn btn-primary" type="button">Collapse all</button>
-                <button id="hide_detailed_status" class="btn btn-primary" type="button">Hide detailed status</button>
+            <th width="80%"></th>
+            <th width="5%">Status</th>
+            <th width="20%">
+                <button id="start_components" class="btn btn-primary" type="button">Start</button>
+                <button id="stop_components" class="btn btn-primary" type="button">Stop</button>
+                <button id="restart_components" class="btn btn-primary" type="button">Restart</button>
             </th>
         </thead>
         <tbody>
