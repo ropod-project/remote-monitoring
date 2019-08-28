@@ -64,7 +64,7 @@ def create_blueprint(communicator):
                                                variable_list,
                                                start_query_time,
                                                end_query_time)
-        query_result = zyre_communicator.get_black_box_data(query_msg)
+        query_result = zyre_communicator.get_query_data(query_msg)
 
         variables = list()
         data = list()
@@ -92,7 +92,7 @@ def create_blueprint(communicator):
                                                variable_list,
                                                start_query_time,
                                                end_query_time)
-        query_result = zyre_communicator.get_black_box_data(query_msg)
+        query_result = zyre_communicator.get_query_data(query_msg)
 
         message = ''
         try:
