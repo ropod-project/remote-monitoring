@@ -123,7 +123,7 @@ class ZyreWebCommunicator(RopodPyre):
             robot_id = dict_msg['payload']['robotId']
             if robot_id in self.__robot_pose_msgs:
                 self.__robot_pose_msgs[robot_id] = dict_msg
-        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS", 
+        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS",
                 "GET-ALL-SCHEDULED-TASK-IDS", "GET-ROBOTS-ASSIGNED-TO-TASK",
                 "GET-TASKS-ASSIGNED-TO-ROBOT"] :
             for session_id in self.__request_data:
@@ -136,6 +136,10 @@ class ZyreWebCommunicator(RopodPyre):
         elif message_type == 'ROBOT-EXPERIMENT-SM':
             robot_id = dict_msg['payload']['robotId']
             self.__sm_msgs[robot_id] = dict_msg['payload']['transitions']
+        elif message_type == 'COMPONENT-MANAGEMENT-RESPONSE':
+            for session_id in self.__request_data:
+                if dict_msg['payload']['receiverId'] == session_id:
+                    self.__request_data[session_id] = dict_msg
 
     def get_query_data(self, query_msg):
         '''Queries data and waits for a response

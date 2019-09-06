@@ -10,6 +10,7 @@ import remote_monitoring.blueprints.ropod_status.robot_status as robot_status
 import remote_monitoring.blueprints.real_time_monitoring.real_time_monitoring as real_time_monitoring
 import remote_monitoring.blueprints.task_scheduling.task_scheduling as task_scheduling
 import remote_monitoring.blueprints.component_monitoring_config.component_monitoring_config as component_monitoring_config
+import remote_monitoring.blueprints.component_management.component_management as component_management
 
 from remote_monitoring.common import socketio
 from remote_monitoring.zyre_communicator import ZyreWebCommunicator
@@ -25,6 +26,7 @@ app.register_blueprint(task_scheduling.create_blueprint(zyre_communicator))
 app.register_blueprint(real_time_monitoring.create_blueprint(zyre_communicator))
 app.register_blueprint(central_operator_console.create_blueprint(zyre_communicator))
 app.register_blueprint(component_monitoring_config.create_blueprint(zyre_communicator))
+app.register_blueprint(component_management.create_blueprint(zyre_communicator))
 
 socketio.init_app(app)
 
