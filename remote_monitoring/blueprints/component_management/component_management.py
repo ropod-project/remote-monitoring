@@ -36,15 +36,23 @@ def create_blueprint(communicator):
         msg['payload']['metamodel'] = 'ropod-component-management-request.json'
         msg['payload']['components'] = components
         msg['payload']['action'] = action
+        result_msg = zyre_communicator.get_query_data(msg)
 
         client_feedback_msg = ''
+        error = False
         try:
-            zyre_communicator.shout(msg)
-            client_feedback_msg = 'Executing {0} request'.format(action)
+            managed_components = result_msg['payload']['components']
+            if managed_components:
+                client_feedback_msg = 'The {0} operation was successful for the following components: '.format(action)
+                client_feedback_msg += ', '.join(managed_components[:-1]) + ', ' + managed_components[-1]
+            else:
+                client_feedback_msg = 'The {0} operation was unsuccessful'.format(action)
+                error = True
         except Exception as exc:
             print('[manage_components] %s' % str(exc))
             client_feedback_msg = 'Command could not be sent'
-        return jsonify(message=client_feedback_msg)
+            error = True
+        return jsonify(message=client_feedback_msg, error=error)
 
     @socketio.on('connect', namespace='/component_management')
     def on_connect():

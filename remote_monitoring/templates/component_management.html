@@ -286,13 +286,11 @@
             {
                 $('#info_message_container').show();
                 $('#info_message_container_content').html(result.message);
-                return;
             }
             else if (result.error)
             {
                 $('#error_message_container').show();
                 $('#error_message_container_content').html(result.message);
-                return;
             }
         }).fail(function(jqXHR, status, error) {
             console.log(error);
