@@ -12,7 +12,9 @@ class ZyreWebCommunicator(RopodPyre):
         data_timeout -- timeout (in seconds) for data queries and messages (default 10.)
         status_timeout -- timeout (in seconds) for status queries and messages (default 5.)
         '''
-        super(ZyreWebCommunicator, self).__init__(node_name, groups, [])
+        super(ZyreWebCommunicator, self).__init__({'node_name': node_name,
+                                                   'groups': groups,
+                                                   'message_types': []})
 
         # timeout (in seconds) for data queries and messages
         self.__data_timeout = data_timeout
@@ -117,11 +119,11 @@ class ZyreWebCommunicator(RopodPyre):
                     if 'totalNumber' in dict_msg['payload']['status']:
                         feedback_data['total_number'] = dict_msg['payload']['status']['totalNumber']
                     self.__request_data[session_id] = feedback_data
-        elif message_type == 'RobotPose2D':
+        elif message_type == 'ROBOT-POSE-2D':
             robot_id = dict_msg['payload']['robotId']
             if robot_id in self.__robot_pose_msgs:
                 self.__robot_pose_msgs[robot_id] = dict_msg
-        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS", 
+        elif message_type in ["GET-ALL-ONGOING-TASKS", "GET-ALL-SCHEDULED-TASKS",
                 "GET-ALL-SCHEDULED-TASK-IDS", "GET-ROBOTS-ASSIGNED-TO-TASK",
                 "GET-TASKS-ASSIGNED-TO-ROBOT"] :
             for session_id in self.__request_data:
@@ -134,6 +136,10 @@ class ZyreWebCommunicator(RopodPyre):
         elif message_type == 'ROBOT-EXPERIMENT-SM':
             robot_id = dict_msg['payload']['robotId']
             self.__sm_msgs[robot_id] = dict_msg['payload']['transitions']
+        elif message_type == 'COMPONENT-MANAGEMENT-RESPONSE':
+            for session_id in self.__request_data:
+                if dict_msg['payload']['receiverId'] == session_id:
+                    self.__request_data[session_id] = dict_msg
 
     def get_query_data(self, query_msg):
         '''Queries data and waits for a response

@@ -101,7 +101,7 @@ def create_blueprint(communicator):
         robot_smart_wheel_count = config.get_robot_smart_wheel_count(robot_id)
 
         while True:
-            data_msg = zyre_communicator.get_black_box_data(robot_data_query_msgs[robot_id])
+            data_msg = zyre_communicator.get_query_data(robot_data_query_msgs[robot_id])
             variables, data = DataUtils.parse_bb_latest_data_msg(data_msg)
 
             short_vel_vars = [cmd_vel_var_name_mapping[x] for x in cmd_vel_vars]
