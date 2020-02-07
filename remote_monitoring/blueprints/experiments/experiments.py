@@ -104,6 +104,25 @@ def create_blueprint(communicator):
             client_feedback_msg = 'Command could not be sent'
         return jsonify(success=True, message=client_feedback_msg)
 
+    @experiments.route('/experiments/remote_command', methods=['GET', 'POST'])
+    def send_remote_command():
+        robot_id = request.args.get('robot_id', '', type=str)
+        command = request.args.get('command', '', type=str)
+
+        msg = dict(msg_data)
+        msg['header']['type'] = 'ROBOT-COMMAND'
+        msg['header']['robotId'] = robot_id
+        msg['payload']['userId'] = session['uid'].hex
+        msg['payload']['command'] = command
+
+        client_feedback_msg = ''
+        try:
+            zyre_communicator.shout(msg, groups=['ROPOD'])
+        except Exception as exc:
+            print('[remote_command] %s' % str(exc))
+            client_feedback_msg = 'Command could not be sent'
+        return jsonify(success=True)
+
     def get_experiment_feedback(session_id, robot_id):
         global data_thread
         experiment_ongoing = True
