@@ -56,8 +56,14 @@
     <div class="col-lg-2">
         <button id="btn_reinit_pose" disabled="disabled" class="btn btn-primary" type="button">Re-init pose</button>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-2">
         <button id="btn_rviz" disabled="disabled" class="btn btn-primary" type="button">Start RViz</button>
+    </div>
+    <div class="col-lg-3">
+        <button id="btn_nav" disabled="disabled" class="btn btn-primary" type="button">Pause Navigation</button>
+    </div>
+    <div class="col-lg-3">
+        <button id="btn_dock" disabled="disabled" class="btn btn-primary" type="button">Dock</button>
     </div>
 </div>
 
@@ -122,6 +128,8 @@
     var experiment = undefined;
     var rviz_started = false;
     var controller_started = false;
+    var navigation_paused = false;
+    var docked = false;
     var vel_plot = new Plot('vel_plot_placeholder', 'vel_plot_variable_selection', 'plot_vel_variables', '', false);
     var accel_plot = new Plot('accel_plot_placeholder', 'accel_plot_variable_selection', 'plot_accel_variables', '', false);
     var gyro_plot = new Plot('gyro_plot_placeholder', 'gyro_plot_variable_selection', 'plot_gyro_variables', '', false);
@@ -136,6 +144,7 @@
         $('#btn_reinit_pose').prop('disabled', true);
         $('#btn_rviz').prop('disabled', true);
         $('#btn_controller').prop('disabled', true);
+        $('#btn_nav').prop('disabled', true);
         $('#experiment_progress').hide();
         $('#data_container').hide();
         $('#graph').hide();
@@ -206,11 +215,15 @@
                 $('#btn_reinit_pose').prop('disabled', false);
                 $('#btn_rviz').prop('disabled', false);
                 $('#btn_controller').prop('disabled', false);
+                $('#btn_nav').prop('disabled', false);
+                $('#btn_dock').prop('disabled', false);
             }
             else {
                 $('#btn_reinit_pose').prop('disabled', true);
                 $('#btn_rviz').prop('disabled', true);
                 $('#btn_controller').prop('disabled', true);
+                $('#btn_nav').prop('disabled', true);
+                $('#btn_dock').prop('disabled', true);
             }
 
         });
@@ -321,6 +334,46 @@
             else {
                 controller_started = true;
                 $("#btn_controller").text('Stop Controller');
+            }
+            $.ajax({
+                url: SCRIPT_ROOT + '/experiments/remote_command',
+                type: 'get',
+                data: { robot_id: robot_id, command:command_txt},
+                contentType: 'application/json',
+                cache: false
+            })
+        });
+
+        $("#btn_nav").click(function(){
+            var command_txt = 'PAUSE-NAVIGATION';
+            if (navigation_paused == true) {
+                command_txt = 'UNPAUSE-NAVIGATION'
+                navigation_paused = false;
+                $("#btn_nav").text('Pause Navigation');
+            }
+            else {
+                navigation_paused = true;
+                $("#btn_nav").text('Unpause Navigation');
+            }
+            $.ajax({
+                url: SCRIPT_ROOT + '/experiments/remote_command',
+                type: 'get',
+                data: { robot_id: robot_id, command:command_txt},
+                contentType: 'application/json',
+                cache: false
+            })
+        });
+
+        $("#btn_dock").click(function(){
+            var command_txt = 'DOCK';
+            if (docked == true) {
+                command_txt = 'UNDOCK'
+                docked = false;
+                $("#btn_dock").text('Dock');
+            }
+            else {
+                docked = true;
+                $("#btn_dock").text('Undock');
             }
             $.ajax({
                 url: SCRIPT_ROOT + '/experiments/remote_command',
