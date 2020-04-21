@@ -11,7 +11,7 @@ This interface is developed as part of the ROPOD project and thus has multiple d
 
 ## Functionalities
 
-The web application provides four main functionalities:
+The web application provides six main functionalities:
 1. **Monitoring the status of robot components**: Information on various robot components (both hardware and software) is provided so that robots can be monitored in real time
 ![Robot status](docs/images/robot_status.png)
 2. **Retrieving the configuration of the component monitors**: The status of the robot components is obtained by component monitors, whose configuration can be retrieved for the purpose of transparency
@@ -37,6 +37,10 @@ The application is exposed as a `remote_monitoring` Python package and is develo
 * `black_box`: Handlers for retrieving black box data
 * `experiments`: Handlers for sending experiment requests and monitoring the status of ongoing experiments
 * `task_scheduling`: Handlers for sending task requests to the fleet management system
+* `central_operator_console`: 
+* `component_management`: 
+* `component_monitoring_config`: 
+* `real_time_monitoring`: 
 
 Each of these blueprints is a separate package in the `remote_monitoring.blueprints` subpackage.
 
