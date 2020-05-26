@@ -5,6 +5,7 @@ A web interface for remotely monitoring robots and their operation. The interfac
 This interface is developed as part of the ROPOD project and thus has multiple direct and indirect dependencies on other components developed in the project. In particular:
 * [Zyre](https://github.com/zeromq/zyre)/[Pyre](https://github.com/ropod-project/pyre) is used for communication between robots and the application
 * a black box and a black box query interface as defined at https://github.com/ropod-project/black-box are assumed to exist for each monitored robot. Since Zyre is used for communication, the black box query interface is assumed to be accessible as a Zyre node
+* a set of utilities for working with black box data, which are available at https://github.com/ropod-project/black-box-tools
 * a component monitoring library as described at https://github.com/ropod-project/component-monitoring is assumed to continuously advertise the status of robot components (also via Zyre)
 * an experiment execution interface as defined at https://git.ropod.org/ropod/execution-monitoring/ropod_experiment_executor is expected to be running so that remote experiments can be performed and monitored
 
