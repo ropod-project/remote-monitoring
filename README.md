@@ -3,7 +3,7 @@
 A web interface for remotely monitoring robots and their operation. The interface is developed in Python 3 using Flask (there are no plans for backwards compatibility with Python 2).
 
 This interface is developed as part of the ROPOD project and thus has multiple direct and indirect dependencies on other components developed in the project. In particular:
-* [Zyre](https://github.com/zeromq/zyre)/[Pyre](https://github.com/ropod-project/pyre) is used for communication between robots and the application
+* [Zyre](https://github.com/zeromq/zyre)/[Pyre](https://github.com/ropod-project/pyre) is used for communication between robots and the application; the `pyropod` package defined in [`ropod_common`](https://github.com/ropod-project/ropod_common) should be set up to make this communication possible
 * a black box and a black box query interface as defined at https://github.com/ropod-project/black-box are assumed to exist for each monitored robot. Since Zyre is used for communication, the black box query interface is assumed to be accessible as a Zyre node
 * a set of utilities for working with black box data, which are available at https://github.com/ropod-project/black-box-tools
 * a component monitoring library as described at https://github.com/ropod-project/component-monitoring is assumed to continuously advertise the status of robot components (also via Zyre)
